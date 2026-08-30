@@ -1,7 +1,7 @@
 # ClassicUO — Bad Newbie & Yoko Injection
 
 <p align="center">
-  <img src="docs/images/wiki-hero-kyiv-warrior.png" alt="ClassicUO Age of Power ="100%">
+  <img src="docs/images/wiki-hero-kyiv-warrior.png" alt="ClassicUO Age of Power — Kyiv, warrior and Ukrainian symbolism" width="100%">
 </p>
 
 <p align="center">
