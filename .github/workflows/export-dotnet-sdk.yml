@@ -27,42 +27,49 @@ jobs:
         run: |
           set -euo pipefail
           cat > global.json <<'EOF'
-          {
-            "sdk": {
-              "version": "10.0.302",
-              "rollForward": "disable",
-              "allowPrerelease": false
-            }
-          }
+          {"sdk":{"version":"10.0.302","rollForward":"disable","allowPrerelease":false}}
           EOF
           test "$(dotnet --version)" = "10.0.302"
           dotnet --info
-          test -d /usr/share/dotnet/sdk/10.0.302
 
-      - name: Package portable SDK payload
+      - name: Package SDK core and packs separately
         shell: bash
         run: |
           set -euo pipefail
-          ROOT="$RUNNER_TEMP/dotnet-10.0.302"
-          mkdir -p "$ROOT/sdk"
-          cp /usr/share/dotnet/dotnet "$ROOT/"
-          cp -a /usr/share/dotnet/host "$ROOT/"
-          cp -a /usr/share/dotnet/sdk/10.0.302 "$ROOT/sdk/"
-          cp -a /usr/share/dotnet/shared "$ROOT/"
-          cp -a /usr/share/dotnet/packs "$ROOT/"
-          if [ -d /usr/share/dotnet/sdk-manifests ]; then cp -a /usr/share/dotnet/sdk-manifests "$ROOT/"; fi
-          if [ -d /usr/share/dotnet/templates ]; then cp -a /usr/share/dotnet/templates "$ROOT/"; fi
-          if [ -d /usr/share/dotnet/metadata ]; then cp -a /usr/share/dotnet/metadata "$ROOT/"; fi
-          tar -C "$RUNNER_TEMP" -czf "$RUNNER_TEMP/dotnet-sdk-10.0.302-linux-x64.tar.gz" dotnet-10.0.302
-          sha256sum "$RUNNER_TEMP/dotnet-sdk-10.0.302-linux-x64.tar.gz" > "$RUNNER_TEMP/dotnet-sdk-10.0.302-linux-x64.tar.gz.sha256"
-          ls -lh "$RUNNER_TEMP/dotnet-sdk-10.0.302-linux-x64.tar.gz"
+          TMP="$RUNNER_TEMP"
+          CORE="$TMP/dotnet-core-10.0.302"
+          PACKS="$TMP/dotnet-packs-10.0.302"
+          mkdir -p "$CORE/sdk" "$PACKS"
+          cp /usr/share/dotnet/dotnet "$CORE/"
+          cp -a /usr/share/dotnet/host "$CORE/"
+          cp -a /usr/share/dotnet/sdk/10.0.302 "$CORE/sdk/"
+          cp -a /usr/share/dotnet/shared "$CORE/"
+          cp -a /usr/share/dotnet/packs "$PACKS/"
+          if [ -d /usr/share/dotnet/sdk-manifests ]; then cp -a /usr/share/dotnet/sdk-manifests "$PACKS/"; fi
+          if [ -d /usr/share/dotnet/templates ]; then cp -a /usr/share/dotnet/templates "$PACKS/"; fi
+          if [ -d /usr/share/dotnet/metadata ]; then cp -a /usr/share/dotnet/metadata "$PACKS/"; fi
+          tar -C "$TMP" -cJf "$TMP/dotnet-core-10.0.302-linux-x64.tar.xz" dotnet-core-10.0.302
+          tar -C "$TMP" -cJf "$TMP/dotnet-packs-10.0.302-linux-x64.tar.xz" dotnet-packs-10.0.302
+          sha256sum "$TMP/dotnet-core-10.0.302-linux-x64.tar.xz" > "$TMP/dotnet-core-10.0.302-linux-x64.tar.xz.sha256"
+          sha256sum "$TMP/dotnet-packs-10.0.302-linux-x64.tar.xz" > "$TMP/dotnet-packs-10.0.302-linux-x64.tar.xz.sha256"
+          ls -lh "$TMP"/dotnet-*-10.0.302-linux-x64.tar.xz
 
-      - name: Upload SDK artifact
+      - name: Upload SDK core artifact
         uses: actions/upload-artifact@v4
         with:
-          name: dotnet-sdk-10.0.302-linux-x64
+          name: dotnet-core-10.0.302-linux-x64
           path: |
-            ${{ runner.temp }}/dotnet-sdk-10.0.302-linux-x64.tar.gz
-            ${{ runner.temp }}/dotnet-sdk-10.0.302-linux-x64.tar.gz.sha256
+            ${{ runner.temp }}/dotnet-core-10.0.302-linux-x64.tar.xz
+            ${{ runner.temp }}/dotnet-core-10.0.302-linux-x64.tar.xz.sha256
+          compression-level: 0
+          retention-days: 1
+
+      - name: Upload SDK packs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-packs-10.0.302-linux-x64
+          path: |
+            ${{ runner.temp }}/dotnet-packs-10.0.302-linux-x64.tar.xz
+            ${{ runner.temp }}/dotnet-packs-10.0.302-linux-x64.tar.xz.sha256
           compression-level: 0
           retention-days: 1
