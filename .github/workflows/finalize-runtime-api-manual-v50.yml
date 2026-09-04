@@ -1,0 +1,122 @@
+name: Finalize exact v50 Runtime API Manual
+
+on:
+  push:
+    branches:
+      - ClientUO-Age-of-Power
+    paths:
+      - _manualfinal/READY
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Finalize and verify exact Manual
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib, re
+
+          root = Path('docs/Runtime-API-Manual')
+          final_sha = '524c4a06be8a621b5b5e24dabc4795c2c7da682f9c23e0b516f2de0a437ee254'
+
+          for path in [root/'README.md', *sorted(root.glob('Part-*.md'))]:
+              text = path.read_text()
+              text = re.sub(r'Canonical source SHA-256: `[0-9a-f]{64}`',
+                            f'Canonical source SHA-256: `{final_sha}`', text)
+              path.write_text(text)
+
+          readme = root/'README.md'
+          text = readme.read_text()
+          text = text.replace('Manifest UO coverage: **734/734**', 'Manifest UO coverage: **738/738**')
+          text = re.sub(r'\n## v50 command help\n\n- \[Hide / InfoGump / InfoGumps — full v50 help\]\(v50-Hide-InfoGump\.md\)\n', '\n', text)
+          readme.write_text(text)
+
+          obsolete = root/'v50-Hide-InfoGump.md'
+          if obsolete.exists():
+              obsolete.unlink()
+
+          expected = {
+          'Part-01.md':'ad83bd5d6d64bcad02124ecdd55bd0d7dd475a67999107b987b53ae6323eedb6',
+          'Part-02.md':'c03ddd19b574122162fd3acefb437284922b70d131d8f6c63e48fced83f10ca1',
+          'Part-03.md':'92f8b761e7fcfc4bf6ba860e7bfb28c815edaf23b8b79ff4e43180851eb58573',
+          'Part-04.md':'ac00353070e23abe0c01e3cc105a5d8fd62d42252f1ee07cd0980dd6c172e3c6',
+          'Part-05.md':'478fa211d17bdd07823360475618b0cce721e4e015a50258fc82c731778603f8',
+          'Part-06.md':'baa193e4b573939c24e449dc9ca3cd9a16d9112c17a5b6636ce70c7f20d94713',
+          'Part-07.md':'1fb43fcbbd4f262cac0d34710e4746a227441d7bfc04888d34d567bc3ad3c57f',
+          'Part-08.md':'b67096d917d692e4c67212671d09cced6334694e8e9759bd6f73eb9baf32e2ee',
+          'Part-09.md':'c73efe52487073759a82af6095bb564b243bb93ca14f5f04921daec9153f8460',
+          'Part-10.md':'cd247f5f7cf95794b5ed5c59a8592ff93c51fa5cf689f63b4598c3c4ecac1fe0',
+          'Part-11.md':'50fef5bfd39cbfd282ee062a10a956f245cd66f6214cc1a6a53d232fe57dbb5a',
+          'Part-12.md':'5efab887e8b19a55b5b4749d7760428959bc1281add54aea3a45e5be8ffee820',
+          'Part-13.md':'c858487979fb21ddc26829b295c654472ce9fd871b4855af990c075319bb05bd',
+          'Part-14.md':'b52450dcc893e662c4355bc86f6fce756668de5e806daf6708bab73e579416d1',
+          'Part-15.md':'1798bc89d44a93179452266097eebad1dac6ff22cb11991129cdc7eaaa038384',
+          'Part-16.md':'c55b6f0f39f0704e0c8e6def97da76b03d8d1f2849cb34af371d45caeb59b73f',
+          'Part-17.md':'eb57a9fef1a4f21d2722fa656897248953e050d18585d2ea8e1ce130be08d548',
+          'Part-18.md':'d11a484147fafdc12c2c991fd72edbcdd16ece69f0539b002b6430f2ef103575',
+          'Part-19.md':'4b12a97ac4b6e15a58383e88b7c53b9094425e9bbe777692e22dc256706c2f3b',
+          'Part-20.md':'28dc6b321cb3ce298e57d378a540ebdb5f768aa861f6dd048d1d814db0c9f7f8',
+          'Part-21.md':'5dd7de393f3d4373d08241c1ff2465eb4a7e1bf9d2cbf17c071862f388675f61',
+          'Part-22.md':'1a2a9fcbeb7adb01e15b698294a74cbe0504ae9f91bd74a11a900d1fbd588b82',
+          'Part-23.md':'ba0eca8d489d25fc93ab9c9c55339bf3ad52a93c6fc5f5fb850156f52d221154',
+          'Part-24.md':'f3bcd3a745142d7d32d45e758e4ad9c0296fcfc93541262a6d6d4c4fb9cf6c59',
+          'Part-25.md':'8b38c5a459f1256fb78430a2c0742080c7d110893fa0cceca485c56eb0067645',
+          'Part-26.md':'42ef3bd21cc7cce08406b525b0c1f5f55303bfd9deaf40c96e4a41f70cbc8bfb',
+          'Part-27.md':'af16a6804a186c04993bf17d857f295889261716f6dc4f2651ac4a9254b375ce',
+          'Part-28.md':'c41c417bcd63d6eb2b9afa8f486fed615040733784517e1aae8405017392c984',
+          'Part-29.md':'751ff40aba9c1042faeb06ee6e42754dd98739ab065883da2578530b72649958',
+          'Part-30.md':'4ac30a974c70192ece50a240f6c6247bce1d3ec33bae630446483e4e4db6ce5e',
+          'Part-31.md':'ce72c1a0bffcf38c3241de5609d8200e3c034d79eeaaceaaddc7418b045b352a',
+          'Part-32.md':'92dece3e3825db7b0bfdb6519225e9cc882ad56416f31d7a7bcc15468e90b84d',
+          'Part-33.md':'1a0ed64eb93ccda87e10b0681565982efbd049da7dc4fc8d04dd500d8a2226ac',
+          'Part-34.md':'8bfeefcc5abb44731f21584d8216bcfed39be5be67debde0fe0ec9b472b23aa4',
+          'README.md':'2af639f3e89b6fcae69735cff76de17311f6b480639c995fd9e6ad2c850ca31e',
+          }
+
+          actual_files = sorted(p.name for p in root.iterdir() if p.is_file())
+          if actual_files != sorted(expected):
+              print('EXPECTED_FILES', sorted(expected))
+              print('ACTUAL_FILES', actual_files)
+              raise SystemExit('Manual top-level file set mismatch')
+
+          failures=[]
+          for name,want in expected.items():
+              got=hashlib.sha256((root/name).read_bytes()).hexdigest()
+              if got != want:
+                  failures.append((name,want,got))
+          if failures:
+              for row in failures:
+                  print('HASH_MISMATCH', *row)
+              raise SystemExit(1)
+          print('GITHUB_MANUAL_EXACT_MATCH=35/35')
+          PY
+
+          grep -q 'Command cards: \*\*738\*\*' docs/Runtime-API-Manual/README.md
+          grep -q 'Manifest UO coverage: \*\*738/738\*\*' docs/Runtime-API-Manual/README.md
+          test "$(find docs/Runtime-API-Manual -maxdepth 1 -name 'Part-*.md' | wc -l)" -eq 34
+          test "$(find docs/Runtime-API-Manual -maxdepth 1 -type f | wc -l)" -eq 35
+          git diff --check
+
+      - name: Commit final Manual
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/Runtime-API-Manual
+          if git diff --cached --quiet; then
+            echo 'No Manual changes required.'
+            exit 0
+          fi
+          git commit -m 'Finalize exact v50 Runtime API Manual [skip ci]'
+          git push
