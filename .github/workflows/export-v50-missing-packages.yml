@@ -38,6 +38,9 @@ jobs:
             ('System.Numerics.Vectors','4.4.0'),
             ('System.Numerics.Vectors','4.5.0'),
             ('Microsoft.NETFramework.ReferenceAssemblies.net472','1.0.3'),
+            ('Microsoft.NETCore.App.Runtime.linux-x64','10.0.10'),
+            ('Microsoft.AspNetCore.App.Runtime.linux-x64','10.0.10'),
+            ('Microsoft.NETCore.App.Runtime.NativeAOT.linux-x64','10.0.10'),
           ]
           root=Path(os.environ['RUNNER_TEMP'])/'pkgs'
           for i,(pkg,ver) in enumerate(pairs):
