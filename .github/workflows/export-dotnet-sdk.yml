@@ -6,6 +6,7 @@ on:
       - ClientUO-Age-of-Power
     paths:
       - _buildsdk/READY
+      - .github/workflows/export-dotnet-sdk.yml
 
 permissions:
   contents: read
@@ -32,7 +33,7 @@ jobs:
           test "$(dotnet --version)" = "10.0.302"
           dotnet --info
 
-      - name: Package SDK core and packs separately
+      - name: Package SDK core and packs
         shell: bash
         run: |
           set -euo pipefail
@@ -52,16 +53,86 @@ jobs:
           tar -C "$TMP" -cJf "$TMP/dotnet-packs-10.0.302-linux-x64.tar.xz" dotnet-packs-10.0.302
           sha256sum "$TMP/dotnet-core-10.0.302-linux-x64.tar.xz" > "$TMP/dotnet-core-10.0.302-linux-x64.tar.xz.sha256"
           sha256sum "$TMP/dotnet-packs-10.0.302-linux-x64.tar.xz" > "$TMP/dotnet-packs-10.0.302-linux-x64.tar.xz.sha256"
-          ls -lh "$TMP"/dotnet-*-10.0.302-linux-x64.tar.xz
+          split -b 70M -d -a 2 "$TMP/dotnet-core-10.0.302-linux-x64.tar.xz" "$TMP/dotnet-core-10.0.302-linux-x64.part"
+          test "$(find "$TMP" -maxdepth 1 -name 'dotnet-core-10.0.302-linux-x64.part*' -type f | wc -l)" -ge 2
+          for part in "$TMP"/dotnet-core-10.0.302-linux-x64.part*; do
+            test -s "$part"
+            sha256sum "$part"
+          done
+          ls -lh "$TMP"/dotnet-core-10.0.302-linux-x64.part* "$TMP/dotnet-packs-10.0.302-linux-x64.tar.xz"
 
-      - name: Upload SDK core artifact
+      - name: Upload SDK core part 00
         uses: actions/upload-artifact@v4
         with:
-          name: dotnet-core-10.0.302-linux-x64
+          name: dotnet-core-10.0.302-part00
           path: |
-            ${{ runner.temp }}/dotnet-core-10.0.302-linux-x64.tar.xz
+            ${{ runner.temp }}/dotnet-core-10.0.302-linux-x64.part00
             ${{ runner.temp }}/dotnet-core-10.0.302-linux-x64.tar.xz.sha256
           compression-level: 0
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Upload SDK core part 01
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-core-10.0.302-part01
+          path: ${{ runner.temp }}/dotnet-core-10.0.302-linux-x64.part01
+          compression-level: 0
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Upload SDK core part 02
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-core-10.0.302-part02
+          path: ${{ runner.temp }}/dotnet-core-10.0.302-linux-x64.part02
+          compression-level: 0
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Upload SDK core part 03
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-core-10.0.302-part03
+          path: ${{ runner.temp }}/dotnet-core-10.0.302-linux-x64.part03
+          compression-level: 0
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Upload SDK core part 04
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-core-10.0.302-part04
+          path: ${{ runner.temp }}/dotnet-core-10.0.302-linux-x64.part04
+          compression-level: 0
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Upload SDK core part 05
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-core-10.0.302-part05
+          path: ${{ runner.temp }}/dotnet-core-10.0.302-linux-x64.part05
+          compression-level: 0
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Upload SDK core part 06
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-core-10.0.302-part06
+          path: ${{ runner.temp }}/dotnet-core-10.0.302-linux-x64.part06
+          compression-level: 0
+          if-no-files-found: ignore
+          retention-days: 1
+
+      - name: Upload SDK core part 07
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-core-10.0.302-part07
+          path: ${{ runner.temp }}/dotnet-core-10.0.302-linux-x64.part07
+          compression-level: 0
+          if-no-files-found: ignore
           retention-days: 1
 
       - name: Upload SDK packs artifact
