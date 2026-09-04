@@ -9,6 +9,10 @@ This index tracks the **complete Runtime-backed API Manual** generated from the 
 - Canonical SHA-256: `4528740e9d5a461847f0f23ebfe4862157edc9d6be26a0b69bec8795cce81d71`
 - Every card contains signatures/overloads, parameters, return type/contract, behavior, limitations and examples.
 
+## v50 command help available now
+
+- [Hide / InfoGump / InfoGumps — full v50 help](v50-Hide-InfoGump.md)
+
 ## Important current semantics
 
 - `UO.Hide()` opens an object Target; `UO.Hide(serial)` hides the loaded item/mobile locally without destroying the world entity.
@@ -41,4 +45,4 @@ Current ranges:
 12. `Str` → `Version`
 13. `Wait` → `Z`
 
-The v50 source package also includes an automated publisher so all generated parts can be copied/committed/pushed together from a normal Git environment.
+The v50 source package includes `scripts/PublishGithubApiManual.ps1` so all generated parts can be copied, committed and pushed together from a normal authenticated Git environment.
