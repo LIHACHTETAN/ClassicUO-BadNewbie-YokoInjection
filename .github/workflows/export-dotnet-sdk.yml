@@ -33,41 +33,36 @@ jobs:
           test "$(dotnet --version)" = "10.0.302"
           dotnet --info
 
-      - name: Package SDK core and packs
+      - name: Package SDK core into transport chunks
         shell: bash
         run: |
           set -euo pipefail
           TMP="$RUNNER_TEMP"
           CORE="$TMP/dotnet-core-10.0.302"
-          PACKS="$TMP/dotnet-packs-10.0.302"
-          mkdir -p "$CORE/sdk" "$PACKS"
+          mkdir -p "$CORE/sdk"
           cp /usr/share/dotnet/dotnet "$CORE/"
           cp -a /usr/share/dotnet/host "$CORE/"
           cp -a /usr/share/dotnet/sdk/10.0.302 "$CORE/sdk/"
           cp -a /usr/share/dotnet/shared "$CORE/"
-          cp -a /usr/share/dotnet/packs "$PACKS/"
-          if [ -d /usr/share/dotnet/sdk-manifests ]; then cp -a /usr/share/dotnet/sdk-manifests "$PACKS/"; fi
-          if [ -d /usr/share/dotnet/templates ]; then cp -a /usr/share/dotnet/templates "$PACKS/"; fi
-          if [ -d /usr/share/dotnet/metadata ]; then cp -a /usr/share/dotnet/metadata "$PACKS/"; fi
-          tar -C "$TMP" -cJf "$TMP/dotnet-core-10.0.302-linux-x64.tar.xz" dotnet-core-10.0.302
-          tar -C "$TMP" -cJf "$TMP/dotnet-packs-10.0.302-linux-x64.tar.xz" dotnet-packs-10.0.302
-          sha256sum "$TMP/dotnet-core-10.0.302-linux-x64.tar.xz" > "$TMP/dotnet-core-10.0.302-linux-x64.tar.xz.sha256"
-          sha256sum "$TMP/dotnet-packs-10.0.302-linux-x64.tar.xz" > "$TMP/dotnet-packs-10.0.302-linux-x64.tar.xz.sha256"
-          split -b 70M -d -a 2 "$TMP/dotnet-core-10.0.302-linux-x64.tar.xz" "$TMP/dotnet-core-10.0.302-linux-x64.part"
-          test "$(find "$TMP" -maxdepth 1 -name 'dotnet-core-10.0.302-linux-x64.part*' -type f | wc -l)" -ge 2
+          tar -C "$TMP" -czf "$TMP/dotnet-core-10.0.302-linux-x64.tar.gz" dotnet-core-10.0.302
+          sha256sum "$TMP/dotnet-core-10.0.302-linux-x64.tar.gz" > "$TMP/dotnet-core-10.0.302-linux-x64.tar.gz.sha256"
+          split -b 70M -d -a 2 "$TMP/dotnet-core-10.0.302-linux-x64.tar.gz" "$TMP/dotnet-core-10.0.302-linux-x64.part"
+          COUNT="$(find "$TMP" -maxdepth 1 -name 'dotnet-core-10.0.302-linux-x64.part*' -type f | wc -l)"
+          test "$COUNT" -ge 2
+          test "$COUNT" -le 8
           for part in "$TMP"/dotnet-core-10.0.302-linux-x64.part*; do
             test -s "$part"
             sha256sum "$part"
           done
-          ls -lh "$TMP"/dotnet-core-10.0.302-linux-x64.part* "$TMP/dotnet-packs-10.0.302-linux-x64.tar.xz"
+          ls -lh "$TMP"/dotnet-core-10.0.302-linux-x64.part*
 
       - name: Upload SDK core part 00
         uses: actions/upload-artifact@v4
         with:
-          name: dotnet-core-10.0.302-part00
+          name: dotnet-core-gzip-10.0.302-part00
           path: |
             ${{ runner.temp }}/dotnet-core-10.0.302-linux-x64.part00
-            ${{ runner.temp }}/dotnet-core-10.0.302-linux-x64.tar.xz.sha256
+            ${{ runner.temp }}/dotnet-core-10.0.302-linux-x64.tar.gz.sha256
           compression-level: 0
           if-no-files-found: error
           retention-days: 1
@@ -75,52 +70,52 @@ jobs:
       - name: Upload SDK core part 01
         uses: actions/upload-artifact@v4
         with:
-          name: dotnet-core-10.0.302-part01
+          name: dotnet-core-gzip-10.0.302-part01
           path: ${{ runner.temp }}/dotnet-core-10.0.302-linux-x64.part01
           compression-level: 0
-          if-no-files-found: error
+          if-no-files-found: ignore
           retention-days: 1
 
       - name: Upload SDK core part 02
         uses: actions/upload-artifact@v4
         with:
-          name: dotnet-core-10.0.302-part02
+          name: dotnet-core-gzip-10.0.302-part02
           path: ${{ runner.temp }}/dotnet-core-10.0.302-linux-x64.part02
           compression-level: 0
-          if-no-files-found: error
+          if-no-files-found: ignore
           retention-days: 1
 
       - name: Upload SDK core part 03
         uses: actions/upload-artifact@v4
         with:
-          name: dotnet-core-10.0.302-part03
+          name: dotnet-core-gzip-10.0.302-part03
           path: ${{ runner.temp }}/dotnet-core-10.0.302-linux-x64.part03
           compression-level: 0
-          if-no-files-found: error
+          if-no-files-found: ignore
           retention-days: 1
 
       - name: Upload SDK core part 04
         uses: actions/upload-artifact@v4
         with:
-          name: dotnet-core-10.0.302-part04
+          name: dotnet-core-gzip-10.0.302-part04
           path: ${{ runner.temp }}/dotnet-core-10.0.302-linux-x64.part04
           compression-level: 0
-          if-no-files-found: error
+          if-no-files-found: ignore
           retention-days: 1
 
       - name: Upload SDK core part 05
         uses: actions/upload-artifact@v4
         with:
-          name: dotnet-core-10.0.302-part05
+          name: dotnet-core-gzip-10.0.302-part05
           path: ${{ runner.temp }}/dotnet-core-10.0.302-linux-x64.part05
           compression-level: 0
-          if-no-files-found: error
+          if-no-files-found: ignore
           retention-days: 1
 
       - name: Upload SDK core part 06
         uses: actions/upload-artifact@v4
         with:
-          name: dotnet-core-10.0.302-part06
+          name: dotnet-core-gzip-10.0.302-part06
           path: ${{ runner.temp }}/dotnet-core-10.0.302-linux-x64.part06
           compression-level: 0
           if-no-files-found: ignore
@@ -129,18 +124,8 @@ jobs:
       - name: Upload SDK core part 07
         uses: actions/upload-artifact@v4
         with:
-          name: dotnet-core-10.0.302-part07
+          name: dotnet-core-gzip-10.0.302-part07
           path: ${{ runner.temp }}/dotnet-core-10.0.302-linux-x64.part07
           compression-level: 0
           if-no-files-found: ignore
-          retention-days: 1
-
-      - name: Upload SDK packs artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: dotnet-packs-10.0.302-linux-x64
-          path: |
-            ${{ runner.temp }}/dotnet-packs-10.0.302-linux-x64.tar.xz
-            ${{ runner.temp }}/dotnet-packs-10.0.302-linux-x64.tar.xz.sha256
-          compression-level: 0
           retention-days: 1
