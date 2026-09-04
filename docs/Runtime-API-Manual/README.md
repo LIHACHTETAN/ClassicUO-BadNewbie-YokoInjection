@@ -6,7 +6,7 @@ This is the GitHub copy of the **complete** Runtime-backed API Manual. The proje
 - Command cards: **738**
 - Manifest UO coverage: **734/734**
 - Runtime compatibility catalogue: **422 commands / 444 overloads**
-- Canonical SHA-256: `4528740e9d5a461847f0f23ebfe4862157edc9d6be26a0b69bec8795cce81d71`
+- Canonical SHA-256: `fcc7bb0bebe94e4b617e1dcb4ab316337d111a1c458a79bda0ae818cb2d4f2bb`
 - Source: current registered Runtime + generated runtime contracts + release manifest.
 - Every card contains signatures/overloads, parameters, return type/contract, behavior, limitations and examples.
 
@@ -45,10 +45,10 @@ This is the GitHub copy of the **complete** Runtime-backed API Manual. The proje
 | [Part-25.md](Part-25.md) | `PredictedY` → `RenameMobile` | 26 | 35132 |
 | [Part-26.md](Part-26.md) | `ReqProfile` → `SetArm` | 27 | 33691 |
 | [Part-27.md](Part-27.md) | `SetARStatus` → `SetJournalLine` | 16 | 35011 |
-| [Part-28.md](Part-28.md) | `SetMulPath` → `SkillVal` | 24 | 34828 |
+| [Part-28.md](Part-28.md) | `SetMulPath` → `SkillVal` | 24 | 35165 |
 | [Part-29.md](Part-29.md) | `Snap` → `TargetByResource` | 21 | 34021 |
 | [Part-30.md](Part-30.md) | `TargetID` → `Undress` | 27 | 34484 |
-| [Part-31.md](Part-31.md) | `Unequip` → `UseSelfPaperdollScroll` | 23 | 34873 |
+| [Part-31.md](Part-31.md) | `Unequip` → `UseSelfPaperdollScroll` | 23 | 34774 |
 | [Part-32.md](Part-32.md) | `UseSkill` → `WaitingMenu` | 16 | 33838 |
 | [Part-33.md](Part-33.md) | `WaitJournalLine` → `WarTargetID` | 14 | 33205 |
 | [Part-34.md](Part-34.md) | `WearItem` → `Z` | 6 | 7937 |
@@ -60,6 +60,6 @@ This is the GitHub copy of the **complete** Runtime-backed API Manual. The proje
 - Profile directories use the connected server/shard **display name**, not the legacy `v2` folder.
 - `CastToObject` reports real success/failure instead of unconditional success.
 - `Version` / `StealthInfo` use the live ClassicUO/Yoko product version.
-- `SetRec`, `UseRec` and global `remain()` are historical Script.dll-only compatibility surfaces whose original help pages did not define behavior; this runtime does not invent fake recorder semantics.
+- `UO.SetRec()` arms the v50 one-shot legacy-command recorder; `UO.UseRec()` replays the captured action and global `remain()` reports whether a recording is available (`0`/`1`).
 
 Regenerate with `python3 scripts/GenerateGithubApiManual.py` after changing Runtime/API documentation.
