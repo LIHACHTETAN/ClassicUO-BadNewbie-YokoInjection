@@ -1,0 +1,63 @@
+name: Export Windows NativeAOT linker libraries
+
+on:
+  push:
+    branches:
+      - ClientUO-Age-of-Power
+    paths:
+      - _windowslink/READY
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: windows-latest
+    steps:
+      - name: Collect x64 VC and Windows SDK libraries
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $out = Join-Path $env:RUNNER_TEMP 'windows-link-libs'
+          New-Item -ItemType Directory -Path $out -Force | Out-Null
+
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $vs = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          if (-not $vs) { throw 'Visual Studio C++ tools not found' }
+          $msvcRoot = Join-Path $vs 'VC\Tools\MSVC'
+          $msvc = Get-ChildItem $msvcRoot -Directory | Sort-Object Name -Descending | Select-Object -First 1
+          if (-not $msvc) { throw 'MSVC directory not found' }
+          $vcLib = Join-Path $msvc.FullName 'lib\x64'
+          if (-not (Test-Path $vcLib)) { throw "VC x64 libs missing: $vcLib" }
+
+          $kits = Join-Path ${env:ProgramFiles(x86)} 'Windows Kits\10\Lib'
+          $sdk = Get-ChildItem $kits -Directory | Sort-Object Name -Descending | Select-Object -First 1
+          if (-not $sdk) { throw 'Windows SDK lib directory not found' }
+          $um = Join-Path $sdk.FullName 'um\x64'
+          $ucrt = Join-Path $sdk.FullName 'ucrt\x64'
+          if (-not (Test-Path $um)) { throw "Windows SDK um x64 libs missing: $um" }
+          if (-not (Test-Path $ucrt)) { throw "Windows SDK ucrt x64 libs missing: $ucrt" }
+
+          New-Item -ItemType Directory -Path (Join-Path $out 'vc') -Force | Out-Null
+          New-Item -ItemType Directory -Path (Join-Path $out 'um') -Force | Out-Null
+          New-Item -ItemType Directory -Path (Join-Path $out 'ucrt') -Force | Out-Null
+          Copy-Item (Join-Path $vcLib '*.lib') (Join-Path $out 'vc') -Force
+          Copy-Item (Join-Path $um '*.lib') (Join-Path $out 'um') -Force
+          Copy-Item (Join-Path $ucrt '*.lib') (Join-Path $out 'ucrt') -Force
+
+          @(
+            "VS=$vs",
+            "MSVC=$($msvc.Name)",
+            "SDK=$($sdk.Name)",
+            "VC_LIBS=$((Get-ChildItem (Join-Path $out 'vc') -Filter *.lib).Count)",
+            "UM_LIBS=$((Get-ChildItem (Join-Path $out 'um') -Filter *.lib).Count)",
+            "UCRT_LIBS=$((Get-ChildItem (Join-Path $out 'ucrt') -Filter *.lib).Count)"
+          ) | Set-Content (Join-Path $out 'VERSIONS.txt') -Encoding utf8
+          Get-Content (Join-Path $out 'VERSIONS.txt')
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-nativeaot-link-libs-x64
+          path: ${{ runner.temp }}/windows-link-libs
+          compression-level: 6
+          retention-days: 1
