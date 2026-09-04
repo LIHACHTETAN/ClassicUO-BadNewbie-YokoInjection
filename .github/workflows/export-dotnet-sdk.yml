@@ -22,22 +22,40 @@ jobs:
         with:
           dotnet-version: '10.0.302'
 
-      - name: Verify SDK
+      - name: Pin and verify SDK 10.0.302
         shell: bash
         run: |
           set -euo pipefail
+          cat > global.json <<'EOF'
+          {
+            "sdk": {
+              "version": "10.0.302",
+              "rollForward": "disable",
+              "allowPrerelease": false
+            }
+          }
+          EOF
           dotnet --info
           test "$(dotnet --version)" = "10.0.302"
+          test -d /usr/share/dotnet/sdk/10.0.302
 
-      - name: Package SDK
+      - name: Package portable SDK payload
         shell: bash
         run: |
           set -euo pipefail
-          DOTNET_BIN="$(readlink -f "$(command -v dotnet)")"
-          DOTNET_DIR="$(dirname "$DOTNET_BIN")"
-          echo "DOTNET_DIR=$DOTNET_DIR"
-          tar -C "$DOTNET_DIR" -czf "$RUNNER_TEMP/dotnet-sdk-10.0.302-linux-x64.tar.gz" .
+          ROOT="$RUNNER_TEMP/dotnet-10.0.302"
+          mkdir -p "$ROOT/sdk" "$ROOT"
+          cp /usr/share/dotnet/dotnet "$ROOT/"
+          cp -a /usr/share/dotnet/host "$ROOT/"
+          cp -a /usr/share/dotnet/sdk/10.0.302 "$ROOT/sdk/"
+          cp -a /usr/share/dotnet/shared "$ROOT/"
+          cp -a /usr/share/dotnet/packs "$ROOT/"
+          if [ -d /usr/share/dotnet/sdk-manifests ]; then cp -a /usr/share/dotnet/sdk-manifests "$ROOT/"; fi
+          if [ -d /usr/share/dotnet/templates ]; then cp -a /usr/share/dotnet/templates "$ROOT/"; fi
+          if [ -d /usr/share/dotnet/metadata ]; then cp -a /usr/share/dotnet/metadata "$ROOT/"; fi
+          tar -C "$RUNNER_TEMP" -czf "$RUNNER_TEMP/dotnet-sdk-10.0.302-linux-x64.tar.gz" dotnet-10.0.302
           sha256sum "$RUNNER_TEMP/dotnet-sdk-10.0.302-linux-x64.tar.gz" > "$RUNNER_TEMP/dotnet-sdk-10.0.302-linux-x64.tar.gz.sha256"
+          ls -lh "$RUNNER_TEMP/dotnet-sdk-10.0.302-linux-x64.tar.gz"
 
       - name: Upload SDK artifact
         uses: actions/upload-artifact@v4
