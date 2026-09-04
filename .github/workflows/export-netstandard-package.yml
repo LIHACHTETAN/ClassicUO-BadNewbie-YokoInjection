@@ -1,0 +1,43 @@
+name: Export NETStandard.Library package
+
+on:
+  push:
+    branches:
+      - ClientUO-Age-of-Power
+    paths:
+      - _buildsdk/NETSTANDARD_READY
+
+permissions:
+  contents: read
+
+jobs:
+  export-netstandard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install .NET SDK 10.0.302
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.302'
+      - name: Pin SDK
+        shell: bash
+        run: echo '{"sdk":{"version":"10.0.302","rollForward":"disable"}}' > global.json
+      - name: Restore netstandard2.0 package
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/netstd
+          cat > /tmp/netstd/netstd.csproj <<'EOF'
+          <Project Sdk="Microsoft.NET.Sdk">
+            <PropertyGroup><TargetFramework>netstandard2.0</TargetFramework></PropertyGroup>
+          </Project>
+          EOF
+          NUGET_PACKAGES="$RUNNER_TEMP/nuget" dotnet restore /tmp/netstd/netstd.csproj --packages "$RUNNER_TEMP/nuget"
+          test -d "$RUNNER_TEMP/nuget/netstandard.library"
+          tar -C "$RUNNER_TEMP/nuget" -cJf "$RUNNER_TEMP/netstandard-library-cache.tar.xz" netstandard.library
+      - name: Upload cache
+        uses: actions/upload-artifact@v4
+        with:
+          name: netstandard-library-cache
+          path: ${{ runner.temp }}/netstandard-library-cache.tar.xz
+          compression-level: 0
+          retention-days: 1
