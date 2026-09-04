@@ -1,0 +1,50 @@
+name: Export .NET SDK 10.0.302
+
+on:
+  push:
+    branches:
+      - ClientUO-Age-of-Power
+    paths:
+      - _buildsdk/READY
+
+permissions:
+  contents: read
+
+jobs:
+  export-sdk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install .NET SDK 10.0.302
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.302'
+
+      - name: Verify SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          dotnet --info
+          test "$(dotnet --version)" = "10.0.302"
+
+      - name: Package SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          DOTNET_BIN="$(readlink -f "$(command -v dotnet)")"
+          DOTNET_DIR="$(dirname "$DOTNET_BIN")"
+          echo "DOTNET_DIR=$DOTNET_DIR"
+          tar -C "$DOTNET_DIR" -czf "$RUNNER_TEMP/dotnet-sdk-10.0.302-linux-x64.tar.gz" .
+          sha256sum "$RUNNER_TEMP/dotnet-sdk-10.0.302-linux-x64.tar.gz" > "$RUNNER_TEMP/dotnet-sdk-10.0.302-linux-x64.tar.gz.sha256"
+
+      - name: Upload SDK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-sdk-10.0.302-linux-x64
+          path: |
+            ${{ runner.temp }}/dotnet-sdk-10.0.302-linux-x64.tar.gz
+            ${{ runner.temp }}/dotnet-sdk-10.0.302-linux-x64.tar.gz.sha256
+          compression-level: 0
+          retention-days: 1
