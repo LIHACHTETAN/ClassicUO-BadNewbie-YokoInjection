@@ -1,0 +1,64 @@
+name: Export v50 missing framework packages
+
+on:
+  push:
+    branches:
+      - ClientUO-Age-of-Power
+    paths:
+      - _nugetcache/MISSING_READY
+
+permissions:
+  contents: read
+
+jobs:
+  export-missing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.302'
+      - name: Pin SDK
+        shell: bash
+        run: |
+          echo '{"sdk":{"version":"10.0.302","rollForward":"disable"}}' > global.json
+          test "$(dotnet --version)" = "10.0.302"
+      - name: Restore exact missing packages
+        shell: bash
+        env:
+          NUGET_PACKAGES: ${{ runner.temp }}/nuget
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/pkgs"
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess, os
+          pairs=[
+            ('NETStandard.Library','2.0.3'),
+            ('System.Numerics.Vectors','4.4.0'),
+            ('System.Numerics.Vectors','4.5.0'),
+            ('Microsoft.NETFramework.ReferenceAssemblies.net472','1.0.3'),
+          ]
+          root=Path(os.environ['RUNNER_TEMP'])/'pkgs'
+          for i,(pkg,ver) in enumerate(pairs):
+              d=root/f'p{i}'; d.mkdir(parents=True,exist_ok=True)
+              (d/'p.csproj').write_text(f'<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net8.0</TargetFramework></PropertyGroup><ItemGroup><PackageReference Include="{pkg}" Version="{ver}" /></ItemGroup></Project>')
+              subprocess.run(['dotnet','restore',str(d/'p.csproj'),'--verbosity','minimal'],check=True)
+          PY
+          find "$NUGET_PACKAGES" -mindepth 1 -maxdepth 2 -type d | sort | tail -100
+      - name: Pack exact cache
+        shell: bash
+        env:
+          NUGET_PACKAGES: ${{ runner.temp }}/nuget
+        run: |
+          set -euo pipefail
+          tar -C "$NUGET_PACKAGES" -cJf "$RUNNER_TEMP/v50-missing-framework-packages.tar.xz" .
+          sha256sum "$RUNNER_TEMP/v50-missing-framework-packages.tar.xz" > "$RUNNER_TEMP/v50-missing-framework-packages.tar.xz.sha256"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v50-missing-framework-packages
+          path: |
+            ${{ runner.temp }}/v50-missing-framework-packages.tar.xz
+            ${{ runner.temp }}/v50-missing-framework-packages.tar.xz.sha256
+          compression-level: 0
+          retention-days: 1
