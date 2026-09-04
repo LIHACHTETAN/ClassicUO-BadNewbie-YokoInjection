@@ -2,7 +2,7 @@
 
 Commands: **Grab** through **Ignore**. This file is generated from the same canonical Runtime Manual shipped with the project/client.
 
-Canonical source SHA-256: `fcc7bb0bebe94e4b617e1dcb4ab316337d111a1c458a79bda0ae818cb2d4f2bb`
+Canonical source SHA-256: `524c4a06be8a621b5b5e24dabc4795c2c7da682f9c23e0b516f2de0a437ee254`
 
 ---
 

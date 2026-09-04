@@ -4,15 +4,11 @@ This is the GitHub copy of the **complete** Runtime-backed API Manual. The proje
 
 - Product/API source version: **50.0.0**
 - Command cards: **738**
-- Manifest UO coverage: **734/734**
+- Manifest UO coverage: **738/738**
 - Runtime compatibility catalogue: **422 commands / 444 overloads**
-- Canonical SHA-256: `fcc7bb0bebe94e4b617e1dcb4ab316337d111a1c458a79bda0ae818cb2d4f2bb`
+- Canonical SHA-256: `524c4a06be8a621b5b5e24dabc4795c2c7da682f9c23e0b516f2de0a437ee254`
 - Source: current registered Runtime + generated runtime contracts + release manifest.
 - Every card contains signatures/overloads, parameters, return type/contract, behavior, limitations and examples.
-
-## v50 command help
-
-- [Hide / InfoGump / InfoGumps — full v50 help](v50-Hide-InfoGump.md)
 
 ## Parts
 
