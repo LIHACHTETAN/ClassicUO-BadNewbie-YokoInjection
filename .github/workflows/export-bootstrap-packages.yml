@@ -1,0 +1,48 @@
+name: Export Bootstrap restore packages
+
+on:
+  push:
+    branches:
+      - ClientUO-Age-of-Power
+    paths:
+      - _buildsdk/BOOTSTRAP_READY
+
+permissions:
+  contents: read
+
+jobs:
+  export-bootstrap-packages:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install .NET SDK 10.0.302
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.302'
+      - name: Pin SDK
+        shell: bash
+        run: echo '{"sdk":{"version":"10.0.302","rollForward":"disable"}}' > global.json
+      - name: Fetch packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/dep
+          cat > /tmp/dep/dep.csproj <<'EOF'
+          <Project Sdk="Microsoft.NET.Sdk">
+            <PropertyGroup><TargetFramework>net472</TargetFramework></PropertyGroup>
+            <ItemGroup>
+              <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
+              <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net472" Version="1.0.3" />
+            </ItemGroup>
+          </Project>
+          EOF
+          NUGET_PACKAGES="$RUNNER_TEMP/nuget" dotnet restore /tmp/dep/dep.csproj --packages "$RUNNER_TEMP/nuget"
+          test -d "$RUNNER_TEMP/nuget/system.numerics.vectors"
+          test -d "$RUNNER_TEMP/nuget/microsoft.netframework.referenceassemblies.net472"
+          tar -C "$RUNNER_TEMP/nuget" -cJf "$RUNNER_TEMP/bootstrap-packages.tar.xz" system.numerics.vectors microsoft.netframework.referenceassemblies.net472
+      - name: Upload cache
+        uses: actions/upload-artifact@v4
+        with:
+          name: bootstrap-restore-packages
+          path: ${{ runner.temp }}/bootstrap-packages.tar.xz
+          compression-level: 0
+          retention-days: 1
