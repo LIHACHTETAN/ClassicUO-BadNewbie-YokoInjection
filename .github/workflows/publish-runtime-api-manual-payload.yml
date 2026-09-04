@@ -23,15 +23,24 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          PAYLOAD="docs/Runtime-API-Manual/_payload"
+          MANUAL="docs/Runtime-API-Manual"
+          PAYLOAD="$MANUAL/_payload"
           cat "$PAYLOAD"/chunk-*.b64 > /tmp/runtime-api-manual.b64
           base64 -d /tmp/runtime-api-manual.b64 > /tmp/runtime-api-manual.tar.xz
           EXPECTED="$(tr -d '[:space:]' < "$PAYLOAD/READY")"
           ACTUAL="$(sha256sum /tmp/runtime-api-manual.tar.xz | awk '{print $1}')"
           test "$EXPECTED" = "$ACTUAL"
-          tar -xJf /tmp/runtime-api-manual.tar.xz -C docs/Runtime-API-Manual
-          test "$(find docs/Runtime-API-Manual -maxdepth 1 -name 'Part-*.md' | wc -l)" -eq 34
-          grep -q 'Command cards: \*\*738\*\*' docs/Runtime-API-Manual/README.md
+
+          # Remove obsolete top-level Manual files so GitHub is an exact copy of
+          # the generated v50 Manual, not an accumulation of old helper pages.
+          find "$MANUAL" -maxdepth 1 -type f \
+            ! -name 'README.md' ! -name 'Part-*.md' -delete
+
+          tar -xJf /tmp/runtime-api-manual.tar.xz -C "$MANUAL"
+          test "$(find "$MANUAL" -maxdepth 1 -name 'Part-*.md' | wc -l)" -eq 34
+          test "$(find "$MANUAL" -maxdepth 1 -type f | wc -l)" -eq 35
+          grep -q 'Command cards: \*\*738\*\*' "$MANUAL/README.md"
+          grep -q 'Manifest UO coverage: \*\*738/738\*\*' "$MANUAL/README.md"
           rm -rf "$PAYLOAD"
 
       - name: Commit generated Manual
