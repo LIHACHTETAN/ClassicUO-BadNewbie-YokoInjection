@@ -33,12 +33,15 @@ jobs:
               text = path.read_text()
               text = re.sub(r'Canonical source SHA-256: `[0-9a-f]{64}`',
                             f'Canonical source SHA-256: `{final_sha}`', text)
+              text = re.sub(r'- Canonical SHA-256: `[0-9a-f]{64}`',
+                            f'- Canonical SHA-256: `{final_sha}`', text)
               path.write_text(text)
 
           readme = root/'README.md'
           text = readme.read_text()
           text = text.replace('Manifest UO coverage: **734/734**', 'Manifest UO coverage: **738/738**')
           text = re.sub(r'\n## v50 command help\n\n- \[Hide / InfoGump / InfoGumps — full v50 help\]\(v50-Hide-InfoGump\.md\)\n', '\n', text)
+          text = text.replace('\n\n\n## Parts', '\n\n## Parts')
           readme.write_text(text)
 
           obsolete = root/'v50-Hide-InfoGump.md'
