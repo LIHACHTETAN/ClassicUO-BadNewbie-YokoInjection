@@ -1,0 +1,44 @@
+name: Inspect legacy Injection Script.dll source
+
+on:
+  push:
+    branches:
+      - ClientUO-Age-of-Power
+    paths:
+      - _legacyinspect/READY
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch official Injection source archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/legacy"
+          cd "$RUNNER_TEMP/legacy"
+          curl -fL --retry 5 --retry-delay 2 \
+            'https://downloads.sourceforge.net/project/injection/OldFiles/injection-src-0.3.30.3.zip' \
+            -o injection-src.zip
+          unzip -q injection-src.zip -d src
+          find src -maxdepth 4 -type f | sort > files.txt
+          {
+            echo '=== MATCHES ==='
+            grep -RIniE --binary-files=without-match 'SetRec|UseRec|\bremain\b' src || true
+            echo
+            echo '=== SCRIPT-RELATED FILES ==='
+            find src -type f | grep -Ei 'script|parser|intrinsic|function|api' | sort || true
+          } > report.txt
+          cat report.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: legacy-script-source-inspection
+          path: |
+            ${{ runner.temp }}/legacy/report.txt
+            ${{ runner.temp }}/legacy/files.txt
+            ${{ runner.temp }}/legacy/src
+          compression-level: 6
+          retention-days: 1
