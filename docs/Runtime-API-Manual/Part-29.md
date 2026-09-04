@@ -2,7 +2,7 @@
 
 Commands: **Snap** through **TargetByResource**. This file is generated from the same canonical Runtime Manual shipped with the project/client.
 
-Canonical source SHA-256: `4528740e9d5a461847f0f23ebfe4862157edc9d6be26a0b69bec8795cce81d71`
+Canonical source SHA-256: `fcc7bb0bebe94e4b617e1dcb4ab316337d111a1c458a79bda0ae818cb2d4f2bb`
 
 ---
 

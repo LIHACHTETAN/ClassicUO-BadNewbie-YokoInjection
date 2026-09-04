@@ -2,7 +2,7 @@
 
 Commands: **Unequip** through **UseSelfPaperdollScroll**. This file is generated from the same canonical Runtime Manual shipped with the project/client.
 
-Canonical source SHA-256: `4528740e9d5a461847f0f23ebfe4862157edc9d6be26a0b69bec8795cce81d71`
+Canonical source SHA-256: `fcc7bb0bebe94e4b617e1dcb4ab316337d111a1c458a79bda0ae818cb2d4f2bb`
 
 ---
 
@@ -656,34 +656,38 @@ END IF
 
 - `UO.UseRec() -> Any`
   - **Return type:** `Any`
-  - **Return contract:** Compatibility metadata exposes an adapted return slot, but the current zero-argument command performs no recorder action and does not provide a meaningful recorder result.
+  - **Return contract:** Compatibility metadata exposes an adapted return slot; the zero-argument command returns no script value.
 
 ### Legacy Yoko overloads
 
 - `UO.UseRec()`
   - **Return type:** `Unit`
-  - **Return contract:** No value. The historical Script.dll recorder/playback facility is not implemented by the current ClassicUO Yoko runtime.
+  - **Return contract:** No value. Replays the command most recently captured by `UO.SetRec()`.
 
 ### Parameters
 
-- None. The historical command is strictly zero-argument.
+- None. The command is strictly zero-argument.
 
 ### Behavior
 
-`UseRec` is retained only for source compatibility with old Injection/Script.dll scripts. The recovered historical help identifies `UO.UseRec()` as a Script.dll-only command introduced by `<=1501.17`, but its help page was explicitly unfinished and does not define what recorded action must be replayed. The ClassicUO Yoko runtime therefore emits an explicit compatibility diagnostic and performs no fake replay.
+`UO.UseRec()` decodes the command and typed arguments stored by the v50 `UO.SetRec()` recorder and routes them back through the same legacy compatibility dispatcher. Playback does not consume the recording, so the same action may be replayed repeatedly. If no valid recording exists, `UO.UseRec()` performs no action; in a connected client it reports that no recorded action is available.
 
 ### Notes / limitations
 
-- This is an intentional legacy compatibility no-op, not a successful playback operation.
-- No argument-bearing overload exists; old code must call exactly `UO.UseRec()`.
-- The previous placeholder that merely printed stored text was removed because it falsely implied execution.
-- `UO.SetRec()` has the same compatibility limitation.
+- Call `UO.SetRec()`, execute one recordable legacy `UO.*` command, then call `UO.UseRec()`.
+- Replay is guarded against recursive re-recording.
+- `remain()` returns `1` while a valid recorded action is available and `0` when none is stored.
+- The historical Script.dll help did not define playback internals; the behavior above is the explicit v50 ClassicUO/Yoko compatibility contract.
 
 ### Examples
 
 ```basic
-UO.UseRec()
-# Current Yoko runtime reports that the legacy Script.dll recorder is unavailable.
+UO.SetRec()
+UO.SetDefault('healbag', 0x40001234)
+
+IF remain() = 1 THEN
+    UO.UseRec()
+END IF
 ```
 
 ---

@@ -2,7 +2,7 @@
 
 Commands: **SetMulPath** through **SkillVal**. This file is generated from the same canonical Runtime Manual shipped with the project/client.
 
-Canonical source SHA-256: `4528740e9d5a461847f0f23ebfe4862157edc9d6be26a0b69bec8795cce81d71`
+Canonical source SHA-256: `fcc7bb0bebe94e4b617e1dcb4ab316337d111a1c458a79bda0ae818cb2d4f2bb`
 
 ---
 
@@ -77,34 +77,38 @@ UO.SetPauseScriptOnDisconnectStatus('value')
 
 - `UO.SetRec() -> Any`
   - **Return type:** `Any`
-  - **Return contract:** Compatibility metadata exposes an adapted return slot, but the current zero-argument command performs no recorder action and does not provide a meaningful recorder result.
+  - **Return contract:** Compatibility metadata exposes an adapted return slot; the command itself is zero-argument and returns no script value.
 
 ### Legacy Yoko overloads
 
 - `UO.SetRec()`
   - **Return type:** `Unit`
-  - **Return contract:** No value. The historical Script.dll recorder is not implemented by the current ClassicUO Yoko runtime.
+  - **Return contract:** No value. Arms a one-shot recorder for the next legacy `UO.*` compatibility command.
 
 ### Parameters
 
-- None. The historical command is strictly zero-argument.
+- None. The command is strictly zero-argument.
 
 ### Behavior
 
-`SetRec` is retained only for source compatibility with old Injection/Script.dll scripts. The recovered historical help identifies `UO.SetRec()` as a Script.dll-only command introduced by `<=1501.17`, but its help page was explicitly unfinished and does not define the recorder semantics. The ClassicUO Yoko runtime therefore does **not invent** recording behavior: calling the command emits an explicit compatibility diagnostic and performs no recorder action.
+The recovered Injection help identifies `UO.SetRec()` as a Script.dll-only command introduced by `<=1501.17`, but the historical help page was unfinished and the public Injection source archives do not contain its Script.dll implementation. ClassicUO Yoko v50 therefore provides an explicit deterministic replacement instead of a no-op: `UO.SetRec()` clears the previous recorded action and arms recording. The next command routed through the legacy `UO.*` compatibility dispatcher executes normally and is saved together with its typed arguments. `UO.UseRec()` can then replay the saved command.
 
 ### Notes / limitations
 
-- This is an intentional legacy compatibility no-op, not a successful recording operation.
-- No argument-bearing overload exists; old code must call exactly `UO.SetRec()`.
-- Because no authoritative historical recorder contract is available, implementing guessed behavior would make scripts silently incorrect.
-- `UO.UseRec()` has the same compatibility limitation.
+- Recording is one-shot: after one compatible command is captured, the recorder automatically disarms.
+- `UO.SetRec()` and `UO.UseRec()` themselves are never captured.
+- The stored command is kept in Yoko runtime state and survives the normal runtime-state snapshot/restore path.
+- `remain()` returns `0` immediately after `UO.SetRec()` and `1` after a command has been captured.
+- This v50 behavior is a documented ClassicUO/Yoko compatibility definition because no authoritative public Script.dll implementation of the historical semantics is available.
 
 ### Examples
 
 ```basic
 UO.SetRec()
-# Current Yoko runtime reports that the legacy Script.dll recorder is unavailable.
+UO.SetDefault('healbag', 0x40001234)  # executes and is recorded
+IF remain() = 1 THEN
+    UO.UseRec()                       # repeats SetDefault with the same arguments
+END IF
 ```
 
 ---
