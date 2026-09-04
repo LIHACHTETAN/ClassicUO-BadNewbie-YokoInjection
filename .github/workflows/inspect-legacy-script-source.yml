@@ -14,17 +14,17 @@ jobs:
   inspect:
     runs-on: ubuntu-latest
     steps:
-      - name: Fetch official Injection source archive
+      - name: Fetch official UO Injection 0.1 source archive
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/legacy"
           cd "$RUNNER_TEMP/legacy"
           curl -fL --retry 5 --retry-delay 2 \
-            'https://downloads.sourceforge.net/project/injection/OldFiles/injection-src-0.3.30.3.zip' \
+            'https://downloads.sourceforge.net/project/injection/Source%20Archive/UO%20Injection%200.1/UOInjection_01.zip' \
             -o injection-src.zip
           unzip -q injection-src.zip -d src
-          find src -maxdepth 4 -type f | sort > files.txt
+          find src -maxdepth 5 -type f | sort > files.txt
           {
             echo '=== MATCHES ==='
             grep -RIniE --binary-files=without-match 'SetRec|UseRec|\bremain\b' src || true
