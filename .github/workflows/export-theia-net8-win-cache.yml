@@ -14,64 +14,41 @@ jobs:
   export:
     runs-on: windows-latest
     steps:
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 10.0.302
-
-      - name: Restore exact net8 Windows Theia dependencies
+      - name: Download exact net8 Windows NuGet packages
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $root = Join-Path $env:RUNNER_TEMP 'theia-cache-work'
-          $packages = Join-Path $root 'nuget'
-          New-Item -ItemType Directory -Path $root -Force | Out-Null
-          New-Item -ItemType Directory -Path $packages -Force | Out-Null
-          $env:NUGET_PACKAGES = $packages
-
-          @'
-          <Project Sdk="Microsoft.NET.Sdk">
-            <PropertyGroup>
-              <OutputType>WinExe</OutputType>
-              <TargetFramework>net8.0-windows</TargetFramework>
-              <UseWindowsForms>true</UseWindowsForms>
-              <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-              <SelfContained>true</SelfContained>
-              <PublishSingleFile>true</PublishSingleFile>
-              <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-            </PropertyGroup>
-            <ItemGroup>
-              <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4129.50" />
-            </ItemGroup>
-          </Project>
-          '@ | Set-Content (Join-Path $root 'TheiaRestore.csproj') -Encoding utf8
-
-          dotnet restore (Join-Path $root 'TheiaRestore.csproj') -r win-x64 --disable-parallel
-          if ($LASTEXITCODE -ne 0) { throw "restore failed: $LASTEXITCODE" }
-
-          $out = Join-Path $env:RUNNER_TEMP 'theia-net8-win-cache'
+          $out = Join-Path $env:RUNNER_TEMP 'theia-net8-win-nupkgs'
           New-Item -ItemType Directory -Path $out -Force | Out-Null
-          $patterns = @(
-            'microsoft.netcore.app.runtime.win-x64',
-            'microsoft.windowsdesktop.app.ref',
-            'microsoft.windowsdesktop.app.runtime.win-x64',
-            'microsoft.aspnetcore.app.runtime.win-x64',
-            'microsoft.netcore.app.host.win-x64',
-            'microsoft.net.illink.tasks',
-            'microsoft.web.webview2'
-          )
-          foreach ($name in $patterns) {
-            $src = Join-Path $packages $name
-            if (-not (Test-Path $src)) { throw "missing restored package directory: $name" }
-            Copy-Item $src $out -Recurse -Force
+
+          $packages = [ordered]@{
+            'microsoft.netcore.app.runtime.win-x64' = '8.0.29'
+            'microsoft.windowsdesktop.app.ref' = '8.0.29'
+            'microsoft.windowsdesktop.app.runtime.win-x64' = '8.0.29'
+            'microsoft.aspnetcore.app.runtime.win-x64' = '8.0.29'
+            'microsoft.netcore.app.host.win-x64' = '8.0.29'
+            'microsoft.net.illink.tasks' = '8.0.29'
+            'microsoft.web.webview2' = '1.0.4129.50'
           }
-          Get-ChildItem $out -Directory | ForEach-Object {
-            $versions = (Get-ChildItem $_.FullName -Directory | Select-Object -ExpandProperty Name) -join ','
-            Write-Host "$($_.Name)=$versions"
+
+          foreach ($entry in $packages.GetEnumerator()) {
+            $id = $entry.Key
+            $version = $entry.Value
+            $file = "$id.$version.nupkg"
+            $url = "https://api.nuget.org/v3-flatcontainer/$id/$version/$file"
+            Write-Host "Downloading $id $version"
+            Invoke-WebRequest -Uri $url -OutFile (Join-Path $out $file) -UseBasicParsing
+            if (-not (Test-Path (Join-Path $out $file))) { throw "download failed: $file" }
+          }
+
+          Get-ChildItem $out -Filter *.nupkg | ForEach-Object {
+            $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            Write-Host "$($_.Name) $($_.Length) $hash"
           }
 
       - uses: actions/upload-artifact@v4
         with:
-          name: theia-net8-win-cache
-          path: ${{ runner.temp }}/theia-net8-win-cache
-          compression-level: 6
+          name: theia-net8-win-nupkgs
+          path: ${{ runner.temp }}/theia-net8-win-nupkgs/*.nupkg
+          compression-level: 0
           retention-days: 1
