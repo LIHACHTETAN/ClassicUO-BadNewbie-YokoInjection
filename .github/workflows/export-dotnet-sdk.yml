@@ -35,8 +35,8 @@ jobs:
             }
           }
           EOF
-          dotnet --info
           test "$(dotnet --version)" = "10.0.302"
+          dotnet --info
           test -d /usr/share/dotnet/sdk/10.0.302
 
       - name: Package portable SDK payload
@@ -44,7 +44,7 @@ jobs:
         run: |
           set -euo pipefail
           ROOT="$RUNNER_TEMP/dotnet-10.0.302"
-          mkdir -p "$ROOT/sdk" "$ROOT"
+          mkdir -p "$ROOT/sdk"
           cp /usr/share/dotnet/dotnet "$ROOT/"
           cp -a /usr/share/dotnet/host "$ROOT/"
           cp -a /usr/share/dotnet/sdk/10.0.302 "$ROOT/sdk/"
