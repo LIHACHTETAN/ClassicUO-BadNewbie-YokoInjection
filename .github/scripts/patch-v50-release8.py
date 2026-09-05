@@ -122,6 +122,20 @@ s = replace_exact(
 )
 save(rel, s)
 
+# Keep the deterministic verifier aligned with the stronger workspace invariant.
+rel = "scripts/VerifyV50Ide.py"
+s = load(rel)
+s = replace_exact(
+    s,
+    "    and '_workspaceSymbols = symbols as YokoApiSymbol[]' in manual_workspace_update\n"
+    "    and '?? (symbols ?? Array.Empty<YokoApiSymbol>()).ToArray();' in manual_workspace_update",
+    "    and '_workspaceSymbols = (symbols ?? Array.Empty<YokoApiSymbol>())' in manual_workspace_update\n"
+    "    and '.Where(symbol => symbol != null && !symbol.IsRuntime)' in manual_workspace_update\n"
+    "    and '.ToArray();' in manual_workspace_update",
+    "VerifyV50Ide workspace snapshot invariant",
+)
+save(rel, s)
+
 # The completion catalog is process-global; this test collection must not race other World instances.
 rel = "tests/ClassicUO.UnitTests/Game/Managers/YokoApiSymbolIndexTests.cs"
 s = load(rel)
@@ -221,6 +235,9 @@ if "per-position wildcard" not in metadata_check:
 manual_check = load("src/ClassicUO.Client/Game/UI/Gumps/YokoManualGump.cs")
 if "!symbol.IsRuntime" not in manual_check:
     raise RuntimeError("Workspace symbol patch verification failed")
+verifier_check = load("scripts/VerifyV50Ide.py")
+if ".Where(symbol => symbol != null && !symbol.IsRuntime)" not in verifier_check:
+    raise RuntimeError("Verifier workspace invariant patch verification failed")
 symbol_check = load("tests/ClassicUO.UnitTests/Game/Managers/YokoApiSymbolIndexTests.cs")
 if "DisableParallelization = true" not in symbol_check:
     raise RuntimeError("Completion test isolation patch verification failed")
