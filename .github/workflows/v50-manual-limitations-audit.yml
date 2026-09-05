@@ -26,7 +26,7 @@ jobs:
           grep -RniE "$regex" "$root" --include='*.md' || true
           echo '===== COUNTS BY TERM ====='
           for term in 'unimplemented' 'not implemented' 'disabled' 'no-op' 'unsupported' 'not supported' 'unavailable' 'compatibility value' 'historical-only' 'not available' 'stub'; do
-            count=$(grep -RilF "$term" "$root" --include='*.md' | wc -l | tr -d ' ')
+            count=$( (grep -RilF "$term" "$root" --include='*.md' || true) | wc -l | tr -d ' ')
             printf '%-22s %s files\n' "$term" "$count"
           done
 
