@@ -1,0 +1,50 @@
+name: v50 inspect Windows build phases
+
+on:
+  push:
+    paths:
+      - .github/workflows/v50-inspect-build-script.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  EXPECTED_SOURCE_SHA256: 070cc3821c836d8470a6b10e295014cabcf8f2ad74ae3c4dddf5d8a6659f23ed
+
+jobs:
+  inspect:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Download source and print BUILD_V50_WINDOWS phases
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $shares=@(
+            @{ Share='ENGSULZWiyg3'; Name='part00'; Size=94371840; Sha='18a2e2a672d44f90215458ddbf81ee82e57dcb1cb11d57c0dae42a79b063c1c6' },
+            @{ Share='vO3RI-uepxuC'; Name='part01'; Size=94371840; Sha='8a81a16359db3396017a60146e2414e873b9738b5a2553a586045cdb6f4c0846' },
+            @{ Share='L0ABqCBELFZo'; Name='part02'; Size=68451382; Sha='5cd92a807e7db72b22c83f04b554f5db5563c3871cb43665f707491cc4b6d96a' }
+          )
+          foreach($s in $shares){
+            $list=Invoke-RestMethod -Uri "https://api.firestorage.ai/dev/file/shares/$($s.Share)/files?maxResults=1000"
+            $file=$list.files[0]
+            $d=Invoke-RestMethod -Uri "https://api.firestorage.ai/dev/file/shares/$($s.Share)/files/$($file.fileId)/download" -Method Post -ContentType 'application/json'
+            $out=Join-Path $env:RUNNER_TEMP $s.Name
+            Invoke-WebRequest $d.downloadUrl -OutFile $out -UseBasicParsing -MaximumRedirection 10
+            if((Get-Item $out).Length -ne [int64]$s.Size){throw "Size mismatch $($s.Name)"}
+            if((Get-FileHash $out -Algorithm SHA256).Hash.ToLowerInvariant() -ne $s.Sha){throw "SHA mismatch $($s.Name)"}
+          }
+          $joined=Join-Path $env:RUNNER_TEMP 'source.zip'
+          $dst=[IO.File]::Open($joined,[IO.FileMode]::Create)
+          try{foreach($n in @('part00','part01','part02')){$src=[IO.File]::OpenRead((Join-Path $env:RUNNER_TEMP $n));try{$src.CopyTo($dst)}finally{$src.Dispose()}}}finally{$dst.Dispose()}
+          if((Get-FileHash $joined -Algorithm SHA256).Hash.ToLowerInvariant() -ne $env:EXPECTED_SOURCE_SHA256){throw 'Full source SHA mismatch'}
+          $root=Join-Path $env:RUNNER_TEMP 'inspect-source'
+          Expand-Archive $joined $root -Force
+          $script=Join-Path $root 'project/BUILD_V50_WINDOWS.ps1'
+          if(-not(Test-Path $script)){throw 'BUILD_V50_WINDOWS.ps1 missing'}
+          Write-Host '===== PIPELINE LABELS / COMMANDS ====='
+          Select-String -Path $script -Pattern '===|dotnet |Invoke-|Run-Step|Publish|Smoke|NativeAOT|Test|Build|Restore|Theia|Scintilla|cuoapi' | ForEach-Object { Write-Host ("{0:D4}: {1}" -f $_.LineNumber,$_.Line.Trim()) }
+          Write-Host '===== FULL BUILD SCRIPT ====='
+          $lines=Get-Content $script
+          for($i=1;$i -le $lines.Count;$i++){Write-Host ("{0:D4}: {1}" -f $i,$lines[$i-1])}
