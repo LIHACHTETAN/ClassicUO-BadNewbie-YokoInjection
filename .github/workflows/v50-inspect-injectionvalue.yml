@@ -54,3 +54,9 @@ jobs:
           Show-Lines (Join-Path $rt 'InjectionApiUO.cs') 490 525
           Write-Host '===== InjectionValue delegate/registration references ====='
           Select-String -Path (Join-Path $rt '*.cs') -Pattern 'InjectionValue|NativeSubrutineDefinition' | Where-Object { $_.Path -match 'InjectionApiUO|NativeSubrutineDefinition|InjectionValue' } | Select-Object -First 120 | ForEach-Object { Write-Host ("{0}:{1}: {2}" -f $_.Path,$_.LineNumber,$_.Line.Trim()) }
+
+          $tests=Join-Path $root 'project/tests/ClassicUO.UnitTests/Game/Managers'
+          Show-Lines (Join-Path $tests 'YokoTheiaIoResponsivenessTests.cs') 315 410
+          Show-Lines (Join-Path $tests 'YokoSelectedAutoloadStartupTests.cs') 95 135
+          Show-Lines (Join-Path $tests 'YokoInjectionCompatibilityTests.cs') 900 955
+          Show-Lines (Join-Path $tests 'YokoInjectionCompatibilityTests.cs') 1460 1510
