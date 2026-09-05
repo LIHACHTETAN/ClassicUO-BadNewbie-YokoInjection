@@ -15,6 +15,7 @@ internal static class AdditionalProxyTests
         Run("SOCKS4 IPv4 target", TestSocks4Ipv4, ref passed);
         Run("SOCKS5 IPv4 target", TestSocks5Ipv4, ref passed);
         Run("SOCKS5 bad auth rejected", TestSocks5BadAuth, ref passed);
+        Run("SOCKS5 unoffered auth rejected", TestSocks5UnofferedAuth, ref passed);
         Run("proxy password without username rejected", TestPasswordWithoutUsername, ref passed);
         Console.WriteLine($"ADDITIONAL_PROXY_PASS={passed}");
         return passed;
@@ -92,6 +93,25 @@ internal static class AdditionalProxyTests
         }));
     }
 
+    private static void TestSocks5UnofferedAuth()
+    {
+        WithServer(async stream =>
+        {
+            byte[] hello = await ReadExactAsync(stream, 3);
+            Assert(hello[0] == 5 && hello[1] == 1 && hello[2] == 0, "client did not offer only SOCKS5 no-auth");
+            await stream.WriteAsync(new byte[] { 5, 2 });
+        }, port =>
+        {
+            IOException ex = CaptureThrows<IOException>(() =>
+            {
+                using TcpClient _ = ProxyTransport.Connect(
+                    "game.example", 2593,
+                    new ProxyTransportOptions(true, "127.0.0.1", port, ProxyTransportType.Socks5, "", ""));
+            });
+            Assert(ex.Message.Contains("did not offer", StringComparison.Ordinal), "SOCKS5 unoffered auth method was not rejected explicitly");
+        });
+    }
+
     private static void TestPasswordWithoutUsername()
     {
         AssertThrows<InvalidOperationException>(() =>
@@ -160,8 +180,13 @@ internal static class AdditionalProxyTests
 
     private static void AssertThrows<T>(Action action) where T : Exception
     {
+        _ = CaptureThrows<T>(action);
+    }
+
+    private static T CaptureThrows<T>(Action action) where T : Exception
+    {
         try { action(); }
-        catch (T) { return; }
+        catch (T ex) { return ex; }
         throw new InvalidOperationException("ASSERT: expected " + typeof(T).Name);
     }
 }
