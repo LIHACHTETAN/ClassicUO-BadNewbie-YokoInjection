@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,18 +9,22 @@ namespace V50ProxyTransportTest;
 
 internal static class AdditionalProxyTests
 {
-    [ModuleInitializer]
-    internal static void Run()
+    internal static int RunAll()
     {
-        TestSocks4Ipv4();
-        Console.WriteLine("PASS | SOCKS4 IPv4 target");
-        TestSocks5Ipv4();
-        Console.WriteLine("PASS | SOCKS5 IPv4 target");
-        TestSocks5BadAuth();
-        Console.WriteLine("PASS | SOCKS5 bad auth rejected");
-        TestPasswordWithoutUsername();
-        Console.WriteLine("PASS | proxy password without username rejected");
-        Console.WriteLine("ADDITIONAL_PROXY_PASS=4");
+        int passed = 0;
+        Run("SOCKS4 IPv4 target", TestSocks4Ipv4, ref passed);
+        Run("SOCKS5 IPv4 target", TestSocks5Ipv4, ref passed);
+        Run("SOCKS5 bad auth rejected", TestSocks5BadAuth, ref passed);
+        Run("proxy password without username rejected", TestPasswordWithoutUsername, ref passed);
+        Console.WriteLine($"ADDITIONAL_PROXY_PASS={passed}");
+        return passed;
+    }
+
+    private static void Run(string name, Action test, ref int passed)
+    {
+        test();
+        passed++;
+        Console.WriteLine("PASS | " + name);
     }
 
     private static void TestSocks4Ipv4()
@@ -115,7 +118,13 @@ internal static class AdditionalProxyTests
         Exception? clientError = null;
         try { client(port); }
         catch (Exception ex) { clientError = ex; }
-        finally { serverTask.GetAwaiter().GetResult(); }
+        finally
+        {
+            listener.Stop();
+            if (!serverTask.Wait(TimeSpan.FromSeconds(12)))
+                throw new TimeoutException("Additional proxy test server did not finish within 12 seconds.");
+            serverTask.GetAwaiter().GetResult();
+        }
         if (clientError != null) throw clientError;
     }
 
