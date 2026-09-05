@@ -40,7 +40,7 @@ if ($missing.Count -gt 0) {
 # settings/profile/log files, and those must not leak into the delivered archive.
 $smokeRoot = Join-Path $env:RUNNER_TEMP ("v50-client-smoke-" + [Guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $smokeRoot -Force | Out-Null
-Copy-Item -LiteralPath (Join-Path $client '*') -Destination $smokeRoot -Recurse -Force
+Copy-Item -Path (Join-Path $client '*') -Destination $smokeRoot -Recurse -Force
 $exe = Join-Path $smokeRoot 'ClassicUO.exe'
 
 $processes = [System.Collections.Generic.List[System.Diagnostics.Process]]::new()
