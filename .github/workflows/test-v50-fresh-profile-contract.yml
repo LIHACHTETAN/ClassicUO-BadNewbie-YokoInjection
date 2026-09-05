@@ -1,0 +1,27 @@
+name: v50 fresh profile contract self-test
+
+on:
+  push:
+    paths:
+      - .github/scripts/v50_fresh_profile_contract.py
+      - .github/workflows/test-v50-fresh-profile-contract.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fresh-profile-gate-selftest:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Compile Python gate
+        shell: pwsh
+        run: python -m py_compile .github/scripts/v50_fresh_profile_contract.py
+      - name: Run positive and negative fixtures
+        shell: pwsh
+        run: python .github/scripts/v50_fresh_profile_contract.py --self-test
