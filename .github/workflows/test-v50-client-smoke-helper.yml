@@ -1,0 +1,67 @@
+name: v50 client smoke helper self-test
+
+on:
+  push:
+    paths:
+      - .github/scripts/v50_run_extracted_client_smoke.ps1
+      - .github/scripts/v50_smoke_fixture/**
+      - .github/workflows/test-v50-client-smoke-helper.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-helper-selftest:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: .github/scripts/v50_smoke_fixture
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.302'
+      - name: Verify exact SDK
+        shell: pwsh
+        run: |
+          $v = (& dotnet --version).Trim()
+          Write-Host "dotnet=$v"
+          if ($v -ne '10.0.302') { throw "Wrong SDK $v" }
+      - name: Build smoke fixture warnings as errors
+        shell: pwsh
+        run: |
+          dotnet restore ClassicUO.csproj
+          if ($LASTEXITCODE -ne 0) { throw 'fixture restore failed' }
+          dotnet build ClassicUO.csproj -c Release --no-restore -warnaserror
+          if ($LASTEXITCODE -ne 0) { throw 'fixture build failed' }
+      - name: Stage fixture as client payload
+        shell: pwsh
+        run: |
+          $stage = Join-Path $env:RUNNER_TEMP 'v50-smoke-fixture-client'
+          if (Test-Path $stage) { Remove-Item -Recurse -Force $stage }
+          New-Item -ItemType Directory -Path $stage | Out-Null
+          Copy-Item -Path 'bin/Release/net10.0/*' -Destination $stage -Recurse -Force
+          foreach ($name in @('cuo.dll','SDL3.dll','FNA3D.dll','FAudio.dll','libtheorafile.dll','zlib.dll','Scintilla.dll')) {
+            Set-Content -LiteralPath (Join-Path $stage $name) -Value "fixture-$name" -Encoding ascii
+          }
+          "SMOKE_FIXTURE_CLIENT=$stage" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+      - name: Positive two-instance smoke fixture
+        shell: pwsh
+        run: |
+          Remove-Item Env:V50_SMOKE_EXIT_EARLY -ErrorAction SilentlyContinue
+          & pwsh -NoProfile -ExecutionPolicy Bypass -File "$env:GITHUB_WORKSPACE/.github/scripts/v50_run_extracted_client_smoke.ps1" `
+            -ClientDirectory $env:SMOKE_FIXTURE_CLIENT -MinAliveSeconds 2
+          if ($LASTEXITCODE -ne 0) { throw 'positive smoke fixture failed' }
+      - name: Negative early-exit fixture must be rejected
+        shell: pwsh
+        run: |
+          $env:V50_SMOKE_EXIT_EARLY = '1'
+          & pwsh -NoProfile -ExecutionPolicy Bypass -File "$env:GITHUB_WORKSPACE/.github/scripts/v50_run_extracted_client_smoke.ps1" `
+            -ClientDirectory $env:SMOKE_FIXTURE_CLIENT -MinAliveSeconds 1
+          $code = $LASTEXITCODE
+          Remove-Item Env:V50_SMOKE_EXIT_EARLY -ErrorAction SilentlyContinue
+          Write-Host "expected-failure-exit-code=$code"
+          if ($code -eq 0) { throw 'smoke helper incorrectly accepted an early-exit process' }
+          Write-Host 'PASS | smoke helper rejects early client exit'
