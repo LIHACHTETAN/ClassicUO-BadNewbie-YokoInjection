@@ -24,7 +24,10 @@ internal static class Program
             Run("HTTP rejection", TestHttpReject);
             Run("SOCKS5 rejection", TestSocks5Reject);
             Run("invalid proxy settings", TestInvalidSettings);
-            Console.WriteLine($"PROXY_TRANSPORT_PASS={Passed.Count}");
+            int additional = AdditionalProxyTests.RunAll();
+            if (additional != 4)
+                throw new InvalidOperationException($"Expected 4 additional proxy tests, got {additional}");
+            Console.WriteLine($"PROXY_TRANSPORT_PASS={Passed.Count + additional}");
             return 0;
         }
         catch (Exception ex)
@@ -216,7 +219,7 @@ internal static class Program
 
     private static void WithServer(Func<NetworkStream, Task> server, Action<int> client)
     {
-        var listener = new TcpListener(IPAddress.Loopback, 0);
+        using var listener = new TcpListener(IPAddress.Loopback, 0);
         listener.Start();
         int port = ((IPEndPoint)listener.LocalEndpoint).Port;
         Task serverTask = Task.Run(async () =>
@@ -238,8 +241,10 @@ internal static class Program
         }
         finally
         {
-            try { serverTask.GetAwaiter().GetResult(); }
-            finally { listener.Stop(); }
+            listener.Stop();
+            if (!serverTask.Wait(TimeSpan.FromSeconds(12)))
+                throw new TimeoutException("Proxy test server did not finish within 12 seconds.");
+            serverTask.GetAwaiter().GetResult();
         }
 
         if (clientError != null)
