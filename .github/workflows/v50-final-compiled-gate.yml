@@ -1,0 +1,222 @@
+name: v50 final compiled gate
+
+on:
+  push:
+    paths:
+      - .github/workflows/v50-final-compiled-gate.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  SOURCE_URL: ""
+  EXPECTED_SHA256: "096c8f9f0688594c079fd77c4ab4f03c705b2110ea89ba043850522bc44d5e72"
+  PROFILE_PATCH_READY: "0"
+
+jobs:
+  final-gate:
+    runs-on: windows-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Guard final gate
+        shell: pwsh
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:SOURCE_URL) -or $env:PROFILE_PATCH_READY -ne '1') {
+            Write-Host 'Final gate is staged but intentionally disabled until the exact v50 profile patch is ready.'
+            'V50_GATE_DISABLED=1' | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          }
+
+      - name: Setup Python
+        if: env.V50_GATE_DISABLED != '1'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Setup exact .NET SDK
+        if: env.V50_GATE_DISABLED != '1'
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.302'
+
+      - name: Download and verify canonical package
+        if: env.V50_GATE_DISABLED != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $zip = Join-Path $env:RUNNER_TEMP 'v50-project-client.zip'
+          Invoke-WebRequest -Uri $env:SOURCE_URL -OutFile $zip -UseBasicParsing
+          $actual = (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash.ToLowerInvariant()
+          $expected = $env:EXPECTED_SHA256.ToLowerInvariant()
+          Write-Host "SHA256=$actual"
+          if ($actual -ne $expected) { throw "Package SHA mismatch: expected $expected got $actual" }
+          $root = Join-Path $env:RUNNER_TEMP 'v50-final'
+          if (Test-Path $root) { Remove-Item -LiteralPath $root -Recurse -Force }
+          Expand-Archive -LiteralPath $zip -DestinationPath $root -Force
+          $project = Join-Path $root 'project'
+          $client = Join-Path $root 'client'
+          if (-not (Test-Path (Join-Path $project 'ClassicUO.sln'))) { throw 'Missing project/ClassicUO.sln' }
+          if (-not (Test-Path $client -PathType Container)) { throw 'Missing client/' }
+          "V50_ROOT=$root" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "V50_PROJECT=$project" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "V50_CLIENT=$client" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Verify exact SDK pin
+        if: env.V50_GATE_DISABLED != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Set-Location $env:V50_PROJECT
+          $v = (& dotnet --version).Trim()
+          Write-Host "dotnet=$v"
+          if ($v -ne '10.0.302') { throw "Wrong .NET SDK: $v" }
+
+      - name: Fresh-profile no-v2 contract gate
+        if: env.V50_GATE_DISABLED != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $pm = Join-Path $env:V50_PROJECT 'src/ClassicUO.Client/Configuration/ProfileManager.cs'
+          if (-not (Test-Path $pm)) { throw 'ProfileManager.cs missing' }
+          $text = Get-Content -LiteralPath $pm -Raw
+          if ($text -match '(?i)legacy\s+v2|[\\/\"]v2[\\/\"]|\"v2\"') {
+            throw 'Fresh-profile contract violation: legacy v2 lookup/migration is still present in ProfileManager.cs'
+          }
+          Write-Host 'ProfileManager: no legacy v2 migration token detected.'
+
+      - name: Clean generated build directories
+        if: env.V50_GATE_DISABLED != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Get-ChildItem -LiteralPath $env:V50_PROJECT -Recurse -Directory -Force -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -in @('bin','obj','publish','__pycache__') } |
+            Sort-Object FullName -Descending |
+            Remove-Item -Recurse -Force -ErrorAction Stop
+
+      - name: Run deterministic source/model gates
+        if: env.V50_GATE_DISABLED != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Set-Location $env:V50_PROJECT
+          $scripts = @(
+            'scripts/VerifyProjectSources.py',
+            'scripts/TestProfileServerFolderModel.py',
+            'scripts/TestGumpApiModel.py',
+            'scripts/TestRuntimeBehaviorFixes.py',
+            'scripts/TestSearchCore.py',
+            'scripts/TestFindTypeModel.py',
+            'scripts/TestParamArrayWrapperModel.py',
+            'scripts/TestAutoloadMenuModel.py',
+            'scripts/VerifyYokoTheiaIde.py',
+            'scripts/TestRuntimeContractIntegrity.py',
+            'scripts/TestApiManualCurrent.py',
+            'scripts/TestApiManualCompleteness.py',
+            'scripts/TestConvertedAutoload.py',
+            'scripts/VerifyYokoLibrary.py'
+          )
+          foreach ($s in $scripts) {
+            if (Test-Path $s) {
+              Write-Host "===== RUN $s ====="
+              & python $s
+              if ($LASTEXITCODE -ne 0) { throw "$s failed with exit code $LASTEXITCODE" }
+            } else {
+              Write-Host "SKIP absent optional gate: $s"
+            }
+          }
+
+      - name: Regenerate API Manual and retest
+        if: env.V50_GATE_DISABLED != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Set-Location $env:V50_PROJECT
+          if (Test-Path 'scripts/GenerateCompleteApiManual.py') {
+            & python 'scripts/GenerateCompleteApiManual.py'
+            if ($LASTEXITCODE -ne 0) { throw 'GenerateCompleteApiManual.py failed' }
+          }
+          foreach ($s in @('scripts/TestApiManualCurrent.py','scripts/TestApiManualCompleteness.py','scripts/TestRuntimeContractIntegrity.py')) {
+            if (Test-Path $s) {
+              & python $s
+              if ($LASTEXITCODE -ne 0) { throw "$s failed after Manual regeneration" }
+            }
+          }
+
+      - name: Restore whole solution
+        if: env.V50_GATE_DISABLED != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Set-Location $env:V50_PROJECT
+          & dotnet restore 'ClassicUO.sln' -p:Configuration=Release '-p:Platform=Any CPU'
+          if ($LASTEXITCODE -ne 0) { throw 'dotnet restore failed' }
+
+      - name: Release build whole solution warnings-as-errors
+        if: env.V50_GATE_DISABLED != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Set-Location $env:V50_PROJECT
+          & dotnet build 'ClassicUO.sln' -c Release --no-restore -warnaserror '-p:Platform=Any CPU'
+          if ($LASTEXITCODE -ne 0) { throw 'dotnet build failed' }
+
+      - name: Discover restore and run every test project
+        if: env.V50_GATE_DISABLED != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Set-Location $env:V50_PROJECT
+          $tests = Get-ChildItem -Recurse -File -Filter '*.csproj' |
+            Where-Object { $_.Name -match '(?i)test' -or $_.DirectoryName -match '(?i)test' } |
+            Sort-Object FullName -Unique
+          if (-not $tests) { throw 'No test projects discovered' }
+          foreach ($p in $tests) {
+            Write-Host "===== RESTORE TEST $($p.FullName) ====="
+            & dotnet restore $p.FullName -p:Configuration=Release '-p:Platform=Any CPU'
+            if ($LASTEXITCODE -ne 0) { throw "Test restore failed: $($p.FullName)" }
+            Write-Host "===== TEST $($p.FullName) ====="
+            & dotnet test $p.FullName -c Release --no-restore --logger 'console;verbosity=normal' '-p:Platform=Any CPU'
+            if ($LASTEXITCODE -ne 0) { throw "Test failed: $($p.FullName)" }
+          }
+
+      - name: Run packaged Windows release pipeline when present
+        if: env.V50_GATE_DISABLED != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Set-Location $env:V50_PROJECT
+          $candidate = @('BUILD_V50_WINDOWS.ps1','BUILD_V49_WINDOWS.ps1','BUILD_V48_WINDOWS.ps1') |
+            Where-Object { Test-Path $_ } |
+            Select-Object -First 1
+          if ($candidate) {
+            Write-Host "===== WINDOWS PIPELINE $candidate ====="
+            & pwsh -NoProfile -ExecutionPolicy Bypass -File $candidate
+            if ($LASTEXITCODE -ne 0) { throw "$candidate failed with exit code $LASTEXITCODE" }
+          } else {
+            throw 'No packaged Windows release pipeline found'
+          }
+
+      - name: Final focused source audit
+        if: env.V50_GATE_DISABLED != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Set-Location $env:V50_PROJECT
+          $bad = Get-ChildItem -Recurse -File -Include *.cs,*.py,*.ps1,*.json,*.md,*.txt |
+            Select-String -Pattern '<<<<<<<|=======|>>>>>>>|NotImplementedException|NOT_IMPLEMENTED|IGNORED ARGUMENT' -ErrorAction SilentlyContinue
+          if ($bad) {
+            $bad | ForEach-Object { Write-Host ("{0}:{1}: {2}" -f $_.Path,$_.LineNumber,$_.Line.Trim()) }
+            throw 'Final source audit found forbidden markers'
+          }
+
+      - name: Upload gate workspace for packaging stage
+        if: env.V50_GATE_DISABLED != '1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: v50-final-gate-workspace
+          path: ${{ env.V50_ROOT }}
+          if-no-files-found: error
+          retention-days: 1
