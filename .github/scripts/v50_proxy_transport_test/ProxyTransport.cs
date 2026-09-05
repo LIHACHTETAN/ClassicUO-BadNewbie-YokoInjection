@@ -1,9 +1,9 @@
 using System;
-using System.Buffers.Binary;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace V50ProxyTransportTest;
 
@@ -32,6 +32,10 @@ internal static class ProxyTransport
             throw new ArgumentException("Destination host is required.", nameof(destinationHost));
         if (destinationPort is < 1 or > 65535)
             throw new ArgumentOutOfRangeException(nameof(destinationPort));
+        if (options.TimeoutMilliseconds is < 1 or > 300000)
+            throw new InvalidOperationException("Proxy timeout must be in range 1..300000 ms.");
+        if (string.IsNullOrEmpty(options.Username) && !string.IsNullOrEmpty(options.Password))
+            throw new InvalidOperationException("Proxy password cannot be configured without a username.");
 
         var client = new TcpClient { NoDelay = true };
         client.SendTimeout = options.TimeoutMilliseconds;
@@ -41,7 +45,7 @@ internal static class ProxyTransport
         {
             if (!options.Enabled)
             {
-                client.Connect(destinationHost, destinationPort);
+                ConnectTcp(client, destinationHost, destinationPort, options.TimeoutMilliseconds);
                 return client;
             }
 
@@ -50,7 +54,7 @@ internal static class ProxyTransport
             if (options.Port is < 1 or > 65535)
                 throw new InvalidOperationException("Proxy port must be in range 1..65535.");
 
-            client.Connect(options.Host, options.Port);
+            ConnectTcp(client, options.Host, options.Port, options.TimeoutMilliseconds);
             NetworkStream stream = client.GetStream();
 
             switch (options.Type)
@@ -75,6 +79,16 @@ internal static class ProxyTransport
             client.Dispose();
             throw;
         }
+    }
+
+    private static void ConnectTcp(TcpClient client, string host, int port, int timeoutMilliseconds)
+    {
+        Task task = client.ConnectAsync(host, port);
+        if (!task.Wait(timeoutMilliseconds))
+            throw new TimeoutException($"TCP connect to {host}:{port} exceeded {timeoutMilliseconds} ms.");
+        task.GetAwaiter().GetResult();
+        if (!client.Connected)
+            throw new SocketException((int)SocketError.NotConnected);
     }
 
     private static void ConnectHttp(NetworkStream stream, string host, int port, string username, string password)
