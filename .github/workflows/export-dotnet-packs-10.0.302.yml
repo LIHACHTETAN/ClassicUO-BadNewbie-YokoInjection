@@ -1,0 +1,46 @@
+name: Export .NET SDK packs 10.0.302
+
+on:
+  push:
+    branches:
+      - ClientUO-Age-of-Power
+    paths:
+      - .github/workflows/export-dotnet-packs-10.0.302.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export-packs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.302'
+      - name: Verify exact SDK and packs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(dotnet --version)" = "10.0.302"
+          test -d /usr/share/dotnet/packs/Microsoft.NETCore.App.Ref/10.0.10
+          test -d /usr/share/dotnet/packs/Microsoft.AspNetCore.App.Ref/10.0.10
+          test -d /usr/share/dotnet/packs/Microsoft.NETCore.App.Host.linux-x64/10.0.10
+          du -sh /usr/share/dotnet/packs
+      - name: Package SDK packs
+        shell: bash
+        run: |
+          set -euo pipefail
+          tar -C /usr/share/dotnet -cJf "$RUNNER_TEMP/dotnet-packs-10.0.302.tar.xz" packs
+          sha256sum "$RUNNER_TEMP/dotnet-packs-10.0.302.tar.xz" > "$RUNNER_TEMP/dotnet-packs-10.0.302.tar.xz.sha256"
+          tar -tJf "$RUNNER_TEMP/dotnet-packs-10.0.302.tar.xz" >/dev/null
+          ls -lh "$RUNNER_TEMP/dotnet-packs-10.0.302.tar.xz"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-packs-10.0.302
+          path: |
+            ${{ runner.temp }}/dotnet-packs-10.0.302.tar.xz
+            ${{ runner.temp }}/dotnet-packs-10.0.302.tar.xz.sha256
+          compression-level: 0
+          retention-days: 1
