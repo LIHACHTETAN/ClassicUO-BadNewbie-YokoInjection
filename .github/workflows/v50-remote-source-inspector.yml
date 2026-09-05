@@ -94,20 +94,58 @@ jobs:
             Sort-Object |
             ForEach-Object { Write-Host $_ }
 
-          Write-Host '===== ALL v2 OCCURRENCES IN PROFILE-RELATED TEXT ====='
+          Write-Host '===== ALL v2 OCCURRENCES IN SOURCE TEXT ====='
           Get-ChildItem -LiteralPath $env:V50_PROJECT -Recurse -File -Include *.cs,*.py,*.ps1,*.json,*.md,*.txt -ErrorAction SilentlyContinue |
             Select-String -Pattern 'legacy v2|\bv2\b' -CaseSensitive:$false -ErrorAction SilentlyContinue |
             ForEach-Object { Write-Host ("{0}:{1}: {2}" -f $_.Path, $_.LineNumber, $_.Line.Trim()) }
 
-      - name: Upload focused profile source snapshot
+      - name: Print exact proxy and network implementation
+        if: env.V50_SOURCE_URL_EMPTY != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          function Print-NumberedFile([string]$Path) {
+            if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+              Write-Host "===== MISSING: $Path ====="
+              return
+            }
+            Write-Host "===== BEGIN FILE: $Path ====="
+            $n = 0
+            Get-Content -LiteralPath $Path | ForEach-Object {
+              $n++
+              Write-Host ('{0:D5}: {1}' -f $n, $_)
+            }
+            Write-Host "===== END FILE: $Path ====="
+          }
+
+          foreach ($relative in @(
+            'src/ClassicUO.Client/Network/NetClient.cs',
+            'src/ClassicUO.Client/Network/Socket/TcpSocketWrapper.cs',
+            'src/ClassicUO.Client/Configuration/GlobalSettings.cs'
+          )) {
+            Print-NumberedFile (Join-Path $env:V50_PROJECT $relative)
+          }
+
+          Write-Host '===== PROXY API MATCHES WITH CONTEXT ====='
+          $searchFiles = Get-ChildItem -LiteralPath $env:V50_PROJECT -Recurse -File -Include *.cs,*.py,*.json,*.md -ErrorAction SilentlyContinue
+          foreach ($m in ($searchFiles | Select-String -Pattern 'ProxyIP|ProxyPort|UseProxy|proxy mode|proxy transport' -CaseSensitive:$false -ErrorAction SilentlyContinue)) {
+            Write-Host ("{0}:{1}: {2}" -f $m.Path,$m.LineNumber,$m.Line.Trim())
+          }
+
+      - name: Upload focused defect source snapshot
         if: env.V50_SOURCE_URL_EMPTY != '1'
         uses: actions/upload-artifact@v4
         with:
-          name: v50-profile-source-snapshot
+          name: v50-defect-source-snapshot
           if-no-files-found: warn
           path: |
             ${{ runner.temp }}/v50-extracted/project/src/ClassicUO.Client/Configuration/ProfileManager.cs
             ${{ runner.temp }}/v50-extracted/project/src/ClassicUO.Client/Configuration/Profile.cs
             ${{ runner.temp }}/v50-extracted/project/scripts/TestProfileServerFolderModel.py
             ${{ runner.temp }}/v50-extracted/project/tests/ClassicUO.UnitTests/**/*Profile*.cs
+            ${{ runner.temp }}/v50-extracted/project/src/ClassicUO.Client/Network/NetClient.cs
+            ${{ runner.temp }}/v50-extracted/project/src/ClassicUO.Client/Network/Socket/TcpSocketWrapper.cs
+            ${{ runner.temp }}/v50-extracted/project/src/ClassicUO.Client/Configuration/GlobalSettings.cs
+            ${{ runner.temp }}/v50-extracted/project/src/ClassicUO.Client/Game/Managers/ClassicUOInjectionApiBridge.cs
+            ${{ runner.temp }}/v50-extracted/project/external/InjectionScript/src/InjectionScript/Runtime/InjectionApiUO.cs
           retention-days: 1
