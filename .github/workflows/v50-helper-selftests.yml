@@ -1,0 +1,92 @@
+name: v50 release helper self-tests
+
+on:
+  push:
+    paths:
+      - .github/workflows/v50-helper-selftests.yml
+      - .github/scripts/v50_fresh_profile_contract.py
+      - .github/scripts/v50_proxy_transport_test/**
+      - .github/scripts/v50_package_project_client.py
+      - .github/scripts/v50_stage_built_client.py
+      - .github/scripts/v50_run_extracted_client_smoke.ps1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  helper-selftests:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.302'
+
+      - name: Verify exact SDK
+        shell: pwsh
+        run: |
+          $v = (& dotnet --version).Trim()
+          Write-Host "dotnet=$v"
+          if ($v -ne '10.0.302') { throw "Wrong SDK $v" }
+
+      - name: Fresh-profile analyzer self-test
+        shell: pwsh
+        run: |
+          & python '.github/scripts/v50_fresh_profile_contract.py' --self-test
+          if ($LASTEXITCODE -ne 0) { throw 'fresh profile analyzer self-test failed' }
+
+      - name: Compile proxy transport harness
+        shell: pwsh
+        run: |
+          Push-Location '.github/scripts/v50_proxy_transport_test'
+          try {
+            & dotnet restore 'v50_proxy_transport_test.csproj'
+            if ($LASTEXITCODE -ne 0) { throw 'proxy restore failed' }
+            & dotnet build 'v50_proxy_transport_test.csproj' -c Release --no-restore -warnaserror
+            if ($LASTEXITCODE -ne 0) { throw 'proxy build failed' }
+          }
+          finally { Pop-Location }
+
+      - name: Run proxy transport regression
+        shell: pwsh
+        run: |
+          & dotnet run --project '.github/scripts/v50_proxy_transport_test/v50_proxy_transport_test.csproj' -c Release --no-build
+          if ($LASTEXITCODE -ne 0) { throw 'proxy transport regression failed' }
+
+      - name: Python helper syntax
+        shell: pwsh
+        run: |
+          foreach ($p in @(
+            '.github/scripts/v50_fresh_profile_contract.py',
+            '.github/scripts/v50_package_project_client.py',
+            '.github/scripts/v50_stage_built_client.py'
+          )) {
+            & python -m py_compile $p
+            if ($LASTEXITCODE -ne 0) { throw "py_compile failed: $p" }
+          }
+
+      - name: PowerShell smoke-helper parse
+        shell: pwsh
+        run: |
+          $errors = $null
+          [void][System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path '.github/scripts/v50_run_extracted_client_smoke.ps1'),
+            [ref]$null,
+            [ref]$errors
+          )
+          if ($errors.Count -gt 0) {
+            $errors | ForEach-Object { Write-Host $_.Message }
+            throw 'smoke helper PowerShell parse failed'
+          }
+
+      - name: Final helper marker
+        shell: pwsh
+        run: |
+          Write-Host 'V50_RELEASE_HELPER_SELFTESTS=PASS'
