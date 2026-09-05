@@ -154,11 +154,16 @@ internal static class ProxyTransport
         bool hasAuth = !string.IsNullOrEmpty(username);
         WriteAll(stream, hasAuth ? new byte[] { 0x05, 0x02, 0x00, 0x02 } : new byte[] { 0x05, 0x01, 0x00 });
         byte[] method = ReadExact(stream, 2);
-        if (method[0] != 0x05 || method[1] == 0xFF)
+        if (method[0] != 0x05)
+            throw new IOException($"Invalid SOCKS5 method-selection version 0x{method[0]:X2}.");
+        if (method[1] == 0xFF)
             throw new IOException("SOCKS5 proxy rejected all authentication methods.");
 
         if (method[1] == 0x02)
         {
+            if (!hasAuth)
+                throw new IOException("SOCKS5 proxy selected username/password authentication that the client did not offer.");
+
             byte[] userBytes = Encoding.UTF8.GetBytes(username ?? string.Empty);
             byte[] passBytes = Encoding.UTF8.GetBytes(password ?? string.Empty);
             if (userBytes.Length > 255 || passBytes.Length > 255)
