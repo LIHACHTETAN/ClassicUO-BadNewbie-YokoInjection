@@ -1,0 +1,281 @@
+name: v50 post-build package
+
+on:
+  workflow_run:
+    workflows: ["v50 final compiled gate"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  package-and-retest:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - name: Resolve source gate run
+        id: gate
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ('${{ github.event_name }}' -eq 'workflow_run') {
+            $runId = '${{ github.event.workflow_run.id }}'
+          } else {
+            Write-Host 'Manual dispatch has no source gate run; package stage is intentionally disabled.'
+            'PACKAGE_DISABLED=1' | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+            exit 0
+          }
+
+          $headers = @{
+            Authorization = "Bearer $env:GH_TOKEN"
+            Accept = 'application/vnd.github+json'
+            'X-GitHub-Api-Version' = '2022-11-28'
+          }
+          $uri = "https://api.github.com/repos/${{ github.repository }}/actions/runs/$runId/artifacts"
+          $resp = Invoke-RestMethod -Uri $uri -Headers $headers -Method Get
+          $artifact = @($resp.artifacts) | Where-Object { $_.name -eq 'v50-final-gate-workspace' -and -not $_.expired } | Select-Object -First 1
+          if (-not $artifact) {
+            Write-Host "No v50-final-gate-workspace artifact on run $runId; staged/no-op gate detected."
+            'PACKAGE_DISABLED=1' | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+            exit 0
+          }
+          "GATE_RUN_ID=$runId" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          Write-Host "Using gate run $runId artifact id=$($artifact.id) size=$($artifact.size_in_bytes)"
+
+      - name: Download compiled gate workspace
+        if: env.PACKAGE_DISABLED != '1'
+        uses: actions/download-artifact@v4
+        with:
+          name: v50-final-gate-workspace
+          path: ${{ runner.temp }}/gate-workspace
+          run-id: ${{ env.GATE_RUN_ID }}
+          github-token: ${{ github.token }}
+
+      - name: Resolve clean project root and fresh built client candidate
+        if: env.PACKAGE_DISABLED != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $gate = Join-Path $env:RUNNER_TEMP 'gate-workspace'
+          $sln = Get-ChildItem -LiteralPath $gate -Recurse -File -Filter 'ClassicUO.sln' | Select-Object -First 1
+          if (-not $sln) { throw 'ClassicUO.sln not found in gate workspace' }
+          $project = $sln.Directory.FullName
+
+          $required = @('ClassicUO.exe','cuo.dll','SDL3.dll','FNA3D.dll','FAudio.dll','libtheorafile.dll','zlib.dll','Scintilla.dll','cuoapi.dll')
+          $candidates = @()
+          foreach ($exe in (Get-ChildItem -LiteralPath $project -Recurse -File -Filter 'ClassicUO.exe' -ErrorAction SilentlyContinue)) {
+            $dir = $exe.Directory.FullName
+            $missing = @($required | Where-Object { -not (Test-Path -LiteralPath (Join-Path $dir $_) -PathType Leaf) })
+            $score = 0
+            if ($missing.Count -eq 0) { $score += 1000 }
+            if ($dir -match '(?i)client.*built|built.*client') { $score += 300 }
+            if ($dir -match '(?i)publish') { $score += 200 }
+            if ($dir -match '(?i)release') { $score += 100 }
+            $candidates += [pscustomobject]@{ Dir=$dir; Missing=$missing.Count; Score=$score; Exe=$exe.FullName; Modified=$exe.LastWriteTimeUtc }
+          }
+          if (-not $candidates) { throw 'No freshly built ClassicUO.exe exists under project build output' }
+
+          Write-Host '===== BUILT CLIENT CANDIDATES ====='
+          $candidates | Sort-Object Score,Modified -Descending | ForEach-Object {
+            Write-Host ("score={0} missing={1} modified={2:o} dir={3}" -f $_.Score,$_.Missing,$_.Modified,$_.Dir)
+          }
+
+          $valid = @($candidates | Where-Object { $_.Missing -eq 0 } | Sort-Object Score,Modified -Descending)
+          if ($valid.Count -eq 0) { throw 'No built client directory contains the complete required EXE/native payload' }
+          $client = $valid[0].Dir
+
+          function Get-PeMachine([string]$Path) {
+            $fs = [System.IO.File]::OpenRead($Path)
+            try {
+              $br = New-Object System.IO.BinaryReader($fs)
+              $fs.Position = 0x3c
+              $pe = $br.ReadInt32()
+              $fs.Position = $pe + 4
+              return $br.ReadUInt16()
+            } finally { $fs.Dispose() }
+          }
+
+          Write-Host "Selected built client: $client"
+          foreach ($name in $required) {
+            $p = Join-Path $client $name
+            $hash = (Get-FileHash -LiteralPath $p -Algorithm SHA256).Hash.ToLowerInvariant()
+            $machine = Get-PeMachine $p
+            Write-Host ("{0} machine=0x{1:x4} sha256={2}" -f $name,$machine,$hash)
+            if ($machine -ne 0x8664) { throw "$name is not PE32+ x64 (machine=0x$('{0:x4}' -f $machine))" }
+          }
+
+          "PACKAGE_PROJECT=$project" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "PACKAGE_BUILT_CLIENT=$client" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Stage clean project and fresh built client
+        if: env.PACKAGE_DISABLED != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $stage = Join-Path $env:RUNNER_TEMP 'final-package-root'
+          if (Test-Path $stage) { Remove-Item -LiteralPath $stage -Recurse -Force }
+          New-Item -ItemType Directory -Path $stage | Out-Null
+          Copy-Item -LiteralPath $env:PACKAGE_PROJECT -Destination (Join-Path $stage 'project') -Recurse -Force
+          Copy-Item -LiteralPath $env:PACKAGE_BUILT_CLIENT -Destination (Join-Path $stage 'client') -Recurse -Force
+
+          $projectCopy = Join-Path $stage 'project'
+          Get-ChildItem -LiteralPath $projectCopy -Recurse -Directory -Force -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -in @('bin','obj','publish','__pycache__','.vs') } |
+            Sort-Object FullName -Descending |
+            Remove-Item -Recurse -Force -ErrorAction Stop
+
+          Get-ChildItem -LiteralPath $stage -Recurse -File -Force -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -match '(?i)(\.tmp$|\.bak$|\.orig$|~$|Zone\.Identifier$)' } |
+            Remove-Item -Force -ErrorAction Stop
+
+          $roots = @(Get-ChildItem -LiteralPath $stage -Force | Select-Object -ExpandProperty Name | Sort-Object)
+          if (($roots -join ',') -ne 'client,project') { throw "Unexpected top-level package roots: $($roots -join ',')" }
+          "FINAL_STAGE=$stage" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Deterministic retest on staged project
+        if: env.PACKAGE_DISABLED != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $project = Join-Path $env:FINAL_STAGE 'project'
+          Set-Location $project
+          $scripts = @(
+            'scripts/VerifyProjectSources.py',
+            'scripts/TestProfileServerFolderModel.py',
+            'scripts/TestGumpApiModel.py',
+            'scripts/TestRuntimeBehaviorFixes.py',
+            'scripts/TestSearchCore.py',
+            'scripts/TestFindTypeModel.py',
+            'scripts/TestParamArrayWrapperModel.py',
+            'scripts/TestAutoloadMenuModel.py',
+            'scripts/VerifyYokoTheiaIde.py',
+            'scripts/TestRuntimeContractIntegrity.py',
+            'scripts/TestApiManualCurrent.py',
+            'scripts/TestApiManualCompleteness.py',
+            'scripts/TestConvertedAutoload.py',
+            'scripts/VerifyYokoLibrary.py'
+          )
+          foreach ($s in $scripts) {
+            if (Test-Path $s) {
+              Write-Host "===== STAGED RETEST $s ====="
+              & python $s
+              if ($LASTEXITCODE -ne 0) { throw "$s failed in staged package" }
+            }
+          }
+
+      - name: Build ZIP, validate entries and create SHA sidecar
+        if: env.PACKAGE_DISABLED != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $out = Join-Path $env:RUNNER_TEMP 'v50-final-output'
+          if (Test-Path $out) { Remove-Item -LiteralPath $out -Recurse -Force }
+          New-Item -ItemType Directory -Path $out | Out-Null
+          $zip = Join-Path $out 'ClassicUO-v50.0.0-BADNEWBIE-YOKO-FINAL-BUILT-TESTED-PROJECT-AND-CLIENT.zip'
+          Compress-Archive -LiteralPath (Join-Path $env:FINAL_STAGE 'project'),(Join-Path $env:FINAL_STAGE 'client') -DestinationPath $zip -CompressionLevel Optimal -Force
+
+          $archive = [System.IO.Compression.ZipFile]::OpenRead($zip)
+          try {
+            $names = @{}
+            $roots = New-Object 'System.Collections.Generic.HashSet[string]'
+            foreach ($entry in $archive.Entries) {
+              $name = $entry.FullName.Replace('\','/')
+              if ($name.StartsWith('/') -or $name -match '(^|/)\.\.(/|$)' -or $name -match '^[A-Za-z]:') { throw "Unsafe ZIP path: $name" }
+              $key = $name.ToLowerInvariant()
+              if ($names.ContainsKey($key)) { throw "Case-insensitive duplicate ZIP entry: $name" }
+              $names[$key] = $true
+              if ($name.Contains('/')) { [void]$roots.Add($name.Split('/')[0]) }
+              if (-not $name.EndsWith('/')) {
+                $stream = $entry.Open()
+                try {
+                  $buffer = New-Object byte[] 1048576
+                  while ($stream.Read($buffer,0,$buffer.Length) -gt 0) { }
+                } finally { $stream.Dispose() }
+              }
+            }
+            $rootList = @($roots | Sort-Object)
+            if (($rootList -join ',') -ne 'client,project') { throw "ZIP roots invalid: $($rootList -join ',')" }
+            Write-Host "ZIP entries=$($archive.Entries.Count) roots=$($rootList -join ',')"
+          } finally { $archive.Dispose() }
+
+          $sha = (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash.ToLowerInvariant()
+          $sidecar = "$zip.sha256.txt"
+          "$sha  $([IO.Path]::GetFileName($zip))" | Set-Content -LiteralPath $sidecar -Encoding ascii
+          Write-Host "FINAL ZIP SHA256=$sha"
+          "FINAL_ZIP=$zip" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "FINAL_SHA=$sidecar" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Fresh extract and byte-for-byte tree comparison
+        if: env.PACKAGE_DISABLED != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $extract = Join-Path $env:RUNNER_TEMP 'final-fresh-extract'
+          if (Test-Path $extract) { Remove-Item -LiteralPath $extract -Recurse -Force }
+          Expand-Archive -LiteralPath $env:FINAL_ZIP -DestinationPath $extract -Force
+
+          function Build-Manifest([string]$Root) {
+            $map = @{}
+            Get-ChildItem -LiteralPath $Root -Recurse -File -Force | ForEach-Object {
+              $rel = $_.FullName.Substring($Root.Length).TrimStart('\','/').Replace('\','/')
+              $map[$rel] = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            }
+            return $map
+          }
+          $a = Build-Manifest $env:FINAL_STAGE
+          $b = Build-Manifest $extract
+          $missing = @($a.Keys | Where-Object { -not $b.ContainsKey($_) })
+          $extra = @($b.Keys | Where-Object { -not $a.ContainsKey($_) })
+          $mismatch = @($a.Keys | Where-Object { $b.ContainsKey($_) -and $a[$_] -ne $b[$_] })
+          Write-Host "Source files=$($a.Count) Extracted files=$($b.Count) Missing=$($missing.Count) Extra=$($extra.Count) SHA mismatches=$($mismatch.Count)"
+          if ($missing.Count -or $extra.Count -or $mismatch.Count) { throw 'Fresh extraction tree/hash comparison failed' }
+          "FRESH_EXTRACT=$extract" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Retest freshly extracted project
+        if: env.PACKAGE_DISABLED != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $project = Join-Path $env:FRESH_EXTRACT 'project'
+          Set-Location $project
+          foreach ($s in @('scripts/VerifyProjectSources.py','scripts/TestProfileServerFolderModel.py','scripts/TestSearchCore.py','scripts/TestRuntimeContractIntegrity.py','scripts/TestApiManualCurrent.py','scripts/TestApiManualCompleteness.py','scripts/TestAutoloadMenuModel.py','scripts/VerifyYokoLibrary.py')) {
+            if (Test-Path $s) {
+              Write-Host "===== FRESH-EXTRACT RETEST $s ====="
+              & python $s
+              if ($LASTEXITCODE -ne 0) { throw "$s failed after fresh extraction" }
+            }
+          }
+
+      - name: Fresh extracted client process smoke
+        if: env.PACKAGE_DISABLED != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $exe = Join-Path $env:FRESH_EXTRACT 'client/ClassicUO.exe'
+          if (-not (Test-Path $exe -PathType Leaf)) { throw 'Fresh extracted ClassicUO.exe missing' }
+          $p = Start-Process -FilePath $exe -WorkingDirectory (Split-Path $exe) -PassThru
+          Start-Sleep -Seconds 8
+          if ($p.HasExited) {
+            Write-Host "ClassicUO.exe exited during smoke with code $($p.ExitCode)"
+            if ($p.ExitCode -ne 0) { throw "Fresh extracted client smoke failed: exit code $($p.ExitCode)" }
+          } else {
+            Write-Host 'ClassicUO.exe remained alive for 8 seconds; terminating smoke instance.'
+            Stop-Process -Id $p.Id -Force
+          }
+
+      - name: Upload final project+client ZIP and SHA
+        if: env.PACKAGE_DISABLED != '1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: v50-final-built-tested-project-and-client
+          path: |
+            ${{ runner.temp }}/v50-final-output/ClassicUO-v50.0.0-BADNEWBIE-YOKO-FINAL-BUILT-TESTED-PROJECT-AND-CLIENT.zip
+            ${{ runner.temp }}/v50-final-output/ClassicUO-v50.0.0-BADNEWBIE-YOKO-FINAL-BUILT-TESTED-PROJECT-AND-CLIENT.zip.sha256.txt
+          if-no-files-found: error
+          retention-days: 2
