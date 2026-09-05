@@ -71,6 +71,18 @@ jobs:
           }
           finally { Pop-Location }
 
+      - name: Package gate self-test
+        shell: pwsh
+        run: |
+          & python '.github/scripts/v50_package_project_client.py' --self-test
+          if ($LASTEXITCODE -ne 0) { throw 'package gate self-test failed' }
+
+      - name: Built-client staging self-test
+        shell: pwsh
+        run: |
+          & python '.github/scripts/v50_stage_built_client.py' --self-test
+          if ($LASTEXITCODE -ne 0) { throw 'built-client staging self-test failed' }
+
       - name: Python helper syntax
         shell: pwsh
         run: |
