@@ -1,0 +1,58 @@
+name: v50 Manual limitations audit
+
+on:
+  push:
+    paths:
+      - .github/workflows/v50-manual-limitations-audit.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Scan canonical GitHub Manual for unresolved markers
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="docs/Runtime-API-Manual"
+          test -d "$root"
+          regex='unimplemented|not implemented|disabled|no-op|no op|unsupported|not supported|unavailable|compatibility value|historical-only|not available|stub'
+          echo '===== V50 MANUAL LIMITATION MARKERS ====='
+          grep -RniE "$regex" "$root" --include='*.md' || true
+          echo '===== COUNTS BY TERM ====='
+          for term in 'unimplemented' 'not implemented' 'disabled' 'no-op' 'unsupported' 'not supported' 'unavailable' 'compatibility value' 'historical-only' 'not available' 'stub'; do
+            count=$(grep -RilF "$term" "$root" --include='*.md' | wc -l | tr -d ' ')
+            printf '%-22s %s files\n' "$term" "$count"
+          done
+
+      - name: Extract affected command headings with context
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          root = Path('docs/Runtime-API-Manual')
+          pat = re.compile(r'unimplemented|not implemented|disabled|no-op|no op|unsupported|not supported|unavailable|compatibility value|historical-only|not available|stub', re.I)
+          rows = []
+          for path in sorted(root.glob('Part-*.md')):
+              heading = None
+              lines = path.read_text(encoding='utf-8').splitlines()
+              for i, line in enumerate(lines, 1):
+                  if line.startswith('## `'):
+                      heading = line[3:].strip('`')
+                  if pat.search(line):
+                      rows.append((path.name, i, heading or '<none>', line.strip()))
+          print(f'AFFECTED_LINES={len(rows)}')
+          affected = sorted({r[2] for r in rows})
+          print(f'AFFECTED_COMMANDS={len(affected)}')
+          print('===== AFFECTED COMMANDS =====')
+          for cmd in affected:
+              print(cmd)
+          print('===== DETAILED MARKERS =====')
+          for row in rows:
+              print(f'{row[0]}:{row[1]} | {row[2]} | {row[3]}')
