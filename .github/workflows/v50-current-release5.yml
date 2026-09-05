@@ -60,6 +60,36 @@ jobs:
           if((Get-Content $api -Raw).Contains('StringSplitOptions.TrimEntries')){throw 'TrimEntries remains after patch'}
           Write-Host 'InjectionApiUO.cs compatibility patch: PASS'
 
+          # Keep InjectionValue.IsSupported() and GetKind() consistent. Native API delegates
+          # deliberately use InjectionValue as a pass-through dynamic argument type.
+          $iv=Join-Path $project 'external/InjectionScript/src/InjectionScript/Runtime/InjectionValue.cs'
+          $ivText=Get-Content $iv -Raw
+          $oldKind=@"
+            if (type.Equals(typeof(string)))
+                return InjectionValueKind.String;
+            else if (type.Equals(typeof(int)))
+                return InjectionValueKind.Integer;
+"@
+          $newKind=@"
+            if (type.Equals(typeof(InjectionValue)))
+                return InjectionValueKind.Any;
+            else if (type.Equals(typeof(string)))
+                return InjectionValueKind.String;
+            else if (type.Equals(typeof(int)))
+                return InjectionValueKind.Integer;
+"@
+          if(-not $ivText.Contains($oldKind)){throw 'InjectionValue.GetKind anchor was not found'}
+          $ivText=$ivText.Replace($oldKind,$newKind)
+          $oldArray='            else if (typeof(Array).IsAssignableFrom(type))'
+          $newArray='            else if (typeof(Array).IsAssignableFrom(type) || typeof(IEnumerable<InjectionValue>).IsAssignableFrom(type))'
+          if(-not $ivText.Contains($oldArray)){throw 'InjectionValue array kind anchor was not found'}
+          $ivText=$ivText.Replace($oldArray,$newArray)
+          Set-Content $iv -Value $ivText -Encoding utf8
+          $patched=Get-Content $iv -Raw
+          if(-not $patched.Contains('type.Equals(typeof(InjectionValue))')){throw 'InjectionValue Any mapping missing after patch'}
+          if(-not $patched.Contains('typeof(IEnumerable<InjectionValue>).IsAssignableFrom(type)')){throw 'InjectionValue enumerable array mapping missing after patch'}
+          Write-Host 'InjectionValue runtime kind mapping patch: PASS'
+
           "V50_ROOT=$root"|Out-File $env:GITHUB_ENV -Append -Encoding utf8;"V50_PROJECT=$project"|Out-File $env:GITHUB_ENV -Append -Encoding utf8;"V50_BASELINE_CLIENT=$client"|Out-File $env:GITHUB_ENV -Append -Encoding utf8
 
       - name: Verify exact SDK and Python
