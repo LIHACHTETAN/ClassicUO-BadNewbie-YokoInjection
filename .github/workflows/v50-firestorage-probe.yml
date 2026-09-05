@@ -14,30 +14,22 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 30
     steps:
-      - name: Inspect firestorage share page for direct download endpoint
+      - name: Inspect firestorage client JS for API endpoints
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $urls = @(
-            'https://firestorage.ai/ja/f/ENGSULZWiyg3',
-            'https://firestorage.ai/ja/f/vO3RI-uepxuC',
-            'https://firestorage.ai/ja/f/L0ABqCBELFZo'
-          )
-          $i=0
-          foreach ($url in $urls) {
-            $r = Invoke-WebRequest -Uri $url -UseBasicParsing -MaximumRedirection 10
-            Write-Host "===== SHARE $i status=$($r.StatusCode) bytes=$($r.RawContentLength) final=$($r.BaseResponse.RequestMessage.RequestUri.AbsoluteUri) ====="
-            $html = $r.Content
-            $hrefs = [regex]::Matches($html,'(?i)(?:href|src)=["'']([^"'']+)["'']') | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique
-            $interesting = $hrefs | Where-Object { $_ -match '(?i)download|file|object|storage|api|attachment|signed|presign|s3|r2' }
-            if (-not $interesting) { $interesting = $hrefs }
-            $interesting | ForEach-Object { Write-Host "LINK[$i]=$_" }
-            $patterns = @('https?://[^"''<> ]+','/api/[^"''<> ]+','/download[^"''<> ]*')
-            foreach ($p in $patterns) {
-              [regex]::Matches($html,$p) | ForEach-Object { Write-Host "TOKEN[$i]=$($_.Value)" }
+          $jsUrl='https://firestorage.ai/_next/static/chunks/app/(files)/ja/f/page-4d19ae0a4ce39d79.js'
+          $r=Invoke-WebRequest -Uri $jsUrl -UseBasicParsing
+          Write-Host "JS status=$($r.StatusCode) bytes=$($r.RawContentLength)"
+          $js=$r.Content
+          $tokens=[regex]::Matches($js,'(?i)(https?://[^"''` ]+|/[A-Za-z0-9_./?=&${}-]*(?:api|download|share|file|object|presign|signed)[A-Za-z0-9_./?=&${}-]*)') | ForEach-Object { $_.Value } | Sort-Object -Unique
+          $tokens | ForEach-Object { Write-Host "TOKEN=$_" }
+          $needles=@('fetch(','download','public_id','share','file_id','presign','signed','/api/')
+          foreach($needle in $needles){
+            $idx=$js.IndexOf($needle,[StringComparison]::OrdinalIgnoreCase)
+            if($idx -ge 0){
+              $start=[Math]::Max(0,$idx-1200); $len=[Math]::Min(5000,$js.Length-$start)
+              Write-Host "===== CONTEXT $needle ====="
+              Write-Host $js.Substring($start,$len)
             }
-            $snippet = ($html -replace "`r|`n",' ')
-            if ($snippet.Length -gt 12000) { $snippet = $snippet.Substring(0,12000) }
-            Write-Host "HTML[$i]=$snippet"
-            $i++
           }
