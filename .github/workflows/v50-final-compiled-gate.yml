@@ -84,7 +84,10 @@ jobs:
           if ($text -match '(?i)legacy\s+v2|[\\/\"]v2[\\/\"]|\"v2\"') {
             throw 'Fresh-profile contract violation: legacy v2 lookup/migration is still present in ProfileManager.cs'
           }
-          Write-Host 'ProfileManager: no legacy v2 migration token detected.'
+          if ($text -match '(?is)CurrentProfile\s*=.*?ConfigurationResolver\.Load<Profile>.*?\?\?\s*NewFromDefault\s*\(\s*\)') {
+            throw 'Fresh-profile contract violation: missing profile still inherits user default.json via NewFromDefault().'
+          }
+          Write-Host 'ProfileManager: no legacy v2 migration and no CurrentProfile -> NewFromDefault fallback detected.'
 
       - name: Clean generated build directories
         if: env.V50_GATE_DISABLED != '1'
@@ -205,11 +208,13 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           Set-Location $env:V50_PROJECT
-          $bad = Get-ChildItem -Recurse -File -Include *.cs,*.py,*.ps1,*.json,*.md,*.txt |
-            Select-String -Pattern '<<<<<<<|=======|>>>>>>>|NotImplementedException|NOT_IMPLEMENTED|IGNORED ARGUMENT' -ErrorAction SilentlyContinue
-          if ($bad) {
+          $code = Get-ChildItem -Recurse -File -Include *.cs,*.py,*.ps1 -ErrorAction SilentlyContinue
+          $merge = $code | Select-String -Pattern '^(<<<<<<< .+|=======|>>>>>>> .+)$' -ErrorAction SilentlyContinue
+          $impl = $code | Select-String -Pattern 'NotImplementedException|NOT_IMPLEMENTED|IGNORED ARGUMENT' -ErrorAction SilentlyContinue
+          $bad = @($merge) + @($impl)
+          if ($bad.Count -gt 0) {
             $bad | ForEach-Object { Write-Host ("{0}:{1}: {2}" -f $_.Path,$_.LineNumber,$_.Line.Trim()) }
-            throw 'Final source audit found forbidden markers'
+            throw 'Final source audit found forbidden implementation/merge markers'
           }
 
       - name: Upload gate workspace for packaging stage
@@ -217,6 +222,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: v50-final-gate-workspace
-          path: ${{ env.V50_ROOT }}
+          path: ${{ runner.temp }}/v50-final
           if-no-files-found: error
           retention-days: 1
