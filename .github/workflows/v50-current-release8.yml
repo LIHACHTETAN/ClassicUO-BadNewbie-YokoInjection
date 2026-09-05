@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - .github/workflows/v50-current-release8.yml
+      - .github/scripts/patch-v50-release8.ps1
   workflow_dispatch:
 
 permissions:
@@ -17,7 +18,7 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 240
     steps:
-      - name: Checkout release tooling
+      - name: Checkout release patch tooling
         uses: actions/checkout@v4
         with:
           ref: ClientUO-Age-of-Power
@@ -27,7 +28,7 @@ jobs:
         with:
           dotnet-version: '10.0.302'
 
-      - name: Download and verify exact current v50 source
+      - name: Download verify and patch current v50 source
         shell: pwsh
         run: |
           $ErrorActionPreference='Stop'
@@ -46,35 +47,35 @@ jobs:
             $sha=(Get-FileHash $out -Algorithm SHA256).Hash.ToLowerInvariant()
             if((Get-Item $out).Length -ne $s.Size -or $sha -ne $s.Sha){throw "Part verification failed: $($s.Name)"}
           }
+
           $joined=Join-Path $env:RUNNER_TEMP 'ClassicUO-v50-current-input.zip'
           $dst=[IO.File]::Open($joined,[IO.FileMode]::Create)
           try {
             foreach($n in @('part00','part01','part02')) {
               $src=[IO.File]::OpenRead((Join-Path $env:RUNNER_TEMP $n))
-              try {$src.CopyTo($dst)} finally {$src.Dispose()}
+              try{$src.CopyTo($dst)}finally{$src.Dispose()}
             }
           } finally {$dst.Dispose()}
+
           $sha=(Get-FileHash $joined -Algorithm SHA256).Hash.ToLowerInvariant()
           if($sha -ne $env:EXPECTED_SOURCE_SHA256){throw "Source SHA mismatch: $sha"}
           Write-Host "SOURCE_SHA256=$sha"
-          $root=Join-Path $env:RUNNER_TEMP 'v50-current-release8'
+
+          $root=Join-Path $env:RUNNER_TEMP 'v50-current-release'
           Expand-Archive $joined $root -Force
           $project=Join-Path $root 'project'
           $client=Join-Path $root 'client'
-          if(-not(Test-Path(Join-Path $project 'ClassicUO.sln'))){throw 'ClassicUO.sln missing after extraction'}
+
+          $g=Get-Content (Join-Path $project 'global.json') -Raw|ConvertFrom-Json
+          $g.sdk.rollForward='disable'
+          $g|ConvertTo-Json -Depth 8|Set-Content (Join-Path $project 'global.json') -Encoding utf8
+
+          & (Join-Path $env:GITHUB_WORKSPACE '.github/scripts/patch-v50-release8.ps1') -Project $project
+          if($LASTEXITCODE -ne 0){throw "Release 8 source patch failed with $LASTEXITCODE"}
+
           "V50_ROOT=$root"|Out-File $env:GITHUB_ENV -Append -Encoding utf8
           "V50_PROJECT=$project"|Out-File $env:GITHUB_ENV -Append -Encoding utf8
           "V50_BASELINE_CLIENT=$client"|Out-File $env:GITHUB_ENV -Append -Encoding utf8
-
-      - name: Apply and self-audit Release 8 source fixes
-        shell: pwsh
-        run: |
-          $ErrorActionPreference='Stop'
-          $patch=Join-Path $env:GITHUB_WORKSPACE '.github/scripts/v50_release8_patch.py'
-          python $patch $env:V50_PROJECT
-          if($LASTEXITCODE -ne 0){throw "Release 8 patch failed with $LASTEXITCODE"}
-          $active=Join-Path $env:V50_PROJECT 'src/ClassicUO.Client/Autoload'
-          Get-ChildItem $active -File | ForEach-Object { Write-Host "ACTIVE_AUTOLOAD=$($_.Name) size=$($_.Length)" }
 
       - name: Verify exact SDK and Python
         shell: pwsh
@@ -122,20 +123,17 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference='Stop'
-          $stage=Join-Path $env:RUNNER_TEMP 'v50-final-package8'
+          $stage=Join-Path $env:RUNNER_TEMP 'v50-final-package'
           New-Item -ItemType Directory $stage -Force|Out-Null
           Copy-Item $env:V50_PROJECT (Join-Path $stage 'project') -Recurse -Force
           Copy-Item $env:V50_BUILT_CLIENT (Join-Path $stage 'client') -Recurse -Force
           $po=Join-Path $stage 'project'
-          Get-ChildItem $po -Recurse -Directory -Force -ErrorAction SilentlyContinue |
-            Where-Object{$_.Name -in @('bin','obj','publish','__pycache__')} |
-            Sort-Object FullName -Descending |
-            Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+          Get-ChildItem $po -Recurse -Directory -Force -ErrorAction SilentlyContinue|Where-Object{$_.Name -in @('bin','obj','publish','__pycache__')}|Sort-Object FullName -Descending|Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
           $zip=Join-Path $env:RUNNER_TEMP 'ClassicUO-v50.0.0-BADNEWBIE-YOKO-NEW-RELEASE-PROJECT-AND-CLIENT.zip'
           Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $zip -CompressionLevel Optimal -Force
           $sha=(Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant()
           "$sha  $(Split-Path $zip -Leaf)"|Set-Content "$zip.sha256.txt" -Encoding ascii
-          $verify=Join-Path $env:RUNNER_TEMP 'verify-final8'
+          $verify=Join-Path $env:RUNNER_TEMP 'verify-final'
           Expand-Archive $zip $verify -Force
           foreach($r in @('client/ClassicUO.exe','client/cuo.dll','project/ClassicUO.sln')){
             if(-not(Test-Path(Join-Path $verify $r))){throw "Final ZIP missing $r"}
