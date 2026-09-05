@@ -25,8 +25,8 @@ internal static class Program
             Run("SOCKS5 rejection", TestSocks5Reject);
             Run("invalid proxy settings", TestInvalidSettings);
             int additional = AdditionalProxyTests.RunAll();
-            if (additional != 4)
-                throw new InvalidOperationException($"Expected 4 additional proxy tests, got {additional}");
+            if (additional != 5)
+                throw new InvalidOperationException($"Expected 5 additional proxy tests, got {additional}");
             Console.WriteLine($"PROXY_TRANSPORT_PASS={Passed.Count + additional}");
             return 0;
         }
