@@ -48,7 +48,6 @@ def discover(root: Path) -> list[Path]:
                 ok, _ = valid_client_dir(p)
                 if ok:
                     found.append(p.resolve())
-    # Unique by resolved path.
     return sorted(set(found), key=lambda p: str(p).casefold())
 
 
@@ -59,8 +58,6 @@ def choose_candidate(root: Path) -> Path:
     if len(candidates) == 1:
         return candidates[0]
 
-    # Multiple outputs are acceptable only when all required binaries are byte-identical;
-    # otherwise choosing one silently could package a stale build.
     signatures: dict[tuple[tuple[str, str], ...], list[Path]] = {}
     for candidate in candidates:
         signature = tuple(sorted((name, sha256(candidate / name)) for name in REQUIRED))
@@ -68,7 +65,6 @@ def choose_candidate(root: Path) -> Path:
     if len(signatures) != 1:
         details = [str(p) for p in candidates]
         raise RuntimeError(f"Ambiguous built-client outputs with different binary hashes: {details}")
-    # Identical outputs: newest directory wins deterministically.
     return max(candidates, key=lambda p: p.stat().st_mtime_ns)
 
 
@@ -89,9 +85,6 @@ def stage(package_root: Path) -> dict[str, object]:
     baseline_hashes = {name: sha256(baseline / name) for name in REQUIRED if (baseline / name).is_file()}
     built_hashes = {name: sha256(candidate / name) for name in REQUIRED}
     changed = sorted(name for name in REQUIRED if baseline_hashes.get(name) != built_hashes[name])
-
-    # A v50 source build is expected to produce at least one changed primary binary relative to the baseline.
-    # This guards against accidentally rediscovering/copied baseline output.
     if not any(name in changed for name in ("ClassicUO.exe", "cuo.dll")):
         raise RuntimeError("Built-client candidate does not change ClassicUO.exe or cuo.dll versus baseline; refusing possible stale baseline")
 
@@ -111,12 +104,18 @@ def stage(package_root: Path) -> dict[str, object]:
         raise
     shutil.rmtree(backup)
 
+    # The build output is only an intermediate transport. Keeping it would create a third
+    # top-level package root or leave generated binaries under project/.
+    if candidate.exists():
+        shutil.rmtree(candidate)
+
     result = {
         "status": "PASS",
         "candidate": str(candidate),
         "changed_required_binaries": changed,
         "classicuo_sha256": built_hashes["ClassicUO.exe"],
         "cuo_sha256": built_hashes["cuo.dll"],
+        "temporary_candidate_removed": not candidate.exists(),
     }
     print(json.dumps(result, indent=2, sort_keys=True))
     return result
@@ -132,18 +131,19 @@ def self_test() -> None:
         built = root / "client-v50.0.0-built"
         built.mkdir()
         for name in REQUIRED:
-            baseline_data = ("old:" + name).encode("ascii")
-            built_data = ("new:" + name).encode("ascii")
-            (baseline / name).write_bytes(baseline_data)
-            (built / name).write_bytes(built_data)
+            (baseline / name).write_bytes(("old:" + name).encode("ascii"))
+            (built / name).write_bytes(("new:" + name).encode("ascii"))
         (built / "Autoload").mkdir()
         (built / "Autoload" / "sample.sc").write_text("SUB Main()\nEND SUB\n", encoding="utf-8")
 
         result = stage(root)
         assert result["status"] == "PASS"
+        assert result["temporary_candidate_removed"] is True
+        assert not built.exists()
+        assert sorted(p.name for p in root.iterdir()) == ["client", "project"]
         assert (root / "client" / "Autoload" / "sample.sc").is_file()
         assert (root / "client" / "ClassicUO.exe").read_bytes().startswith(b"new:")
-        print("PASS fixture | fresh built client replaces baseline")
+        print("PASS fixture | fresh built client replaces baseline and temp output is removed")
 
     with tempfile.TemporaryDirectory(prefix="v50-stale-client-") as td:
         root = Path(td)
@@ -161,7 +161,8 @@ def self_test() -> None:
             stage(root)
         except RuntimeError as exc:
             assert "stale baseline" in str(exc)
-            print("PASS fixture | identical stale baseline rejected")
+            assert built.exists(), "rejected candidate must not be deleted"
+            print("PASS fixture | identical stale baseline rejected without mutation")
         else:
             raise AssertionError("stale baseline candidate was accepted")
 
