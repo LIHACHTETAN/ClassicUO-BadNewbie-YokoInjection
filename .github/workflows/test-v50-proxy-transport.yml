@@ -1,0 +1,36 @@
+name: v50 proxy transport regression
+
+on:
+  push:
+    paths:
+      - .github/scripts/v50_proxy_transport_test/**
+      - .github/workflows/test-v50-proxy-transport.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  proxy-transport:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.302'
+      - name: Verify exact SDK
+        shell: pwsh
+        run: |
+          $v = (& dotnet --version).Trim()
+          Write-Host "dotnet=$v"
+          if ($v -ne '10.0.302') { throw "Wrong SDK $v" }
+      - name: Restore
+        shell: pwsh
+        run: dotnet restore .github/scripts/v50_proxy_transport_test/v50_proxy_transport_test.csproj
+      - name: Build warnings as errors
+        shell: pwsh
+        run: dotnet build .github/scripts/v50_proxy_transport_test/v50_proxy_transport_test.csproj -c Release --no-restore -warnaserror
+      - name: Run local proxy handshake regressions
+        shell: pwsh
+        run: dotnet run --project .github/scripts/v50_proxy_transport_test/v50_proxy_transport_test.csproj -c Release --no-build
