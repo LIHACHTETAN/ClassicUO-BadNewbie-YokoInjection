@@ -14,22 +14,19 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 30
     steps:
-      - name: Inspect firestorage client JS for API endpoints
+      - name: Inspect firestorage route JS exactly
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $jsUrl='https://firestorage.ai/_next/static/chunks/app/(files)/ja/f/page-4d19ae0a4ce39d79.js'
-          $r=Invoke-WebRequest -Uri $jsUrl -UseBasicParsing
-          Write-Host "JS status=$($r.StatusCode) bytes=$($r.RawContentLength)"
-          $js=$r.Content
-          $tokens=[regex]::Matches($js,'(?i)(https?://[^"''` ]+|/[A-Za-z0-9_./?=&${}-]*(?:api|download|share|file|object|presign|signed)[A-Za-z0-9_./?=&${}-]*)') | ForEach-Object { $_.Value } | Sort-Object -Unique
-          $tokens | ForEach-Object { Write-Host "TOKEN=$_" }
-          $needles=@('fetch(','download','public_id','share','file_id','presign','signed','/api/')
-          foreach($needle in $needles){
-            $idx=$js.IndexOf($needle,[StringComparison]::OrdinalIgnoreCase)
-            if($idx -ge 0){
-              $start=[Math]::Max(0,$idx-1200); $len=[Math]::Min(5000,$js.Length-$start)
-              Write-Host "===== CONTEXT $needle ====="
-              Write-Host $js.Substring($start,$len)
-            }
+          $urls=@(
+            'https://firestorage.ai/_next/static/chunks/app/(files)/ja/f/page-4d19ae0a4ce39d79.js',
+            'https://firestorage.ai/_next/static/chunks/8500-f4d7bfbe7500f274.js',
+            'https://firestorage.ai/_next/static/chunks/8437-d65cc193dc908afa.js',
+            'https://firestorage.ai/_next/static/chunks/5841-1160578ba9bb4f3e.js',
+            'https://firestorage.ai/_next/static/chunks/4899-d89df949f2dbd5af.js'
+          )
+          foreach($url in $urls){
+            $r=Invoke-WebRequest -Uri $url -UseBasicParsing
+            Write-Host "===== URL=$url status=$($r.StatusCode) bytes=$($r.RawContentLength) ====="
+            Write-Host $r.Content
           }
