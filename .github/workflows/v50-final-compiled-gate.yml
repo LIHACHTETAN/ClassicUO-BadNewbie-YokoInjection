@@ -13,19 +13,25 @@ env:
   SOURCE_URL: ""
   EXPECTED_SHA256: "096c8f9f0688594c079fd77c4ab4f03c705b2110ea89ba043850522bc44d5e72"
   PROFILE_PATCH_READY: "0"
+  PROXY_PATCH_READY: "0"
+  FINAL_SMOKE_READY: "0"
 
 jobs:
   final-gate:
     runs-on: windows-latest
-    timeout-minutes: 120
+    timeout-minutes: 240
     steps:
       - uses: actions/checkout@v4
 
       - name: Guard final gate
         shell: pwsh
         run: |
-          if ([string]::IsNullOrWhiteSpace($env:SOURCE_URL) -or $env:PROFILE_PATCH_READY -ne '1') {
-            Write-Host 'Final gate is staged but intentionally disabled until the exact v50 profile patch is ready.'
+          $ready = -not [string]::IsNullOrWhiteSpace($env:SOURCE_URL) -and
+                   $env:PROFILE_PATCH_READY -eq '1' -and
+                   $env:PROXY_PATCH_READY -eq '1' -and
+                   $env:FINAL_SMOKE_READY -eq '1'
+          if (-not $ready) {
+            Write-Host 'Final gate is staged but intentionally disabled until exact v50 profile/proxy patches, source URL and extracted-client smoke route are ready.'
             'V50_GATE_DISABLED=1' | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           }
 
@@ -41,16 +47,16 @@ jobs:
         with:
           dotnet-version: '10.0.302'
 
-      - name: Download and verify canonical package
+      - name: Download and verify canonical baseline package
         if: env.V50_GATE_DISABLED != '1'
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $zip = Join-Path $env:RUNNER_TEMP 'v50-project-client.zip'
+          $zip = Join-Path $env:RUNNER_TEMP 'v50-project-client-baseline.zip'
           Invoke-WebRequest -Uri $env:SOURCE_URL -OutFile $zip -UseBasicParsing
           $actual = (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash.ToLowerInvariant()
           $expected = $env:EXPECTED_SHA256.ToLowerInvariant()
-          Write-Host "SHA256=$actual"
+          Write-Host "BASELINE_SHA256=$actual"
           if ($actual -ne $expected) { throw "Package SHA mismatch: expected $expected got $actual" }
           $root = Join-Path $env:RUNNER_TEMP 'v50-final'
           if (Test-Path $root) { Remove-Item -LiteralPath $root -Recurse -Force }
@@ -63,7 +69,19 @@ jobs:
           "V50_PROJECT=$project" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           "V50_CLIENT=$client" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
-      - name: Verify exact SDK pin
+      - name: Apply exact reviewed v50 patches
+        if: env.V50_GATE_DISABLED != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $patcher = Join-Path $env:GITHUB_WORKSPACE '.github/scripts/v50_apply_final_patches.py'
+          if (-not (Test-Path $patcher -PathType Leaf)) {
+            throw 'v50_apply_final_patches.py is missing; refusing to build unpatched baseline source.'
+          }
+          & python $patcher --project $env:V50_PROJECT --client $env:V50_CLIENT
+          if ($LASTEXITCODE -ne 0) { throw 'Exact v50 patch application failed' }
+
+      - name: Verify exact SDK pin from patched project
         if: env.V50_GATE_DISABLED != '1'
         shell: pwsh
         run: |
@@ -110,7 +128,7 @@ jobs:
           }
           finally { Pop-Location }
 
-      - name: Clean generated build directories
+      - name: Clean generated build directories before tests
         if: env.V50_GATE_DISABLED != '1'
         shell: pwsh
         run: |
@@ -120,7 +138,7 @@ jobs:
             Sort-Object FullName -Descending |
             Remove-Item -Recurse -Force -ErrorAction Stop
 
-      - name: Run deterministic source/model gates
+      - name: Run deterministic source and model gates
         if: env.V50_GATE_DISABLED != '1'
         shell: pwsh
         run: |
@@ -178,7 +196,7 @@ jobs:
           & dotnet restore 'ClassicUO.sln' -p:Configuration=Release '-p:Platform=Any CPU'
           if ($LASTEXITCODE -ne 0) { throw 'dotnet restore failed' }
 
-      - name: Release build whole solution warnings-as-errors
+      - name: Release build whole solution warnings as errors
         if: env.V50_GATE_DISABLED != '1'
         shell: pwsh
         run: |
@@ -206,7 +224,18 @@ jobs:
             if ($LASTEXITCODE -ne 0) { throw "Test failed: $($p.FullName)" }
           }
 
-      - name: Run packaged Windows release pipeline when present
+      - name: Remove stale built-client outputs before Windows release pipeline
+        if: env.V50_GATE_DISABLED != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          foreach ($base in @($env:V50_ROOT, $env:V50_PROJECT)) {
+            Get-ChildItem -LiteralPath $base -Directory -ErrorAction SilentlyContinue |
+              Where-Object { $_.Name -match '(?i)^client.*built' } |
+              Remove-Item -Recurse -Force
+          }
+
+      - name: Run packaged Windows release pipeline
         if: env.V50_GATE_DISABLED != '1'
         shell: pwsh
         run: |
@@ -215,13 +244,28 @@ jobs:
           $candidate = @('BUILD_V50_WINDOWS.ps1','BUILD_V49_WINDOWS.ps1','BUILD_V48_WINDOWS.ps1') |
             Where-Object { Test-Path $_ } |
             Select-Object -First 1
-          if ($candidate) {
-            Write-Host "===== WINDOWS PIPELINE $candidate ====="
-            & pwsh -NoProfile -ExecutionPolicy Bypass -File $candidate
-            if ($LASTEXITCODE -ne 0) { throw "$candidate failed with exit code $LASTEXITCODE" }
-          } else {
-            throw 'No packaged Windows release pipeline found'
-          }
+          if (-not $candidate) { throw 'No packaged Windows release pipeline found' }
+          Write-Host "===== WINDOWS PIPELINE $candidate ====="
+          & pwsh -NoProfile -ExecutionPolicy Bypass -File $candidate
+          if ($LASTEXITCODE -ne 0) { throw "$candidate failed with exit code $LASTEXITCODE" }
+
+      - name: Stage freshly built client and reject baseline
+        if: env.V50_GATE_DISABLED != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          & python (Join-Path $env:GITHUB_WORKSPACE '.github/scripts/v50_stage_built_client.py') --package-root $env:V50_ROOT
+          if ($LASTEXITCODE -ne 0) { throw 'Fresh built-client staging failed' }
+
+      - name: Run exact extracted-client smoke route
+        if: env.V50_GATE_DISABLED != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $smoke = Join-Path $env:GITHUB_WORKSPACE '.github/scripts/v50_run_extracted_client_smoke.ps1'
+          if (-not (Test-Path $smoke -PathType Leaf)) { throw 'Exact extracted-client smoke helper is missing' }
+          & pwsh -NoProfile -ExecutionPolicy Bypass -File $smoke -ClientDirectory $env:V50_CLIENT -ProjectDirectory $env:V50_PROJECT
+          if ($LASTEXITCODE -ne 0) { throw 'Built client smoke failed before packaging' }
 
       - name: Final focused source audit
         if: env.V50_GATE_DISABLED != '1'
@@ -238,11 +282,121 @@ jobs:
             throw 'Final source audit found forbidden implementation/merge markers'
           }
 
-      - name: Upload gate workspace for packaging stage
+      - name: Clean generated project residues before packaging
+        if: env.V50_GATE_DISABLED != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Get-ChildItem -LiteralPath $env:V50_PROJECT -Recurse -Directory -Force -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -in @('bin','obj','publish','__pycache__') } |
+            Sort-Object FullName -Descending |
+            Remove-Item -Recurse -Force
+          Get-ChildItem -LiteralPath $env:V50_PROJECT -Recurse -File -Include *.pyc,*.pyo -ErrorAction SilentlyContinue |
+            Remove-Item -Force
+
+      - name: Create final project-client ZIP and verify CRC fresh extraction SHA
+        if: env.V50_GATE_DISABLED != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $zip = Join-Path $env:RUNNER_TEMP 'ClassicUO-v50.0.0-BADNEWBIE-YOKO-FINAL-BUILT-TESTED-PROJECT-AND-CLIENT.zip'
+          $sha = "$zip.sha256.txt"
+          $report = Join-Path $env:RUNNER_TEMP 'V50_FINAL_PACKAGE_REPORT.json'
+          & python (Join-Path $env:GITHUB_WORKSPACE '.github/scripts/v50_package_project_client.py') `
+            --staging-root $env:V50_ROOT --output $zip --sha-sidecar $sha --report $report
+          if ($LASTEXITCODE -ne 0) { throw 'Final package gate failed' }
+          "FINAL_ZIP=$zip" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "FINAL_SHA=$sha" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "FINAL_REPORT=$report" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Fresh-extract the final ZIP for mandatory retest
+        if: env.V50_GATE_DISABLED != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $retest = Join-Path $env:RUNNER_TEMP 'v50-final-retest'
+          if (Test-Path $retest) { Remove-Item -Recurse -Force $retest }
+          Expand-Archive -LiteralPath $env:FINAL_ZIP -DestinationPath $retest -Force
+          $rp = Join-Path $retest 'project'
+          $rc = Join-Path $retest 'client'
+          if (-not (Test-Path (Join-Path $rp 'ClassicUO.sln'))) { throw 'Fresh ZIP missing project/ClassicUO.sln' }
+          if (-not (Test-Path (Join-Path $rc 'ClassicUO.exe'))) { throw 'Fresh ZIP missing client/ClassicUO.exe' }
+          "RETEST_ROOT=$retest" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "RETEST_PROJECT=$rp" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "RETEST_CLIENT=$rc" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Fresh-extracted deterministic and profile retest
+        if: env.V50_GATE_DISABLED != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $pm = Join-Path $env:RETEST_PROJECT 'src/ClassicUO.Client/Configuration/ProfileManager.cs'
+          & python (Join-Path $env:GITHUB_WORKSPACE '.github/scripts/v50_fresh_profile_contract.py') $pm
+          if ($LASTEXITCODE -ne 0) { throw 'Fresh-extracted profile contract failed' }
+          Set-Location $env:RETEST_PROJECT
+          $scripts = @(
+            'scripts/VerifyProjectSources.py',
+            'scripts/TestProfileServerFolderModel.py',
+            'scripts/TestGumpApiModel.py',
+            'scripts/TestRuntimeBehaviorFixes.py',
+            'scripts/TestSearchCore.py',
+            'scripts/TestFindTypeModel.py',
+            'scripts/TestParamArrayWrapperModel.py',
+            'scripts/TestAutoloadMenuModel.py',
+            'scripts/VerifyYokoTheiaIde.py',
+            'scripts/TestRuntimeContractIntegrity.py',
+            'scripts/TestApiManualCurrent.py',
+            'scripts/TestApiManualCompleteness.py',
+            'scripts/TestConvertedAutoload.py',
+            'scripts/VerifyYokoLibrary.py'
+          )
+          foreach ($s in $scripts) {
+            if (Test-Path $s) {
+              & python $s
+              if ($LASTEXITCODE -ne 0) { throw "Fresh-extracted $s failed" }
+            }
+          }
+
+      - name: Fresh-extracted restore build and compiled tests
+        if: env.V50_GATE_DISABLED != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Set-Location $env:RETEST_PROJECT
+          $v = (& dotnet --version).Trim()
+          if ($v -ne '10.0.302') { throw "Fresh-extracted project selected wrong SDK: $v" }
+          & dotnet restore 'ClassicUO.sln' -p:Configuration=Release '-p:Platform=Any CPU'
+          if ($LASTEXITCODE -ne 0) { throw 'Fresh-extracted restore failed' }
+          & dotnet build 'ClassicUO.sln' -c Release --no-restore -warnaserror '-p:Platform=Any CPU'
+          if ($LASTEXITCODE -ne 0) { throw 'Fresh-extracted build failed' }
+          $tests = Get-ChildItem -Recurse -File -Filter '*.csproj' |
+            Where-Object { $_.Name -match '(?i)test' -or $_.DirectoryName -match '(?i)test' } |
+            Sort-Object FullName -Unique
+          if (-not $tests) { throw 'No fresh-extracted test projects discovered' }
+          foreach ($p in $tests) {
+            & dotnet restore $p.FullName -p:Configuration=Release '-p:Platform=Any CPU'
+            if ($LASTEXITCODE -ne 0) { throw "Fresh-extracted test restore failed: $($p.FullName)" }
+            & dotnet test $p.FullName -c Release --no-restore --logger 'console;verbosity=normal' '-p:Platform=Any CPU'
+            if ($LASTEXITCODE -ne 0) { throw "Fresh-extracted test failed: $($p.FullName)" }
+          }
+
+      - name: Smoke the client from the fresh final ZIP
+        if: env.V50_GATE_DISABLED != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $smoke = Join-Path $env:GITHUB_WORKSPACE '.github/scripts/v50_run_extracted_client_smoke.ps1'
+          & pwsh -NoProfile -ExecutionPolicy Bypass -File $smoke -ClientDirectory $env:RETEST_CLIENT -ProjectDirectory $env:RETEST_PROJECT
+          if ($LASTEXITCODE -ne 0) { throw 'Fresh final ZIP client smoke failed' }
+
+      - name: Upload final verified release artifacts
         if: env.V50_GATE_DISABLED != '1'
         uses: actions/upload-artifact@v4
         with:
-          name: v50-final-gate-workspace
-          path: ${{ runner.temp }}/v50-final
+          name: v50-final-built-tested-project-and-client
+          path: |
+            ${{ runner.temp }}/ClassicUO-v50.0.0-BADNEWBIE-YOKO-FINAL-BUILT-TESTED-PROJECT-AND-CLIENT.zip
+            ${{ runner.temp }}/ClassicUO-v50.0.0-BADNEWBIE-YOKO-FINAL-BUILT-TESTED-PROJECT-AND-CLIENT.zip.sha256.txt
+            ${{ runner.temp }}/V50_FINAL_PACKAGE_REPORT.json
           if-no-files-found: error
           retention-days: 1
