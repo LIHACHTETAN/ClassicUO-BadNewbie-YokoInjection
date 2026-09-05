@@ -1,0 +1,113 @@
+name: v50 remote source inspector
+
+on:
+  push:
+    paths:
+      - .github/workflows/v50-remote-source-inspector.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  # Filled only when the verified v50 package has a temporary public download URL.
+  SOURCE_URL: ""
+  EXPECTED_SHA256: "096c8f9f0688594c079fd77c4ab4f03c705b2110ea89ba043850522bc44d5e72"
+
+jobs:
+  inspect-v50-source:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Guard source URL
+        shell: pwsh
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:SOURCE_URL)) {
+            Write-Host "SOURCE_URL is intentionally empty; inspector is staged and no package was downloaded."
+            "V50_SOURCE_URL_EMPTY=1" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          }
+
+      - name: Download and verify canonical v50 package
+        if: env.V50_SOURCE_URL_EMPTY != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $zip = Join-Path $env:RUNNER_TEMP 'v50-project-client.zip'
+          Write-Host "Downloading canonical v50 package..."
+          Invoke-WebRequest -Uri $env:SOURCE_URL -OutFile $zip -UseBasicParsing
+          $actual = (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash.ToLowerInvariant()
+          $expected = $env:EXPECTED_SHA256.ToLowerInvariant()
+          Write-Host "SHA256=$actual"
+          if ($actual -ne $expected) {
+            throw "v50 package SHA mismatch. Expected $expected, got $actual"
+          }
+          "V50_ZIP=$zip" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Extract and validate project roots
+        if: env.V50_SOURCE_URL_EMPTY != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $root = Join-Path $env:RUNNER_TEMP 'v50-extracted'
+          if (Test-Path $root) { Remove-Item -LiteralPath $root -Recurse -Force }
+          Expand-Archive -LiteralPath $env:V50_ZIP -DestinationPath $root -Force
+          $project = Join-Path $root 'project'
+          $client = Join-Path $root 'client'
+          if (-not (Test-Path $project -PathType Container)) { throw 'Missing project/ root' }
+          if (-not (Test-Path $client -PathType Container)) { throw 'Missing client/ root' }
+          if (-not (Test-Path (Join-Path $project 'ClassicUO.sln') -PathType Leaf)) { throw 'Missing project/ClassicUO.sln' }
+          "V50_ROOT=$root" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "V50_PROJECT=$project" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Print exact profile implementation and tests
+        if: env.V50_SOURCE_URL_EMPTY != '1'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          function Print-NumberedFile([string]$Path) {
+            if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+              Write-Host "===== MISSING: $Path ====="
+              return
+            }
+            Write-Host "===== BEGIN FILE: $Path ====="
+            $n = 0
+            Get-Content -LiteralPath $Path | ForEach-Object {
+              $n++
+              Write-Host ('{0:D5}: {1}' -f $n, $_)
+            }
+            Write-Host "===== END FILE: $Path ====="
+          }
+
+          $targets = @(
+            (Join-Path $env:V50_PROJECT 'src/ClassicUO.Client/Configuration/ProfileManager.cs'),
+            (Join-Path $env:V50_PROJECT 'src/ClassicUO.Client/Configuration/Profile.cs'),
+            (Join-Path $env:V50_PROJECT 'scripts/TestProfileServerFolderModel.py')
+          )
+          foreach ($target in $targets) { Print-NumberedFile $target }
+
+          Write-Host '===== PROFILE-RELATED SOURCE FILES ====='
+          Get-ChildItem -LiteralPath $env:V50_PROJECT -Recurse -File -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -match 'Profile|profile' } |
+            Select-Object -ExpandProperty FullName |
+            Sort-Object |
+            ForEach-Object { Write-Host $_ }
+
+          Write-Host '===== ALL v2 OCCURRENCES IN PROFILE-RELATED TEXT ====='
+          Get-ChildItem -LiteralPath $env:V50_PROJECT -Recurse -File -Include *.cs,*.py,*.ps1,*.json,*.md,*.txt -ErrorAction SilentlyContinue |
+            Select-String -Pattern 'legacy v2|\bv2\b' -CaseSensitive:$false -ErrorAction SilentlyContinue |
+            ForEach-Object { Write-Host ("{0}:{1}: {2}" -f $_.Path, $_.LineNumber, $_.Line.Trim()) }
+
+      - name: Upload focused profile source snapshot
+        if: env.V50_SOURCE_URL_EMPTY != '1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: v50-profile-source-snapshot
+          if-no-files-found: warn
+          path: |
+            ${{ env.V50_PROJECT }}/src/ClassicUO.Client/Configuration/ProfileManager.cs
+            ${{ env.V50_PROJECT }}/src/ClassicUO.Client/Configuration/Profile.cs
+            ${{ env.V50_PROJECT }}/scripts/TestProfileServerFolderModel.py
+            ${{ env.V50_PROJECT }}/tests/ClassicUO.UnitTests/**/*Profile*.cs
+          retention-days: 1
