@@ -1,0 +1,48 @@
+name: v50 firestorage probe
+
+on:
+  push:
+    paths:
+      - .github/workflows/v50-firestorage-probe.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Download three release-input parts
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $items = @(
+            @{ Url='https://firestorage.ai/ja/f/ENGSULZWiyg3'; Name='part00'; Size=94371840 },
+            @{ Url='https://firestorage.ai/ja/f/vO3RI-uepxuC'; Name='part01'; Size=94371840 },
+            @{ Url='https://firestorage.ai/ja/f/L0ABqCBELFZo'; Name='part02'; Size=68451382 }
+          )
+          foreach ($i in $items) {
+            $out = Join-Path $env:RUNNER_TEMP $i.Name
+            Invoke-WebRequest -Uri $i.Url -OutFile $out -UseBasicParsing -MaximumRedirection 10
+            $len = (Get-Item $out).Length
+            Write-Host "$($i.Name) length=$len"
+            if ($len -ne $i.Size) { throw "Unexpected downloaded size for $($i.Name): $len" }
+          }
+          $joined = Join-Path $env:RUNNER_TEMP 'ClassicUO-v50-release-input.zip'
+          $fs = [IO.File]::Open($joined,[IO.FileMode]::Create)
+          try {
+            foreach ($name in @('part00','part01','part02')) {
+              $bytes = [IO.File]::ReadAllBytes((Join-Path $env:RUNNER_TEMP $name))
+              $fs.Write($bytes,0,$bytes.Length)
+            }
+          } finally { $fs.Dispose() }
+          $sha=(Get-FileHash $joined -Algorithm SHA256).Hash.ToLowerInvariant()
+          Write-Host "JOINED_SHA256=$sha"
+          if ($sha -ne '070cc3821c836d8470a6b10e295014cabcf8f2ad74ae3c4dddf5d8a6659f23ed') { throw "Joined SHA mismatch: $sha" }
+          $root=Join-Path $env:RUNNER_TEMP 'v50-probe'
+          Expand-Archive -LiteralPath $joined -DestinationPath $root -Force
+          if (-not (Test-Path (Join-Path $root 'project/ClassicUO.sln'))) { throw 'ClassicUO.sln missing after extraction' }
+          if (-not (Test-Path (Join-Path $root 'client/ClassicUO.exe'))) { throw 'Baseline ClassicUO.exe missing after extraction' }
+          Write-Host 'FIRESTORAGE_PROBE_PASS=1'
