@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - .github/workflows/v50-current-release8.yml
-      - .github/scripts/patch-v50-release8.ps1
+      - .github/scripts/patch-v50-release8.py
   workflow_dispatch:
 
 permissions:
@@ -70,7 +70,8 @@ jobs:
           $g.sdk.rollForward='disable'
           $g|ConvertTo-Json -Depth 8|Set-Content (Join-Path $project 'global.json') -Encoding utf8
 
-          & (Join-Path $env:GITHUB_WORKSPACE '.github/scripts/patch-v50-release8.ps1') -Project $project
+          $patch=Join-Path $env:GITHUB_WORKSPACE '.github/scripts/patch-v50-release8.py'
+          python $patch $project
           if($LASTEXITCODE -ne 0){throw "Release 8 source patch failed with $LASTEXITCODE"}
 
           "V50_ROOT=$root"|Out-File $env:GITHUB_ENV -Append -Encoding utf8
