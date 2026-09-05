@@ -14,6 +14,9 @@ jobs:
   proxy-transport:
     runs-on: windows-latest
     timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: .github/scripts/v50_proxy_transport_test
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -27,10 +30,10 @@ jobs:
           if ($v -ne '10.0.302') { throw "Wrong SDK $v" }
       - name: Restore
         shell: pwsh
-        run: dotnet restore .github/scripts/v50_proxy_transport_test/v50_proxy_transport_test.csproj
+        run: dotnet restore v50_proxy_transport_test.csproj
       - name: Build warnings as errors
         shell: pwsh
-        run: dotnet build .github/scripts/v50_proxy_transport_test/v50_proxy_transport_test.csproj -c Release --no-restore -warnaserror
+        run: dotnet build v50_proxy_transport_test.csproj -c Release --no-restore -warnaserror
       - name: Run local proxy handshake regressions
         shell: pwsh
-        run: dotnet run --project .github/scripts/v50_proxy_transport_test/v50_proxy_transport_test.csproj -c Release --no-build
+        run: dotnet run --project v50_proxy_transport_test.csproj -c Release --no-build
