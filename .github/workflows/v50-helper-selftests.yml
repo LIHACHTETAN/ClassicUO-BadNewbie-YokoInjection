@@ -29,12 +29,19 @@ jobs:
         with:
           dotnet-version: '10.0.302'
 
-      - name: Verify exact SDK
+      - name: Verify exact SDK pin from harness global.json
         shell: pwsh
         run: |
-          $v = (& dotnet --version).Trim()
-          Write-Host "dotnet=$v"
-          if ($v -ne '10.0.302') { throw "Wrong SDK $v" }
+          $installed = @(& dotnet --list-sdks)
+          $installed | ForEach-Object { Write-Host $_ }
+          if (-not ($installed -match '^10\.0\.302\s')) { throw 'SDK 10.0.302 was not installed' }
+          Push-Location '.github/scripts/v50_proxy_transport_test'
+          try {
+            $v = (& dotnet --version).Trim()
+            Write-Host "pinned-dotnet=$v"
+            if ($v -ne '10.0.302') { throw "global.json did not select exact SDK: $v" }
+          }
+          finally { Pop-Location }
 
       - name: Fresh-profile analyzer self-test
         shell: pwsh
@@ -57,8 +64,12 @@ jobs:
       - name: Run proxy transport regression
         shell: pwsh
         run: |
-          & dotnet run --project '.github/scripts/v50_proxy_transport_test/v50_proxy_transport_test.csproj' -c Release --no-build
-          if ($LASTEXITCODE -ne 0) { throw 'proxy transport regression failed' }
+          Push-Location '.github/scripts/v50_proxy_transport_test'
+          try {
+            & dotnet run --project 'v50_proxy_transport_test.csproj' -c Release --no-build
+            if ($LASTEXITCODE -ne 0) { throw 'proxy transport regression failed' }
+          }
+          finally { Pop-Location }
 
       - name: Python helper syntax
         shell: pwsh
