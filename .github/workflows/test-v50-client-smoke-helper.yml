@@ -65,3 +65,5 @@ jobs:
           Write-Host "expected-failure-exit-code=$code"
           if ($code -eq 0) { throw 'smoke helper incorrectly accepted an early-exit process' }
           Write-Host 'PASS | smoke helper rejects early client exit'
+          $global:LASTEXITCODE = 0
+          exit 0
