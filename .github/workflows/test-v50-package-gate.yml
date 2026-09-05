@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - .github/scripts/v50_package_project_client.py
+      - .github/scripts/v50_stage_built_client.py
       - .github/workflows/test-v50-package-gate.yml
   workflow_dispatch:
 
@@ -19,9 +20,16 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
-      - name: Compile package gate
+      - name: Compile packaging gates
         shell: pwsh
-        run: python -m py_compile .github/scripts/v50_package_project_client.py
+        run: |
+          python -m py_compile .github/scripts/v50_package_project_client.py
+          if ($LASTEXITCODE -ne 0) { throw 'Package gate Python compile failed' }
+          python -m py_compile .github/scripts/v50_stage_built_client.py
+          if ($LASTEXITCODE -ne 0) { throw 'Built-client staging Python compile failed' }
+      - name: Run built-client staging fixtures
+        shell: pwsh
+        run: python .github/scripts/v50_stage_built_client.py --self-test
       - name: Run package positive and negative fixtures
         shell: pwsh
         run: python .github/scripts/v50_package_project_client.py --self-test
