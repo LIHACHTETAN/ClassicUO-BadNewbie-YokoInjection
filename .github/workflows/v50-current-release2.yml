@@ -1,0 +1,150 @@
+name: v50 current full Windows release 2
+
+on:
+  push:
+    paths:
+      - .github/workflows/v50-current-release2.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  EXPECTED_SOURCE_SHA256: 070cc3821c836d8470a6b10e295014cabcf8f2ad74ae3c4dddf5d8a6659f23ed
+
+jobs:
+  build-release:
+    runs-on: windows-latest
+    timeout-minutes: 240
+    steps:
+      - name: Setup exact .NET SDK 10.0.302
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.302'
+
+      - name: Download current v50 package parts from firestorage API
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $shares=@(
+            @{ Share='ENGSULZWiyg3'; Name='part00'; Size=94371840; Sha='18a2e2a672d44f90215458ddbf81ee82e57dcb1cb11d57c0dae42a79b063c1c6' },
+            @{ Share='vO3RI-uepxuC'; Name='part01'; Size=94371840; Sha='8a81a16359db3396017a60146e2414e873b9738b5a2553a586045cdb6f4c0846' },
+            @{ Share='L0ABqCBELFZo'; Name='part02'; Size=68451382; Sha='5cd92a807e7db72b22c83f04b554f5db5563c3871cb43665f707491cc4b6d96a' }
+          )
+          foreach($s in $shares){
+            $list=Invoke-RestMethod -Uri "https://api.firestorage.ai/dev/file/shares/$($s.Share)/files?maxResults=1000" -Method Get
+            if(-not $list.files -or $list.files.Count -ne 1){ throw "Expected exactly one file for share $($s.Share)" }
+            $file=$list.files[0]
+            if([int64]$file.sizeBytes -ne [int64]$s.Size){ throw "API file size mismatch for $($s.Name)" }
+            $download=Invoke-RestMethod -Uri "https://api.firestorage.ai/dev/file/shares/$($s.Share)/files/$($file.fileId)/download" -Method Post -ContentType 'application/json'
+            if([string]::IsNullOrWhiteSpace($download.downloadUrl)){ throw "No downloadUrl for $($s.Name)" }
+            $out=Join-Path $env:RUNNER_TEMP $s.Name
+            Invoke-WebRequest -Uri $download.downloadUrl -OutFile $out -UseBasicParsing -MaximumRedirection 10
+            $len=(Get-Item $out).Length
+            $sha=(Get-FileHash $out -Algorithm SHA256).Hash.ToLowerInvariant()
+            Write-Host "$($s.Name): size=$len sha=$sha"
+            if($len -ne $s.Size){ throw "Downloaded size mismatch for $($s.Name): $len" }
+            if($sha -ne $s.Sha){ throw "Part SHA mismatch for $($s.Name): $sha" }
+          }
+
+      - name: Reassemble and verify current package
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $joined=Join-Path $env:RUNNER_TEMP 'ClassicUO-v50-current-input.zip'
+          $out=[IO.File]::Open($joined,[IO.FileMode]::Create)
+          try {
+            foreach($name in @('part00','part01','part02')){
+              $input=[IO.File]::OpenRead((Join-Path $env:RUNNER_TEMP $name))
+              try { $input.CopyTo($out) } finally { $input.Dispose() }
+            }
+          } finally { $out.Dispose() }
+          $sha=(Get-FileHash $joined -Algorithm SHA256).Hash.ToLowerInvariant()
+          Write-Host "SOURCE_SHA256=$sha"
+          if($sha -ne $env:EXPECTED_SOURCE_SHA256){ throw "Source SHA mismatch: $sha" }
+          $root=Join-Path $env:RUNNER_TEMP 'v50-current-release'
+          if(Test-Path $root){ Remove-Item $root -Recurse -Force }
+          Expand-Archive -LiteralPath $joined -DestinationPath $root -Force
+          $project=Join-Path $root 'project'
+          $client=Join-Path $root 'client'
+          foreach($required in @((Join-Path $project 'ClassicUO.sln'),(Join-Path $project 'BUILD_V50_WINDOWS.ps1'),(Join-Path $project 'global.json'),(Join-Path $client 'ClassicUO.exe'))){ if(-not (Test-Path $required)){ throw "Missing required file: $required" } }
+          "V50_ROOT=$root" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "V50_PROJECT=$project" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "V50_BASELINE_CLIENT=$client" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Verify project selects exact SDK
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          Set-Location $env:V50_PROJECT
+          Get-Content global.json
+          $v=(& dotnet --version).Trim()
+          Write-Host "project dotnet=$v"
+          if($v -ne '10.0.302'){ throw "Project selected wrong .NET SDK: $v" }
+
+      - name: Build full Windows v50 Release from current source
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          Set-Location $env:V50_PROJECT
+          $built=Join-Path $env:V50_ROOT 'client-v50.0.0-built-current'
+          & pwsh -NoProfile -ExecutionPolicy Bypass -File (Join-Path $env:V50_PROJECT 'BUILD_V50_WINDOWS.ps1') `
+            -OutputDirectory $built `
+            -BaselineClientDirectory $env:V50_BASELINE_CLIENT `
+            -PythonExecutable 'python' `
+            -SmokeTestSeconds 15
+          if($LASTEXITCODE -ne 0){ throw "BUILD_V50_WINDOWS.ps1 failed with $LASTEXITCODE" }
+          foreach($name in @('ClassicUO.exe','cuo.dll','cuoapi.dll')){ if(-not (Test-Path (Join-Path $built $name))){ throw "Fresh $name missing" } }
+          "V50_BUILT_CLIENT=$built" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Verify freshly compiled binaries
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $newExe=Join-Path $env:V50_BUILT_CLIENT 'ClassicUO.exe'
+          $newDll=Join-Path $env:V50_BUILT_CLIENT 'cuo.dll'
+          $oldExe=Join-Path $env:V50_BASELINE_CLIENT 'ClassicUO.exe'
+          $oldDll=Join-Path $env:V50_BASELINE_CLIENT 'cuo.dll'
+          foreach($p in @($newExe,$newDll)){
+            $f=Get-Item $p
+            $sha=(Get-FileHash $p -Algorithm SHA256).Hash.ToLowerInvariant()
+            Write-Host "NEW $($f.Name) size=$($f.Length) sha=$sha version=$($f.VersionInfo.FileVersion)"
+          }
+          $newDllSha=(Get-FileHash $newDll -Algorithm SHA256).Hash
+          $oldDllSha=(Get-FileHash $oldDll -Algorithm SHA256).Hash
+          Write-Host "OLD exe sha=$((Get-FileHash $oldExe -Algorithm SHA256).Hash.ToLowerInvariant())"
+          Write-Host "OLD dll sha=$($oldDllSha.ToLowerInvariant())"
+          if($newDllSha -eq $oldDllSha){ throw 'Fresh cuo.dll is byte-identical to baseline' }
+
+      - name: Create final Project plus new Client ZIP
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $stage=Join-Path $env:RUNNER_TEMP 'v50-final-package'
+          if(Test-Path $stage){ Remove-Item $stage -Recurse -Force }
+          New-Item -ItemType Directory $stage | Out-Null
+          $projectOut=Join-Path $stage 'project'
+          $clientOut=Join-Path $stage 'client'
+          Copy-Item $env:V50_PROJECT $projectOut -Recurse -Force
+          Copy-Item $env:V50_BUILT_CLIENT $clientOut -Recurse -Force
+          Get-ChildItem $projectOut -Recurse -Directory -Force -ErrorAction SilentlyContinue | Where-Object { $_.Name -in @('bin','obj','publish','__pycache__') } | Sort-Object FullName -Descending | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+          Get-ChildItem $projectOut -Recurse -File -Include *.pyc,*.pyo -ErrorAction SilentlyContinue | Remove-Item -Force
+          $zip=Join-Path $env:RUNNER_TEMP 'ClassicUO-v50.0.0-BADNEWBIE-YOKO-NEW-RELEASE-PROJECT-AND-CLIENT.zip'
+          Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $zip -CompressionLevel Optimal -Force
+          $sha=(Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$sha  $(Split-Path $zip -Leaf)" | Set-Content "$zip.sha256.txt" -Encoding ascii
+          $verify=Join-Path $env:RUNNER_TEMP 'v50-final-verify'
+          if(Test-Path $verify){ Remove-Item $verify -Recurse -Force }
+          Expand-Archive -LiteralPath $zip -DestinationPath $verify -Force
+          foreach($required in @('client/ClassicUO.exe','client/cuo.dll','project/ClassicUO.sln')){ if(-not (Test-Path (Join-Path $verify $required))){ throw "Final ZIP missing $required" } }
+          Write-Host "FINAL_SHA256=$sha"
+
+      - name: Upload new v50 Release project and client
+        uses: actions/upload-artifact@v4
+        with:
+          name: ClassicUO-v50.0.0-BADNEWBIE-YOKO-NEW-RELEASE-PROJECT-AND-CLIENT
+          path: |
+            ${{ runner.temp }}/ClassicUO-v50.0.0-BADNEWBIE-YOKO-NEW-RELEASE-PROJECT-AND-CLIENT.zip
+            ${{ runner.temp }}/ClassicUO-v50.0.0-BADNEWBIE-YOKO-NEW-RELEASE-PROJECT-AND-CLIENT.zip.sha256.txt
+          if-no-files-found: error
+          retention-days: 7
