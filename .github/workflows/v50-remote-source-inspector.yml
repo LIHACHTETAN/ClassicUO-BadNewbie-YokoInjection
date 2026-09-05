@@ -106,8 +106,8 @@ jobs:
           name: v50-profile-source-snapshot
           if-no-files-found: warn
           path: |
-            ${{ env.V50_PROJECT }}/src/ClassicUO.Client/Configuration/ProfileManager.cs
-            ${{ env.V50_PROJECT }}/src/ClassicUO.Client/Configuration/Profile.cs
-            ${{ env.V50_PROJECT }}/scripts/TestProfileServerFolderModel.py
-            ${{ env.V50_PROJECT }}/tests/ClassicUO.UnitTests/**/*Profile*.cs
+            ${{ runner.temp }}/v50-extracted/project/src/ClassicUO.Client/Configuration/ProfileManager.cs
+            ${{ runner.temp }}/v50-extracted/project/src/ClassicUO.Client/Configuration/Profile.cs
+            ${{ runner.temp }}/v50-extracted/project/scripts/TestProfileServerFolderModel.py
+            ${{ runner.temp }}/v50-extracted/project/tests/ClassicUO.UnitTests/**/*Profile*.cs
           retention-days: 1
