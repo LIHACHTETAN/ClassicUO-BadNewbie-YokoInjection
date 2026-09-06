@@ -32,11 +32,12 @@ if 'Compress-Archive -Path (Join-Path $OutputDirectory "*")' in check:
 if '& $tar -a -cf $ArchivePath -C $OutputDirectory .' not in check:
     raise RuntimeError('Fast tar.exe internal ZIP route missing after Release 12 patch')
 for required in (
-    'Expand-Archive -Path $ArchivePath',
-    'Archive missing files',
-    'Archive content hash mismatch',
-    'Native dependency/export probe on extracted archive',
-    'Client process startup smoke test on extracted archive',
+    'Expand-Archive -LiteralPath $ArchivePath',
+    'Final archive file list differs from tested output',
+    'Final archive hash mismatch',
+    'Extracted final archive is missing required file',
+    'Extracted archive native dependency/export probe',
+    'Extracted archive client process smoke test',
 ):
     if required not in check:
         raise RuntimeError(f'Existing archive verification invariant missing: {required}')
