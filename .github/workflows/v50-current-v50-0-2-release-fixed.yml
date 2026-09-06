@@ -8,6 +8,7 @@ on:
       - .github/scripts/patch-v50-0-2-gump-model.py
       - .github/scripts/patch-v50-0-2-build-manual.py
       - .github/scripts/manual-v50-0-2.py
+      - .github/scripts/manual-v50-0-2-gate-fix.py
   workflow_dispatch:
 
 permissions:
@@ -75,6 +76,7 @@ jobs:
           }
 
           Copy-Item (Join-Path $env:GITHUB_WORKSPACE '.github/scripts/manual-v50-0-2.py') (Join-Path $project 'scripts/ApplyV5002ManualPatch.py') -Force
+          Copy-Item (Join-Path $env:GITHUB_WORKSPACE '.github/scripts/manual-v50-0-2-gate-fix.py') (Join-Path $project 'scripts/ApplyV5002ManualGateFix.py') -Force
           python (Join-Path $env:GITHUB_WORKSPACE '.github/scripts/patch-v50-0-2-build-manual.py') (Join-Path $project 'BUILD_V50_WINDOWS.ps1')
           if($LASTEXITCODE -ne 0){throw 'BUILD_V50_WINDOWS Manual integration patch failed'}
 
@@ -94,6 +96,8 @@ jobs:
 
           python (Join-Path $env:V50_PROJECT 'scripts/ApplyV5002ManualPatch.py') $env:V50_PROJECT
           if($LASTEXITCODE -ne 0){throw 'Final v50.0.2 Manual patch failed'}
+          python (Join-Path $env:V50_PROJECT 'scripts/ApplyV5002ManualGateFix.py') $env:V50_PROJECT
+          if($LASTEXITCODE -ne 0){throw 'Final exact Manual gate wording failed'}
           python scripts\TestApiManualCurrent.py
           if($LASTEXITCODE -ne 0){throw 'Final 52/52 Manual gate failed'}
 
