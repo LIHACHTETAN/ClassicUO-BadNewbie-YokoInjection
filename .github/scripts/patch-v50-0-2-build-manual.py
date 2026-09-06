@@ -13,14 +13,18 @@ patterns = [
         "                & $python.Source -3 scripts\\GenerateCompleteApiManual.py\n"
         "                if ($LASTEXITCODE -ne 0) { throw 'GenerateCompleteApiManual.py failed' }\n"
         "                & $python.Source -3 scripts\\ApplyV5002ManualPatch.py $ProjectRoot\n"
-        "                if ($LASTEXITCODE -ne 0) { throw 'ApplyV5002ManualPatch.py failed' }\n",
+        "                if ($LASTEXITCODE -ne 0) { throw 'ApplyV5002ManualPatch.py failed' }\n"
+        "                & $python.Source -3 scripts\\ApplyV5002ManualGateFix.py $ProjectRoot\n"
+        "                if ($LASTEXITCODE -ne 0) { throw 'ApplyV5002ManualGateFix.py failed' }\n",
     ),
     (
         "                & $python.Source scripts\\GenerateCompleteApiManual.py\n",
         "                & $python.Source scripts\\GenerateCompleteApiManual.py\n"
         "                if ($LASTEXITCODE -ne 0) { throw 'GenerateCompleteApiManual.py failed' }\n"
         "                & $python.Source scripts\\ApplyV5002ManualPatch.py $ProjectRoot\n"
-        "                if ($LASTEXITCODE -ne 0) { throw 'ApplyV5002ManualPatch.py failed' }\n",
+        "                if ($LASTEXITCODE -ne 0) { throw 'ApplyV5002ManualPatch.py failed' }\n"
+        "                & $python.Source scripts\\ApplyV5002ManualGateFix.py $ProjectRoot\n"
+        "                if ($LASTEXITCODE -ne 0) { throw 'ApplyV5002ManualGateFix.py failed' }\n",
     ),
 ]
 
