@@ -8,8 +8,9 @@ if len(sys.argv) != 2:
 
 root = Path(sys.argv[1]).resolve()
 path = root / "scripts" / "TestGumpApiModel.py"
-if not path.is_file():
-    raise SystemExit(f"missing {path}")
+bridge_path = root / "src" / "ClassicUO.Client" / "Game" / "Managers" / "ClassicUOInjectionApiBridge.cs"
+if not path.is_file() or not bridge_path.is_file():
+    raise SystemExit("required Gump regression sources are missing")
 
 text = path.read_text(encoding="utf-8")
 
@@ -46,8 +47,21 @@ for old, new, label in ((old1, new1, 'NumGumpButton'), (old2, new2, 'NumGump con
 
 path.write_text(text, encoding="utf-8", newline="\n")
 
-# Validate immediately. This remains a hard gate; nothing is skipped.
 proc = subprocess.run([sys.executable, str(path)], cwd=str(root), check=False)
 if proc.returncode != 0:
+    # Print only focused source slices so a failing gate can be fixed against
+    # the exact patched source rather than guessed from an older extraction.
+    bridge = bridge_path.read_text(encoding="utf-8")
+    print("--- exact SendGumpSelect declarations/routes ---")
+    for match in re.finditer(r'SendGumpSelect', bridge):
+        start = max(0, match.start() - 220)
+        end = min(len(bridge), match.start() + 900)
+        print(bridge[start:end].replace("\r", ""))
+    print("--- exact GetGump command-related slices ---")
+    for token in ('\"command\"', 'DescribeControl'):
+        for match in re.finditer(re.escape(token), bridge):
+            start = max(0, match.start() - 260)
+            end = min(len(bridge), match.start() + 1100)
+            print(bridge[start:end].replace("\r", ""))
     raise SystemExit(f"patched Gump API regression model still fails: {proc.returncode}")
 print("v50.0.2 Gump regression model semantic anchors: PASS")
