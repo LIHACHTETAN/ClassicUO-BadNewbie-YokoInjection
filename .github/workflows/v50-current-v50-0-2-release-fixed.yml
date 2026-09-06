@@ -6,6 +6,7 @@ on:
       - .github/workflows/v50-current-v50-0-2-release-fixed.yml
       - .github/scripts/patch-v50-0-2.py
       - .github/scripts/patch-v50-0-2-gump-model.py
+      - .github/scripts/patch-v50-0-2-build-manual.py
       - .github/scripts/manual-v50-0-2.py
   workflow_dispatch:
 
@@ -30,7 +31,7 @@ jobs:
         with:
           dotnet-version: '10.0.302'
 
-      - name: Download exact source and apply all v50.0.2 patches
+      - name: Download exact source and apply v50.0.2 patches
         shell: pwsh
         run: |
           $ErrorActionPreference='Stop'
@@ -50,57 +51,38 @@ jobs:
           }
           $joined=Join-Path $env:RUNNER_TEMP 'v50-source.zip'
           $dst=[IO.File]::Open($joined,[IO.FileMode]::Create)
-          try{foreach($n in @('part00','part01','part02')){$src=[IO.File]::OpenRead((Join-Path $env:RUNNER_TEMP $n));try{$src.CopyTo($dst)}finally{$src.Dispose()}}}finally{$dst.Dispose()}
+          try{
+            foreach($n in @('part00','part01','part02')){
+              $src=[IO.File]::OpenRead((Join-Path $env:RUNNER_TEMP $n))
+              try{$src.CopyTo($dst)}finally{$src.Dispose()}
+            }
+          }finally{$dst.Dispose()}
           $sha=(Get-FileHash $joined -Algorithm SHA256).Hash.ToLowerInvariant()
           if($sha -ne $env:EXPECTED_SOURCE_SHA256){throw "Combined source SHA mismatch $sha"}
+
           $root=Join-Path $env:RUNNER_TEMP 'v50.0.2-fixed-work'
           Expand-Archive $joined $root -Force
           $project=Join-Path $root 'project'
           $baseline=Join-Path $root 'client'
+
           $g=Get-Content (Join-Path $project 'global.json') -Raw|ConvertFrom-Json
           $g.sdk.rollForward='disable'
           $g|ConvertTo-Json -Depth 8|Set-Content (Join-Path $project 'global.json') -Encoding utf8
+
           foreach($name in @('patch-v50-release10.py','patch-v50-release11-theia.py','patch-v50-release12-fastzip.py','patch-v50-0-2.py','patch-v50-0-2-gump-model.py')){
             python (Join-Path $env:GITHUB_WORKSPACE ".github/scripts/$name") $project
             if($LASTEXITCODE -ne 0){throw "$name failed: $LASTEXITCODE"}
           }
 
-          # BUILD_V50_WINDOWS regenerates the Manual internally. Install the
-          # v50.0.2 Manual post-processor inside the extracted source and invoke
-          # it after every generation so the full 52/52 Manual gate is stable.
-          $manualHelper=Join-Path $project 'scripts/ApplyV5002ManualPatch.py'
-          Copy-Item (Join-Path $env:GITHUB_WORKSPACE '.github/scripts/manual-v50-0-2.py') $manualHelper -Force
-          $buildPath=Join-Path $project 'BUILD_V50_WINDOWS.ps1'
-          $patcherPath=Join-Path $env:RUNNER_TEMP 'patch-build-manual.py'
-          @'
-from pathlib import Path
-import sys
-p=Path(sys.argv[1])
-s=p.read_text(encoding='utf-8-sig')
-repls=[
-("                & $python.Source -3 scripts\\GenerateCompleteApiManual.py\n",
- "                & $python.Source -3 scripts\\GenerateCompleteApiManual.py\n                & $python.Source -3 scripts\\ApplyV5002ManualPatch.py $ProjectRoot\n"),
-("                & $python.Source scripts\\GenerateCompleteApiManual.py\n",
- "                & $python.Source scripts\\GenerateCompleteApiManual.py\n                & $python.Source scripts\\ApplyV5002ManualPatch.py $ProjectRoot\n"),
-]
-changed=0
-for old,new in repls:
-    if old in s:
-        s=s.replace(old,new)
-        changed+=1
-if changed != 2:
-    raise SystemExit(f'Expected to patch both Manual generation branches, patched={changed}')
-p.write_text(s,encoding='utf-8',newline='')
-print('BUILD_V50_WINDOWS Manual integration patched:', changed)
-'@ | Set-Content $patcherPath -Encoding utf8
-          python $patcherPath $buildPath
+          Copy-Item (Join-Path $env:GITHUB_WORKSPACE '.github/scripts/manual-v50-0-2.py') (Join-Path $project 'scripts/ApplyV5002ManualPatch.py') -Force
+          python (Join-Path $env:GITHUB_WORKSPACE '.github/scripts/patch-v50-0-2-build-manual.py') (Join-Path $project 'BUILD_V50_WINDOWS.ps1')
           if($LASTEXITCODE -ne 0){throw 'BUILD_V50_WINDOWS Manual integration patch failed'}
 
           "V50_ROOT=$root"|Out-File $env:GITHUB_ENV -Append -Encoding utf8
           "V50_PROJECT=$project"|Out-File $env:GITHUB_ENV -Append -Encoding utf8
           "V50_BASELINE_CLIENT=$baseline"|Out-File $env:GITHUB_ENV -Append -Encoding utf8
 
-      - name: Full build tests NativeAOT and Windows smoke
+      - name: Build test NativeAOT and smoke fresh Windows client
         shell: pwsh
         run: |
           $ErrorActionPreference='Stop'
@@ -109,16 +91,21 @@ print('BUILD_V50_WINDOWS Manual integration patched:', changed)
           $built=Join-Path $env:V50_ROOT 'client-v50.0.2-fixed-built'
           & pwsh -NoProfile -ExecutionPolicy Bypass -File (Join-Path $env:V50_PROJECT 'BUILD_V50_WINDOWS.ps1') -OutputDirectory $built -BaselineClientDirectory $env:V50_BASELINE_CLIENT -SmokeTestSeconds 15
           if($LASTEXITCODE -ne 0){throw "BUILD_V50_WINDOWS failed $LASTEXITCODE"}
+
           python (Join-Path $env:V50_PROJECT 'scripts/ApplyV5002ManualPatch.py') $env:V50_PROJECT
           if($LASTEXITCODE -ne 0){throw 'Final v50.0.2 Manual patch failed'}
           python scripts\TestApiManualCurrent.py
           if($LASTEXITCODE -ne 0){throw 'Final 52/52 Manual gate failed'}
+
           $manual=Join-Path $env:V50_PROJECT 'src/ClassicUO.Client/YokoDocumentation/Manual/COMPLETE_RUNTIME_API_MANUAL.md'
           $dest=Join-Path $built 'YokoDocumentation/Manual/COMPLETE_RUNTIME_API_MANUAL.md'
           New-Item -ItemType Directory (Split-Path $dest) -Force|Out-Null
           Copy-Item $manual $dest -Force
+
           $exe=Join-Path $built 'ClassicUO.exe'
           $dll=Join-Path $built 'cuo.dll'
+          $api=Join-Path $built 'cuoapi.dll'
+          foreach($f in @($exe,$dll,$api)){if(-not(Test-Path $f)){throw "Missing fresh binary $f"}}
           if((Get-Item $exe).VersionInfo.FileVersion -ne '50.0.2.0'){throw 'ClassicUO.exe is not v50.0.2.0'}
           if((Get-Item $dll).VersionInfo.FileVersion -ne '50.0.2.0'){throw 'cuo.dll is not v50.0.2.0'}
           "V50_BUILT_CLIENT=$built"|Out-File $env:GITHUB_ENV -Append -Encoding utf8
@@ -136,21 +123,28 @@ print('BUILD_V50_WINDOWS Manual integration patched:', changed)
             Where-Object{$_.Name -in @('bin','obj','publish','__pycache__')} |
             Sort-Object FullName -Descending |
             Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+
           $zip=Join-Path $env:RUNNER_TEMP 'ClassicUO-v50.0.2-BADNEWBIE-YOKO-FINAL-PROJECT-AND-CLIENT.zip'
           if(Test-Path $zip){Remove-Item $zip -Force}
           & (Get-Command tar.exe).Source -a -cf $zip -C $stage .
           if($LASTEXITCODE -ne 0){throw 'ZIP create failed'}
           $sha=(Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant()
           "$sha  $(Split-Path $zip -Leaf)"|Set-Content "$zip.sha256.txt" -Encoding ascii
+
           $verify=Join-Path $env:RUNNER_TEMP 'v50.0.2-fixed-extracted'
           if(Test-Path $verify){Remove-Item $verify -Recurse -Force}
           Expand-Archive $zip $verify -Force
           foreach($r in @(
-            'client/ClassicUO.exe','client/cuo.dll','client/cuoapi.dll','client/Theia/ClassicUO.TheiaHost.exe',
-            'project/ClassicUO.sln','project/tests/ClassicUO.UnitTests/Game/Managers/YokoCommandEndToEndTests.cs',
+            'client/ClassicUO.exe',
+            'client/cuo.dll',
+            'client/cuoapi.dll',
+            'client/Theia/ClassicUO.TheiaHost.exe',
+            'project/ClassicUO.sln',
+            'project/tests/ClassicUO.UnitTests/Game/Managers/YokoCommandEndToEndTests.cs',
             'project/src/ClassicUO.Client/YokoDocumentation/Manual/COMPLETE_RUNTIME_API_MANUAL.md',
-            'client/YokoDocumentation/Manual/COMPLETE_RUNTIME_API_MANUAL.md')){
-              if(-not(Test-Path(Join-Path $verify $r))){throw "ZIP missing $r"}
+            'client/YokoDocumentation/Manual/COMPLETE_RUNTIME_API_MANUAL.md'
+          )){
+            if(-not(Test-Path(Join-Path $verify $r))){throw "ZIP missing $r"}
           }
           $pm=(Get-FileHash (Join-Path $verify 'project/src/ClassicUO.Client/YokoDocumentation/Manual/COMPLETE_RUNTIME_API_MANUAL.md') -Algorithm SHA256).Hash
           $cm=(Get-FileHash (Join-Path $verify 'client/YokoDocumentation/Manual/COMPLETE_RUNTIME_API_MANUAL.md') -Algorithm SHA256).Hash
