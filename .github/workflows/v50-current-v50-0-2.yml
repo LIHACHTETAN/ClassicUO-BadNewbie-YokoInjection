@@ -5,6 +5,7 @@ on:
     paths:
       - .github/workflows/v50-current-v50-0-2.yml
       - .github/scripts/patch-v50-0-2.py
+      - .github/scripts/patch-v50-0-2-gump-model.py
       - .github/scripts/manual-v50-0-2.py
   workflow_dispatch:
 
@@ -56,7 +57,7 @@ jobs:
           Expand-Archive $joined $root -Force
           $project=Join-Path $root 'project'; $baseline=Join-Path $root 'client'
           $g=Get-Content (Join-Path $project 'global.json') -Raw|ConvertFrom-Json; $g.sdk.rollForward='disable'; $g|ConvertTo-Json -Depth 8|Set-Content (Join-Path $project 'global.json') -Encoding utf8
-          foreach($name in @('patch-v50-release10.py','patch-v50-release11-theia.py','patch-v50-release12-fastzip.py','patch-v50-0-2.py')){
+          foreach($name in @('patch-v50-release10.py','patch-v50-release11-theia.py','patch-v50-release12-fastzip.py','patch-v50-0-2.py','patch-v50-0-2-gump-model.py')){
             python (Join-Path $env:GITHUB_WORKSPACE ".github/scripts/$name") $project
             if($LASTEXITCODE -ne 0){throw "$name failed: $LASTEXITCODE"}
           }
