@@ -42,6 +42,7 @@ Try/Catch/Finally 和 Throw 不會傳回 ID、數字或 Boolean。Catch 透過 n
 - 準備階段驗證區塊並禁止 GoTo/On Error GoTo 直接進入 Try、Catch 或 Finally。產生器記錄處理與收尾位置。每次呼叫有獨立的有效處理常式，錯誤先到最近的適用 Catch。Catch 內再次出錯時，先經過自己的 Finally 再向外傳遞。沒有結構化處理常式時，可能套用一般 On Error 規則。
 - 執行 Finally 時暫存待處理的傳回值、錯誤或向外跳轉；巢狀收尾由內向外進行。Finally 的新錯誤會取代原先錯誤。Basic 也允許 Finally 內的 Return 或向外跳轉，它們會取代原先待續的流程，這與 VB.NET 不同。重新拋出會保留第一次失敗的位置，包括被呼叫函式內的錯誤。
 - 暫停與停止檢查仍然有效。Try 不會建立執行緒、重試或等待。準備好的位置會重複使用；一般條件應直接檢查，不要以例外代替。緊急停止會略過腳本收尾；主機管理的資源仍依照引擎自己的生命週期釋放。
+- 錯誤在清理後離開 Try 並交給外部 On Error GoTo 時，Resume 會從標頭重試整個 Try。Resume Next 與 On Error Resume Next 都接續 End Try 後的第一個陳述式。已完成的動作可能重複，不會跳回已結束區塊的本體中間。
 
 ## 範例
 

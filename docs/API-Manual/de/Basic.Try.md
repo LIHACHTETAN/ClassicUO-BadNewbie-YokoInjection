@@ -42,6 +42,7 @@ Try/Catch/Finally und Throw liefern keine ID, Zahl oder Boolean. Catch stellt Na
 - Die Vorbereitung prüft Blöcke und verbietet GoTo/On Error GoTo in Try, Catch oder Finally. Der Generator speichert Handler- und Abschlussadressen. Jeder Aufruf besitzt eigene aktive Handler. Fehler erreichen den nächsten geeigneten Catch; Fehler im Catch laufen über dessen Finally nach außen. Ohne strukturierten Handler können normale On-Error-Regeln gelten.
 - Ausstehende Rückgabe, Fehler oder Sprünge werden während Finally gespeichert. Verschachtelte Abschlüsse laufen von innen nach außen. Ein neuer Fehler in Finally ersetzt den ausstehenden Fehler. Basic erlaubt auch Return oder auswärts gerichtete Sprünge aus Finally, welche die ausstehende Fortsetzung ersetzen; anders als VB.NET. Ein erneutes Throw erhält den ersten Fehlerort, auch aus Hilfsfunktionen.
 - Pause/Stopp bleiben aktiv. Try erzeugt weder Threads noch Wiederholungsversuche oder Wartezeiten. Vorbereitete Adressen werden wiederverwendet; normale Bedingungen direkt prüfen, statt Ausnahmen dafür zu verwenden. Notstopp überspringt Skript-Abschlusscode; vom Host verwaltete Ressourcen folgen ihrer eigenen Laufzeitverwaltung.
+- Erreicht ein Fehler nach der Bereinigung von Try einen äußeren On Error GoTo-Handler, wiederholt Resume den gesamten Try-Block ab dem Kopf. Resume Next und On Error Resume Next setzen bei der ersten Anweisung nach End Try fort. Bereits ausgeführte Aktionen können sich wiederholen; ein abgewickelter Block wird nicht mitten im Rumpf betreten.
 
 ## Beispiele
 

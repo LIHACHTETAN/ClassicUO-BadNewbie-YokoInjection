@@ -1178,6 +1178,31 @@
         "Option Explicit On\nModule Controller\n    Private Enum Mode\n        Idle\n        Walking = 4\n        Arrived\n    End Enum\n\n    Public Function NextMode(ByVal distance As Integer) As Integer\n        Dim state As Mode\n        If distance <= 1 Then\n            state = Mode.Arrived\n        Else\n            state = Mode.Walking\n        End If\n        Return state\n    End Function\nEnd Module\n\nSub Main()\n    Dim farState = Controller.NextMode(3)\n    Dim nearState = Controller.NextMode(1)\n    Return farState * 10 + nearState\nEnd Sub\n",
         "Option Explicit On\nConst FirstState As Integer = 2\nEnum Mode\n    Idle = FirstState\n    Working = Idle + 1\n    Finished\nEnd Enum\n\nSub Advance(ByRef state As Mode)\n    With Mode\n        Select Case state\n            Case .Idle\n                state = .Working\n            Case .Working\n                state = .Finished\n            Case Else\n                Throw \"No next state\"\n        End Select\n    End With\nEnd Sub\n\nFunction IsFinal(ByVal state As Mode) As Boolean\n    Return state = Mode.Finished\nEnd Function\n\nSub Main()\n    Dim state As Mode = Mode.Idle\n    Advance(state)\n    Advance(state)\n    Return IsFinal(state)\nEnd Sub\n"
       ]
+    },
+    {
+      "id": "Basic.Using",
+      "name": "Using / End Using",
+      "signatures": [
+        "Dim resource = MemoryStream()\nUsing resource\n    statements\nEnd Using",
+        "Using resourceExpression\n    statements\nEnd Using"
+      ],
+      "descriptions": {
+        "en": "Using closes a native resource when control leaves its block. The supported form accepts an existing resource variable or an expression returning a resource.",
+        "ru": "Using закрывает нативный ресурс при выходе из блока. Поддерживается форма с уже объявленной переменной или выражением, возвращающим ресурс.",
+        "uk": "Using закриває нативний ресурс під час виходу з блока. Підтримано раніше оголошену змінну або вираз, що повертає ресурс.",
+        "fr": "Using ferme une ressource native à la sortie du bloc. La forme prise en charge reçoit une variable existante ou une expression qui produit une ressource.",
+        "de": "Using schließt eine native Ressource beim Verlassen des Blocks. Unterstützt wird eine vorhandene Variable oder ein Ausdruck, der eine Ressource liefert.",
+        "it": "Using chiude una risorsa nativa quando si esce dal blocco. La forma supportata usa una variabile esistente o un’espressione che restituisce una risorsa.",
+        "es": "Using cierra un recurso nativo al salir del bloque. La forma admitida recibe una variable existente o una expresión que devuelve un recurso.",
+        "zh-tw": "Using 會在離開區塊時關閉原生資源。目前支援既有變數，或傳回資源的運算式。",
+        "ja": "Using はブロックを離れるときにネイティブリソースを閉じます。既存の変数、またはリソースを返す式を受け取る形式をサポートします。",
+        "ko": "Using은 블록을 벗어날 때 네이티브 리소스를 닫습니다. 기존 변수 또는 리소스를 반환하는 식을 받는 형식을 지원합니다."
+      },
+      "examples": [
+        "Option Explicit On\nFunction IsClosed(ByVal stream) As Boolean\n    Try\n        Dim size = stream.Length()\n        Return False\n    Catch closed\n        Return True\n    End Try\nEnd Function\n\nSub Main()\n    Dim stream = MemoryStream()\n    Dim size = -1\n    Using stream\n        size = stream.Length()\n    End Using\n    Return CStr(size) & \":\" & CStr(IsClosed(stream))\nEnd Sub\n",
+        "Option Explicit On\nFunction ReadLength(ByVal stream) As Integer\n    Using stream\n        Return stream.Length()\n    End Using\nEnd Function\n\nSub Main()\n    Dim stream = MemoryStream()\n    Dim size = ReadLength(stream)\n    Dim closed = False\n    Try\n        Dim after = stream.Length()\n    Catch problem\n        closed = True\n    End Try\n    Return CStr(size) & \":\" & CStr(closed)\nEnd Sub\n",
+        "Option Explicit On\nFunction IsClosed(ByVal stream) As Boolean\n    Try\n        Dim size = stream.Length()\n        Return False\n    Catch closed\n        Return True\n    End Try\nEnd Function\n\nSub Main()\n    Dim outer = MemoryStream()\n    Dim inner = MemoryStream()\n    Dim message = \"\"\n    Try\n        Using outer\n            Using inner\n                Throw \"demo\"\n            End Using\n        End Using\n    Catch problem\n        message = problem\n    End Try\n    Return message & \":\" & CStr(IsClosed(outer) + IsClosed(inner))\nEnd Sub\n"
+      ]
     }
   ]
 }

@@ -42,6 +42,7 @@ Try/Catch/Finally and Throw do not return an ID, number or Boolean. Catch expose
 - Preparation validates block nesting and disallows GoTo/On Error GoTo into Try, Catch or Finally. The generator records handler/finalization addresses. At runtime each call maintains its own active handlers; errors first reach the nearest eligible Catch. Errors in Catch continue through its Finally to an outer handler. With no structured handler, ordinary On Error rules may apply.
 - A pending return, error or outward jump is saved while Finally executes; nested finalization runs from inside outward. A new error in Finally replaces the pending error. Basic also permits Return or outward transfers from Finally, which replace the pending continuation; this differs from VB.NET. Bare Throw retains the first failure location, including errors from called helpers.
 - Pause/stop checkpoints remain active. Try does not start threads, retry work or insert delays. Prepared handler addresses are reused; exception handling is for failures, not a substitute for routine checks. Emergency termination skips script cleanup; host-owned resources still follow their separate runtime lifetimes.
+- If an error leaves a Try block after cleanup and reaches an external On Error GoTo handler, Resume retries the whole Try from its header. Resume Next continues with the first statement after End Try. On Error Resume Next has the same continuation. Completed actions may repeat when retrying; it does not jump back into an unwound body.
 
 ## Examples
 

@@ -42,6 +42,7 @@ Try/Catch/Finally e Throw non restituiscono ID, numeri o Boolean. Catch espone i
 - La preparazione verifica i blocchi e vieta GoTo/On Error GoTo dentro Try, Catch o Finally. Il generatore conserva gli indirizzi di gestione e finalizzazione. Ogni chiamata ha i propri gestori attivi; l’errore raggiunge il Catch idoneo più vicino. Un errore in Catch passa attraverso il suo Finally a un gestore esterno. In assenza di gestione strutturata possono intervenire le normali regole On Error.
 - Ritorno, errore o salto in sospeso sono conservati durante Finally. La finalizzazione annidata procede dall’interno verso l’esterno. Un nuovo errore in Finally sostituisce quello in sospeso. Basic permette anche Return e salti uscenti da Finally, sostituendo la continuazione in sospeso: è diverso da VB.NET. Il rilancio conserva la prima posizione dell’errore, anche da funzioni chiamate.
 - Pausa/arresto rimangono attivi. Try non crea thread, tentativi ripetuti o attese. Gli indirizzi preparati vengono riutilizzati; controllare direttamente le condizioni normali anziché usare eccezioni. L’arresto di emergenza salta la finalizzazione dello script; le risorse gestite dall’host seguono la propria durata di vita nel motore.
+- Se un errore esce da Try dopo la pulizia e raggiunge un gestore esterno On Error GoTo, Resume ripete l’intero Try dall’intestazione. Resume Next e On Error Resume Next continuano dalla prima istruzione dopo End Try. Le azioni già eseguite possono ripetersi; non si rientra a metà del corpo terminato.
 
 ## Esempi
 

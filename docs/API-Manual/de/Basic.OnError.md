@@ -37,6 +37,7 @@ On Error und Resume liefern keinen Wert. Ein behandelter Fehler wird nicht zu TR
 - GoTo 0 löscht die gespeicherte Fehleradresse nicht. Der Handler kann sich deaktivieren, Daten reparieren und Resume ausführen. Vor fehleranfälliger Handler-Arbeit deaktivieren, um Wiedereintritt zu vermeiden.
 - Syntaxfehler und Abbruch werden nicht behandelt. Liefert ein Befehl lediglich 0, FALSE oder einen Fehlerstatus ohne Ausnahme, wird On Error nicht aufgerufen; Ergebnis prüfen.
 - Normalen Ablauf mit Return oder GoTo vom Handler fernhalten. Aufgerufene Prozeduren haben eigenen Zustand; unbehandelte Fehler können zum Aufrufer gelangen. Resume wiederholt dort den gesamten Aufruf, keine interne Zeile. Keine automatische Versuchszahl oder Wartezeit.
+- Erreicht ein Fehler nach der Bereinigung von Try einen äußeren On Error GoTo-Handler, wiederholt Resume den gesamten Try-Block ab dem Kopf. Resume Next und On Error Resume Next setzen bei der ersten Anweisung nach End Try fort. Bereits ausgeführte Aktionen können sich wiederholen; ein abgewickelter Block wird nicht mitten im Rumpf betreten.
 
 ## Beispiele
 

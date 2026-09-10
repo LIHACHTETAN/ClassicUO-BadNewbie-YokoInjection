@@ -37,6 +37,7 @@ On Error y Resume no devuelven valores. Un error tratado no se convierte en TRUE
 - GoTo 0 conserva la dirección del fallo pendiente. El manejador puede desactivarse, reparar y ejecutar Resume. Desactívalo antes de operaciones que puedan fallar para evitar volver a entrar.
 - No recupera errores sintácticos ni cancelación. Si un comando solo devuelve 0, FALSE o un estado de fallo sin excepción, On Error no se activa; comprueba su resultado.
 - Evita entrar normalmente al manejador con Return o GoTo. Cada procedimiento llamado tiene su modo; un fallo sin tratar puede llegar al llamador. Resume repite entonces la llamada completa, no una línea interna. Sin límite de intentos ni demora automática.
+- Si un error sale de Try tras la limpieza y llega a un controlador externo On Error GoTo, Resume repite todo el Try desde su cabecera. Resume Next y On Error Resume Next continúan con la primera instrucción después de End Try. Las acciones ya realizadas pueden repetirse; no se vuelve al interior del cuerpo finalizado.
 
 ## Ejemplos
 

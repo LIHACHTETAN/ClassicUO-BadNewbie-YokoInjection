@@ -37,6 +37,7 @@ On Error et Resume ne renvoient rien. Une erreur traitée ne devient pas TRUE/FA
 - GoTo 0 conserve l’adresse de l’erreur en attente. Le gestionnaire peut se désactiver, réparer puis Resume. Désactivez-le avant ses opérations susceptibles d’échouer afin d’éviter une nouvelle entrée.
 - Les erreurs de syntaxe et l’annulation ne sont pas récupérées. Un retour 0, FALSE ou un statut d’échec sans exception ne déclenche pas On Error : vérifiez le résultat de la commande.
 - Évitez l’entrée normale dans le gestionnaire avec Return ou GoTo. Chaque procédure appelée a son mode ; une erreur non traitée peut remonter à l’appelant. Resume y répète l’instruction d’appel entière, pas une ligne interne. Ni limite de tentatives ni attente automatique.
+- Si une erreur quitte Try après nettoyage et atteint un gestionnaire externe On Error GoTo, Resume reprend tout le Try à son en-tête. Resume Next et On Error Resume Next poursuivent à la première instruction après End Try. Les actions accomplies peuvent se répéter ; la reprise ne rentre pas au milieu du corps déjà terminé.
 
 ## Exemples
 

@@ -47,7 +47,7 @@
     },
     {
       "path": "basic-language.json",
-      "sha256": "f3383ed94fdb56fdfc929e9696a7d04e6498ab3d216be90e7da77f907989fff5"
+      "sha256": "acb7b4d3175e5af5820c796f77d8ba2ae512eeeb28d8eaa281ce97d777ee7d61"
     },
     {
       "path": "Basic.ApiNames.md",
@@ -143,7 +143,7 @@
     },
     {
       "path": "Basic.OnError.md",
-      "sha256": "81cf09b7413d93e0847c12fba6d5ed22ed39e967eaed924228f8380c4874fca9"
+      "sha256": "6be35527cb6d730770a23931b3735b0d94219cc5402f90f69bff9abafc645086"
     },
     {
       "path": "Basic.Optional.md",
@@ -179,11 +179,15 @@
     },
     {
       "path": "Basic.Try.md",
-      "sha256": "1653a9328d29cf80960ee860eaed16dc780b643e0e929e2d60823a7b3276b3ea"
+      "sha256": "72b20588b442960e35042f9aab69b7b768b2e1dad8440ce9b4e11590a3f38d56"
     },
     {
       "path": "Basic.Types.md",
       "sha256": "07550d4c58d6d3ed0cc6ca98dc3dfffa582b6438963f6d54ab0d9e614377331f"
+    },
+    {
+      "path": "Basic.Using.md",
+      "sha256": "3f787e65877070b5bc2f76e7f012dedc84d9e78d6c96d064412a2ffd63f9fa28"
     },
     {
       "path": "Basic.Variables.md",
@@ -375,7 +379,7 @@
     },
     {
       "path": "de/Basic.OnError.md",
-      "sha256": "89e95822857a95c755c137039beccbff0de791049f5f40281d72654879834cd3"
+      "sha256": "ba7f72b615d8208685840ff5913b2c1000842f49653ad1d9e5de393d816e2eaf"
     },
     {
       "path": "de/Basic.Optional.md",
@@ -411,11 +415,15 @@
     },
     {
       "path": "de/Basic.Try.md",
-      "sha256": "f369ffbc6b09d762f7dda6ff12a339645ac419ca785cc3577ad0b4f9dcf6f7f7"
+      "sha256": "8879c5db5293a668d18f3fc53730d669ca39aa6267a5b30048a52211321c693a"
     },
     {
       "path": "de/Basic.Types.md",
       "sha256": "0a6c85b3e85f7b448e8388fd8c1cef2a81baffaea46fe8eb5c39aced18eab8b1"
+    },
+    {
+      "path": "de/Basic.Using.md",
+      "sha256": "38c5760384bd94fb86c0bee7d147b56154d12d2a0203e1508f90b63e06cad9f0"
     },
     {
       "path": "de/Basic.Variables.md",
@@ -1151,7 +1159,7 @@
     },
     {
       "path": "en/Basic.OnError.md",
-      "sha256": "904240b230547a51f9c42803630731f30fb33b7010685432f3c5782d6f2dcc2e"
+      "sha256": "629466ed4edff3cd61af36cce8128219b693805d3995cda711d2fe9e3966853b"
     },
     {
       "path": "en/Basic.Optional.md",
@@ -1187,11 +1195,15 @@
     },
     {
       "path": "en/Basic.Try.md",
-      "sha256": "40e57f9abfe6ac6acd711845821e09b6f3ca9bc276eea54784c9e0b3a8659e09"
+      "sha256": "740626bbff018fc41e2f3da2d10ad4a8507edcc3c4a8c966ef3f5159e148c2e9"
     },
     {
       "path": "en/Basic.Types.md",
       "sha256": "a8f1da455c61df5667acf4bc43ef8a0a0030b26ebb70ec52b27a8c4ccf31a7c0"
+    },
+    {
+      "path": "en/Basic.Using.md",
+      "sha256": "de05097c58c4105c06703c94369f95ab085419aa12558a44ba6fde8fe50a6b0b"
     },
     {
       "path": "en/Basic.Variables.md",
@@ -1907,7 +1919,7 @@
     },
     {
       "path": "es/Basic.OnError.md",
-      "sha256": "769a72d96522e13f4ad61e00607ecb531902777d1eeab9901d2085dbd799533b"
+      "sha256": "7440e65b89f77c9e3ca88ed3c8af6a782086c918d7cac9e9493bc4191290be77"
     },
     {
       "path": "es/Basic.Optional.md",
@@ -1943,11 +1955,15 @@
     },
     {
       "path": "es/Basic.Try.md",
-      "sha256": "8d1bc7b2e42116dbc433ee0a07d9d265c409d60f5599e62cbce11435d266d366"
+      "sha256": "df5c9a202d3c2bc54ffc24e5e234763ea8212c7421d341fe66b3ffc2fcbe7c7e"
     },
     {
       "path": "es/Basic.Types.md",
       "sha256": "f1b7cdbb58f3d4e6ea806486a81dbb961f9718e1f238dc120e574de17ccc5c89"
+    },
+    {
+      "path": "es/Basic.Using.md",
+      "sha256": "da71d752ef1a51cfffc73c44ab6c3fb804b4b26429301d742ebdf3b3089cbcc6"
     },
     {
       "path": "es/Basic.Variables.md",
@@ -2691,7 +2707,7 @@
     },
     {
       "path": "fr/Basic.OnError.md",
-      "sha256": "533c599f3a7d2a09168a1a8970d699f5adba51728b6d3540d58262b9786ba75f"
+      "sha256": "94e6d3a0a8fce7edff7b017cc59c315bd48ae6896737c14e65cc073d9825beeb"
     },
     {
       "path": "fr/Basic.Optional.md",
@@ -2727,11 +2743,15 @@
     },
     {
       "path": "fr/Basic.Try.md",
-      "sha256": "e4a24560c5467bb4c4dc8153f04cbdb207b0c8d857e0a2c509fed00947d5eada"
+      "sha256": "5cca14df77f2d357fd7a8f46a3a548c5831d492c20b29ea90558ac5eece20a7f"
     },
     {
       "path": "fr/Basic.Types.md",
       "sha256": "847c6d7c779d406838355c9f0f60c228dfe4dd9fcc0901d73481069ee378736f"
+    },
+    {
+      "path": "fr/Basic.Using.md",
+      "sha256": "11134bf5434d8051bebe1d079254ab1fe921e9e0269967e05643067b5b890f00"
     },
     {
       "path": "fr/Basic.Variables.md",
@@ -3387,7 +3407,7 @@
     },
     {
       "path": "INDEX.json",
-      "sha256": "e0f956d3abe8516dbd93690b842f324d769572bebcccd1b35ed70c7480af72c3"
+      "sha256": "fb93e0e08c5777663aeb3a33fde0047d3214089ee93a9d22f4eb5b91ca7e02d3"
     },
     {
       "path": "InStr.md",
@@ -3511,7 +3531,7 @@
     },
     {
       "path": "it/Basic.OnError.md",
-      "sha256": "334012752181e26b1226c2a7ab1b733ff2c10073b2fe23e0fe4188ebdc89a591"
+      "sha256": "88d10c7b37e6c4302abe196705fac04b126e4f8a4a333349897a98b5f1405dbe"
     },
     {
       "path": "it/Basic.Optional.md",
@@ -3547,11 +3567,15 @@
     },
     {
       "path": "it/Basic.Try.md",
-      "sha256": "ed8e9f68d5c59c125ff08208d16adc4b59579d72042ad31ada60b71462b7c4eb"
+      "sha256": "2e67e50bdb8eed4f865e76b0889f16457958139e590f20d59bb00ff65b857625"
     },
     {
       "path": "it/Basic.Types.md",
       "sha256": "ea72fe164c16acef6de33df5102162e24d6894c06880dd68a92f13df34562cc8"
+    },
+    {
+      "path": "it/Basic.Using.md",
+      "sha256": "8e8b420da1877a441140cc292a54b3854fec75d324ab66071012ee48576be1af"
     },
     {
       "path": "it/Basic.Variables.md",
@@ -4267,7 +4291,7 @@
     },
     {
       "path": "ja/Basic.OnError.md",
-      "sha256": "5c1c6e29b55967e5e29be72235a4da3fd9f9f3559b1d4c35507923c944e3ebff"
+      "sha256": "71b14fc92e6a7f0da5f08b2e3515810e1a1817e010d4b9dd4113a8c95eff18bc"
     },
     {
       "path": "ja/Basic.Optional.md",
@@ -4303,11 +4327,15 @@
     },
     {
       "path": "ja/Basic.Try.md",
-      "sha256": "4aebe617290604a8f56837011d7e122604d594bb9d9bb1075f037d1cd719be39"
+      "sha256": "bde7a239c969232aace3be8015909f7d4610795a445118baa9f6d6399a8070c2"
     },
     {
       "path": "ja/Basic.Types.md",
       "sha256": "c6e02ca470ce9331c395442221958009f1d9355444c4a07db5e53e19784e3be1"
+    },
+    {
+      "path": "ja/Basic.Using.md",
+      "sha256": "f2de8620c33e8fb7a6677cbdba84a636a8c8135c3e806c93ec3563b7951a7ca4"
     },
     {
       "path": "ja/Basic.Variables.md",
@@ -5023,7 +5051,7 @@
     },
     {
       "path": "ko/Basic.OnError.md",
-      "sha256": "f5f9d285d3a5de5a9b8d7c78481a573f06aef3e94ce24e3e2ca81a839d7aeb15"
+      "sha256": "772a5101f56f22747704264350b4ceef1cc93c26586ee803a7d7ae265e003a45"
     },
     {
       "path": "ko/Basic.Optional.md",
@@ -5059,11 +5087,15 @@
     },
     {
       "path": "ko/Basic.Try.md",
-      "sha256": "f020b5c67b67ed34e9aad35b142b5d9bd699a22e7b33fa3f5fcf721358285cc2"
+      "sha256": "57eb5d914b4b45cc001086e25f2a5a8249216c9960a08f0e90c87add3312fcf7"
     },
     {
       "path": "ko/Basic.Types.md",
       "sha256": "0a7de90aecbf13d7d49b1ea9cd6b46169597fb4e316348e797ff38f071fe9efa"
+    },
+    {
+      "path": "ko/Basic.Using.md",
+      "sha256": "f5fe9f6603054c1f375cfc8326588e66c9b6d7fdc1b7f6f99e30a3da073f08cd"
     },
     {
       "path": "ko/Basic.Variables.md",
@@ -5799,7 +5831,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "f8e6156598febc2442fc9e723b0b24f41b28d3e970f0e4c0e303cf8c64107c95"
+      "sha256": "f88ad912619815c62e84f68a33cc694a4081012c3a4ef43ceddf286d2414f570"
     },
     {
       "path": "remain.md",
@@ -5959,7 +5991,7 @@
     },
     {
       "path": "ru/Basic.OnError.md",
-      "sha256": "81cf09b7413d93e0847c12fba6d5ed22ed39e967eaed924228f8380c4874fca9"
+      "sha256": "6be35527cb6d730770a23931b3735b0d94219cc5402f90f69bff9abafc645086"
     },
     {
       "path": "ru/Basic.Optional.md",
@@ -5995,11 +6027,15 @@
     },
     {
       "path": "ru/Basic.Try.md",
-      "sha256": "1653a9328d29cf80960ee860eaed16dc780b643e0e929e2d60823a7b3276b3ea"
+      "sha256": "72b20588b442960e35042f9aab69b7b768b2e1dad8440ce9b4e11590a3f38d56"
     },
     {
       "path": "ru/Basic.Types.md",
       "sha256": "07550d4c58d6d3ed0cc6ca98dc3dfffa582b6438963f6d54ab0d9e614377331f"
+    },
+    {
+      "path": "ru/Basic.Using.md",
+      "sha256": "3f787e65877070b5bc2f76e7f012dedc84d9e78d6c96d064412a2ffd63f9fa28"
     },
     {
       "path": "ru/Basic.Variables.md",
@@ -7863,7 +7899,7 @@
     },
     {
       "path": "uk/Basic.OnError.md",
-      "sha256": "8c22dec5c1749756d82afcab71e920826c20720a04c27c2845fff40bc98c0a3e"
+      "sha256": "1ebf287870b90149f9427733b1718b9e1aa803c5fe00e4ff4174bd6344d3c828"
     },
     {
       "path": "uk/Basic.Optional.md",
@@ -7899,11 +7935,15 @@
     },
     {
       "path": "uk/Basic.Try.md",
-      "sha256": "5af40e830ad08552cac6bf3426cb42b55c2877fe602771dc928e98b0b8147cf5"
+      "sha256": "3ccd95f7afeb0890085d88197f7ea58489478c60c2caceadcf4f5b1b5d37ea36"
     },
     {
       "path": "uk/Basic.Types.md",
       "sha256": "63e2a47ab297ef5aa2fc1073bf93ebd5f5b2bb3531f4fe70c8dc1537535444f3"
+    },
+    {
+      "path": "uk/Basic.Using.md",
+      "sha256": "2cb6fe44ba6dfd8d79ae75482a62713cf064a1f110f60959ba1425c665f27449"
     },
     {
       "path": "uk/Basic.Variables.md",
@@ -11607,7 +11647,7 @@
     },
     {
       "path": "zh-tw/Basic.OnError.md",
-      "sha256": "7595d0c7ec5aebde963818cb768b3b93da1fc961526a4d31c171fe006a231c81"
+      "sha256": "69394a72e65b13cf37efe1deac51a1949b6898e205621b65efaaee416c5ebf28"
     },
     {
       "path": "zh-tw/Basic.Optional.md",
@@ -11643,11 +11683,15 @@
     },
     {
       "path": "zh-tw/Basic.Try.md",
-      "sha256": "d3ca434025f69542afbbaca90108adfd92b6ff1586c89b16fbc8830be8c6a83f"
+      "sha256": "dfe7b87906fe5f04382a53394b46eb77be315205de9e8e40e377b0e0828ad104"
     },
     {
       "path": "zh-tw/Basic.Types.md",
       "sha256": "d6a8e0b815fd4288b2819d1448da2d76a75bf5aa14efea3d983da00017d90c6d"
+    },
+    {
+      "path": "zh-tw/Basic.Using.md",
+      "sha256": "7c5bf86d77ea089c178f13583ce140530f8b5da6e2d0948a5c92080da47995ed"
     },
     {
       "path": "zh-tw/Basic.Variables.md",

@@ -51,6 +51,7 @@
 - [Try / Catch / Finally / Throw](Basic.Try.md)
 - [Wait Until / Timeout](Basic.WaitUntil.md)
 - [Enum / End Enum](Basic.Enum.md)
+- [Using / End Using](Basic.Using.md)
 
 ### Встроенные функции Basic
 

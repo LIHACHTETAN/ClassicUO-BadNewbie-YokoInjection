@@ -37,6 +37,7 @@ On Error e Resume non restituiscono valori. Un errore gestito non diventa TRUE/F
 - GoTo 0 non cancella l’indirizzo in attesa. Il gestore può disattivarsi, riparare e poi Resume. Disattivalo prima delle operazioni che potrebbero fallire per evitare il rientro.
 - Errori sintattici e annullamento non vengono recuperati. Restituire 0, FALSE o uno stato negativo senza eccezione non richiama On Error: controlla il risultato del comando.
 - Evita l’ingresso normale nel gestore con Return o GoTo. Ogni procedura chiamata ha il proprio modo; errori non gestiti possono risalire al chiamante. Resume ripete allora l’intera chiamata, non una riga interna. Nessun limite di tentativi o ritardo automatico.
+- Se un errore esce da Try dopo la pulizia e raggiunge un gestore esterno On Error GoTo, Resume ripete l’intero Try dall’intestazione. Resume Next e On Error Resume Next continuano dalla prima istruzione dopo End Try. Le azioni già eseguite possono ripetersi; non si rientra a metà del corpo terminato.
 
 ## Esempi
 

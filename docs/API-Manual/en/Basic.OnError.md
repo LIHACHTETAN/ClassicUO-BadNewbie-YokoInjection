@@ -37,6 +37,7 @@ On Error and Resume do not return a value. A handled failure does not become TRU
 - On Error GoTo 0 does not erase the pending failed address; a handler can disable itself before repairing data and then Resume. Disable before fallible handler work to prevent re-entry into the same handler.
 - Parse errors and cancellation are not recovered by this statement. A command returning 0, FALSE or another failure status without throwing does not invoke it: inspect that command’s result.
 - Use Return or a deliberate GoTo to keep normal flow out of handler labels. A callee gets its own handler state. An unhandled callee error can reach the caller, where retrying repeats the call instruction, not an inner callee line. There is no automatic retry limit or delay.
+- If an error leaves a Try block after cleanup and reaches an external On Error GoTo handler, Resume retries the whole Try from its header. Resume Next continues with the first statement after End Try. On Error Resume Next has the same continuation. Completed actions may repeat when retrying; it does not jump back into an unwound body.
 
 ## Examples
 
