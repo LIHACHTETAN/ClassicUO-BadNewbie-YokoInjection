@@ -1,0 +1,116 @@
+# ByRef
+
+ClassicUO • Basic
+
+<!-- yoko-manual: 1 -->
+<!-- yoko-language-guide: 1 -->
+<!-- yoko-locale: ru -->
+
+Параметры передают данные в SUB/FUNCTION. ByRef позволяет записать изменённое значение обратно вызывающему коду; ByVal сохраняет его переменную. Optional задаёт значение при пропуске аргумента, ParamArray принимает оставшиеся аргументы массивом. Это модификаторы объявления, а не отдельные вызываемые команды.
+
+## Точный синтаксис
+
+```text
+Sub Adjust(ByRef amount, ByVal increment)
+Adjust(amount, 3)
+Bump(items[index])
+Function name(ByRef value As type)
+```
+
+## Параметры
+
+- `name / As type` — name / As type: имя параметра и необязательное преобразование типа при входе. В вызове передаются значения по порядку. Модификаторы пишутся только в объявлении.
+- `ByRef` — ByRef: изменяемая переменная или существующий элемент массива/коллекции. Без ByVal параметр этого движка также использует обратную запись; это отличается от значения по умолчанию в VB.NET. Литерал, константа или вычисленное выражение передаются как временное значение.
+- `ByVal` — ByVal: локальная копия значения. Присваивание параметру не меняет переменную вызывающего кода. Массивы и объекты при этом остаются общими ссылками, глубокой копии нет.
+- `Optional / defaultValue` — Optional / defaultValue: аргумент можно не передавать в конце вызова. Выражение после = вычисляется только при пропуске. Всегда указывайте понятное значение по умолчанию; без него пропущенный параметр получает неинициализированное Unit.
+- `ParamArray` — ParamArray values(): последний параметр собирает ноль или больше оставшихся значений. Один переданный массив используется напрямую; список скаляров упаковывается в новый массив. GetArrayLength возвращает его длину.
+
+## Возвращает
+
+Модификаторы сами ничего не возвращают. RETURN задаёт результат функции отдельно. Запись через ByRef — изменение аргумента, а не возвращаемое значение; SUB без RETURN возвращает Unit. Числа в примерах — результаты расчёта, не признаки TRUE/FALSE.
+
+## Поведение
+
+- При вызове аргументы вычисляются слева направо один раз. Для индексированного ByRef сохраняются контейнер и индекс/ключ; изменение переменной контейнера другим аргументом не перенаправляет эту запись.
+- При входе создаются локальные параметры. При выходе, после внутренних FINALLY, значения ByRef записываются обратно по порядку параметров, включая выход из тела по ошибке. Передача одной переменной дважды не создаёт живой связи между двумя локальными параметрами: побеждает последняя обратная запись.
+- ByVal запрещает замену переменной вызывающего кода, но не изменение содержимого общего массива или объекта. ReDim локального ByVal-массива создаёт новую локальную ссылку. Для независимых данных нужна явная копия.
+- Необязательные аргументы пропускаются с конца; пустые места между запятыми не поддерживаются. Значение по умолчанию может быть выражением нашего движка и исполняется при каждом пропуске. Оно не обязано быть константой VB.NET.
+- ParamArray не записывает упакованные скаляры обратно в исходные переменные. Если передан готовый массив, изменение его элементов видно вызывающему коду. Повторная передача массива в другую ParamArray-функцию не создаёт лишний уровень вложенности.
+- Пишите ByRef и ByVal явно, чтобы читатель видел намерение. Эти правила относятся к вызовам пользовательских процедур из скрипта; параметры встроенных команд описываются в их собственных карточках.
+
+## Примеры
+
+### 1. Изменение переменной
+
+```vb
+# amount=5 передаётся в Adjust по ByRef, increment=3 — по ByVal. amount увеличивается до 8 и записывается обратно. Main возвращает Integer 8; Adjust не возвращает результата.
+Option Explicit On
+Sub Adjust(ByRef amount, ByVal increment)
+    amount += increment
+End Sub
+Sub Main()
+    Var amount = 5
+    Adjust(amount, 3)
+    Return amount
+End Sub
+```
+
+**Разбор параметров и выполнения:**
+
+amount=5 передаётся в Adjust по ByRef, increment=3 — по ByVal. amount увеличивается до 8 и записывается обратно. Main возвращает Integer 8; Adjust не возвращает результата.
+
+### 2. Один вызов индекса
+
+```vb
+# items[0]=5; NextIndex увеличивает calls и возвращает индекс 0. Bump получает именно этот элемент и увеличивает до 6. Индекс не вычисляется повторно: calls=1. Main возвращает 6*100+1, Integer 601.
+Option Explicit On
+Function NextIndex(ByRef calls)
+    calls += 1
+    Return 0
+End Function
+Sub Bump(ByRef amount)
+    amount += 1
+End Sub
+Sub Main()
+    Dim items[0]
+    items[0] = 5
+    Var calls = 0
+    Bump(items[NextIndex(calls)])
+    Return items[0] * 100 + calls
+End Sub
+```
+
+**Разбор параметров и выполнения:**
+
+items[0]=5; NextIndex увеличивает calls и возвращает индекс 0. Bump получает именно этот элемент и увеличивает до 6. Индекс не вычисляется повторно: calls=1. Main возвращает 6*100+1, Integer 601.
+
+### 3. Одна переменная в двух параметрах
+
+```vb
+# Оба параметра получают исходное 5. first становится 6, second — 7. При выходе сначала записывается 6, затем 7 в ту же value. Main возвращает Integer 7, а не 8.
+Option Explicit On
+Sub Change(ByRef first, ByRef second)
+    first += 1
+    second += 2
+End Sub
+Sub Main()
+    Var value = 5
+    Change(value, value)
+    Return value
+End Sub
+```
+
+**Разбор параметров и выполнения:**
+
+Оба параметра получают исходное 5. first становится 6, second — 7. При выходе сначала записывается 6, затем 7 в ту же value. Main возвращает Integer 7, а не 8.
+
+<!-- implementation references (not callable script procedures):
+Parsing/injection.g4: parameterName / parameterModifier / defaultValue
+Runtime/SubrutineDefinition.cs: WritableParameters / RequiredArgumentCount / HasParamArray
+Runtime/Interpreter.cs: VisitCall / CreateArgumentWriter / CallSubrutine / EvaluateInitializer
+Runtime/IndexedValueSlot.cs: Read / Write
+https://learn.microsoft.com/en-us/dotnet/visual-basic/language-reference/modifiers/byref
+https://learn.microsoft.com/en-us/dotnet/visual-basic/language-reference/modifiers/byval
+https://learn.microsoft.com/en-us/dotnet/visual-basic/language-reference/modifiers/optional
+https://learn.microsoft.com/en-us/dotnet/visual-basic/language-reference/modifiers/paramarray
+-->

@@ -1,203 +1,29 @@
-# Runtime API Manual — Part 34
+# Runtime API Manual — Part-34
 
-Commands: **WearItem** through **Z**. This file is generated from the same canonical Runtime Manual shipped with the project/client.
+[Current external Manual](../API-Manual/README.md) · [Basic language](https://github.com/LIHACHTETAN/ClassicUO-BadNewbie-BasicIDE/wiki/Basic-Language-Manual)
 
-Canonical source SHA-256: `524c4a06be8a621b5b5e24dabc4795c2c7da682f9c23e0b516f2de0a437ee254`
-
----
+Each link opens the current command card, shared with the client. The old alphabetical part URL remains available for navigation.
 
 ## `UO.WearItem`
 
-### Compatibility description
-
-> Historical Stealth/Pascal reference text. Current Yoko signatures and return contracts below are authoritative when behavior differs.
-
-Экипирует ранее подобранный предмет на указанный слой экипировки. Layer — индекс слоя экипировки. См. ConstantsAndEnums . Вспомогательные методы, возвращающие значения слоёв, вынесены на отдельную страницу: Layers . Должен быть ненулевым. ObjID — serial (ID) экипируемого предмета. Возвращает True при успешной экипировке, False — в противном случае. Метод требует, чтобы предмет был предварительно подобран (через DragItem или аналогичный метод). Если ничего не держится ( PickupedItem = 0 ), метод возвращает False . Если слой равен 0 или ID игрока равен 0 , метод также возвращает False .
-
-### Current Yoko signatures / Return
-
-- `UO.WearItem(Layer, ObjID)`
-  - **Return type:** `Integer`
-  - **Return contract:** Integer runtime value. Zero may be a valid value or a command-specific no-result/failure sentinel.
-  - **Runtime route:** `DISPATCH -> InjectionApiUO.ExecuteStealthCompatibility["WearItem"]` → `BRIDGE CONTRACT -> IApiBridge.Equip`
-
-**Pascal compatibility signature:** `function WearItem(Layer: Byte; ObjID: Cardinal): Boolean;`
-
-### Parameters
-
-- `Layer` — Equipment layer name or numeric layer identifier accepted by the runtime overload.
-- `ObjID` — Object/mobile/item serial. Use 0 only when the command explicitly documents 0 as a sentinel.
-
-### Behavior
-
-Reads or mutates the current ClassicUO item/equipment state through the registered runtime route and client action queue.
-
-### Notes / limitations
-
-Use the exact registered overload and positional argument order. Server/world-dependent effects may complete asynchronously; validate state when the script depends on confirmation.
-
-### Examples
-
-```basic
-VAR result = UO.WearItem('Rhand', self)
-```
-
----
+[Parameters, return value and examples](../API-Manual/UO.WearItem.md)
 
 ## `UO.Weight`
 
-### Compatibility description
-
-> Historical Stealth/Pascal reference text. Current Yoko signatures and return contracts below are authoritative when behavior differs.
-
-Возвращает текущий общий вес персонажа (в стоунах). Это значение включает вес тела персонажа, всех экипированных предметов и всего содержимого рюкзака (включая вложенные контейнеры). Возвращает 0 , если персонаж не подключён.
-
-### Current Yoko signatures / Return
-
-- `UO.Weight()`
-  - **Return type:** `Integer`
-  - **Return contract:** Integer runtime value. Zero may be a valid value or a command-specific no-result/failure sentinel.
-  - **Runtime route:** `DISPATCH -> InjectionApiUO.ExecuteStealthCompatibility["Weight"]` → `BRIDGE CONTRACT -> IApiBridge.Weight`
-
-**Pascal compatibility signature:** `function Weight: Word;`
-
-### Parameters
-
-- None. This command has a zero-argument overload or exposes no positional arguments in the current runtime registration.
-
-### Behavior
-
-Reads or changes the requested mobile/player stat/state through the current ClassicUO world model and registered API bridge.
-
-### Notes / limitations
-
-Use the exact registered overload and positional argument order. Server/world-dependent effects may complete asynchronously; validate state when the script depends on confirmation.
-
-### Examples
-
-```basic
-VAR result = UO.Weight()
-```
-
----
+[Parameters, return value and examples](../API-Manual/UO.Weight.md)
 
 ## `UO.WorldNum`
 
-### Compatibility description
-
-> Historical Stealth/Pascal reference text. Current Yoko signatures and return contracts below are authoritative when behavior differs.
-
-Возвращает номер текущего мира (фасета), в котором находится персонаж. Значение Фасет 0 Felucca 1 Trammel 2 Ilshenar 3 Malas 4 Tokuno 5 Ter Mur
-
-### Current Yoko signatures / Return
-
-- `UO.WorldNum()`
-  - **Return type:** `Integer`
-  - **Return contract:** Integer runtime value. Zero may be a valid value or a command-specific no-result/failure sentinel.
-  - **Runtime route:** `DISPATCH -> InjectionApiUO.ExecuteStealthCompatibility["WorldNum"]` → `BRIDGE CONTRACT -> IApiBridge.WorldNumber`
-
-**Pascal compatibility signature:** `function WorldNum: Byte;`
-
-### Parameters
-
-- None. This command has a zero-argument overload or exposes no positional arguments in the current runtime registration.
-
-### Behavior
-
-Executes the registered Yoko runtime implementation shown in the Runtime route. The behavior is source-backed by the current registration rather than the historical Stealth text alone.
-
-### Notes / limitations
-
-Use the exact registered overload and positional argument order. Server/world-dependent effects may complete asynchronously; validate state when the script depends on confirmation.
-
-### Examples
-
-```basic
-VAR result = UO.WorldNum()
-```
-
----
+[Parameters, return value and examples](../API-Manual/UO.WorldNum.md)
 
 ## `UO.X`
 
-### Direct runtime overloads
-
-- `UO.X() -> Integer`
-  - **Return type:** `Integer`
-  - **Return contract:** Integer coordinate/direction value for the current player in the zero-argument alias form.
-
-### Parameters
-
-- None. This command has a zero-argument overload or exposes no positional arguments in the current runtime registration.
-
-### Behavior
-
-Executes the registered Yoko runtime implementation shown in the Runtime route. The behavior is source-backed by the current registration rather than the historical Stealth text alone.
-
-### Notes / limitations
-
-Use the exact registered overload and positional argument order. Server/world-dependent effects may complete asynchronously; validate state when the script depends on confirmation.
-
-### Examples
-
-```basic
-VAR result = UO.X()
-```
-
----
+[Parameters, return value and examples](../API-Manual/UO.X.md)
 
 ## `UO.Y`
 
-### Direct runtime overloads
-
-- `UO.Y() -> Integer`
-  - **Return type:** `Integer`
-  - **Return contract:** Integer coordinate/direction value for the current player in the zero-argument alias form.
-
-### Parameters
-
-- None. This command has a zero-argument overload or exposes no positional arguments in the current runtime registration.
-
-### Behavior
-
-Executes the registered Yoko runtime implementation shown in the Runtime route. The behavior is source-backed by the current registration rather than the historical Stealth text alone.
-
-### Notes / limitations
-
-Use the exact registered overload and positional argument order. Server/world-dependent effects may complete asynchronously; validate state when the script depends on confirmation.
-
-### Examples
-
-```basic
-VAR result = UO.Y()
-```
-
----
+[Parameters, return value and examples](../API-Manual/UO.Y.md)
 
 ## `UO.Z`
 
-### Direct runtime overloads
-
-- `UO.Z() -> Integer`
-  - **Return type:** `Integer`
-  - **Return contract:** Integer coordinate/direction value for the current player in the zero-argument alias form.
-
-### Parameters
-
-- None. This command has a zero-argument overload or exposes no positional arguments in the current runtime registration.
-
-### Behavior
-
-Executes the registered Yoko runtime implementation shown in the Runtime route. The behavior is source-backed by the current registration rather than the historical Stealth text alone.
-
-### Notes / limitations
-
-Use the exact registered overload and positional argument order. Server/world-dependent effects may complete asynchronously; validate state when the script depends on confirmation.
-
-### Examples
-
-```basic
-VAR result = UO.Z()
-```
-
----
+[Parameters, return value and examples](../API-Manual/UO.Z.md)

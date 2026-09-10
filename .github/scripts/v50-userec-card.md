@@ -6,7 +6,7 @@
   - **Return type:** `Any`
   - **Return contract:** Compatibility metadata exposes an adapted return slot; the zero-argument command returns no script value.
 
-### Legacy Yoko overloads
+### Legacy Basic overloads
 
 - `UO.UseRec()`
   - **Return type:** `Unit`
@@ -25,7 +25,7 @@
 - Call `UO.SetRec()`, execute one recordable legacy `UO.*` command, then call `UO.UseRec()`.
 - Replay is guarded against recursive re-recording.
 - `remain()` returns `1` while a valid recorded action is available and `0` when none is stored.
-- The historical Script.dll help did not define playback internals; the behavior above is the explicit v50 ClassicUO/Yoko compatibility contract.
+- The historical Script.dll help did not define playback internals; the behavior above is the explicit v50 ClassicUO/Basic compatibility contract.
 
 ### Examples
 

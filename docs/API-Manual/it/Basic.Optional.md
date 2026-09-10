@@ -1,0 +1,114 @@
+# Optional
+
+ClassicUO • Basic
+
+<!-- yoko-manual: 1 -->
+<!-- yoko-language-guide: 1 -->
+<!-- yoko-locale: it -->
+
+I parametri passano dati a SUB/FUNCTION. ByRef riscrive il valore modificato nel chiamante; ByVal ne conserva la variabile. Optional fornisce un argomento omesso e ParamArray raccoglie gli argomenti rimanenti. Sono modificatori della dichiarazione, non comandi richiamabili.
+
+## Sintassi esatta
+
+```text
+Function Scale(ByVal value, Optional ByVal factor = 2)
+Scale(3)
+Scale(3, 4)
+```
+
+## Parametri
+
+- `name / As type` — name / As type: nome e conversione facoltativa del tipo in ingresso. Gli argomenti sono posizionali; i modificatori appartengono alla dichiarazione.
+- `ByRef` — ByRef: variabile modificabile o elemento indicizzato esistente. Senza ByVal questo motore riscrive comunque il valore, diversamente dal comportamento predefinito VB.NET. Letterali, costanti ed espressioni calcolate sono temporanei.
+- `ByVal` — ByVal: copia locale del valore. Assegnare il parametro non sostituisce la variabile chiamante. Array e oggetti condividono ancora i riferimenti: non è una copia profonda.
+- `Optional / defaultValue` — Optional / defaultValue: omettere un argomento finale valuta la sua espressione dopo =. Specificare un valore esplicito; senza di esso il parametro omesso riceve Unit non inizializzato.
+- `ParamArray` — ParamArray values(): ultimo parametro per zero o più valori restanti. Un singolo array viene riutilizzato; gli scalari creano un nuovo array. GetArrayLength ne restituisce la lunghezza.
+
+## Restituisce
+
+I modificatori non restituiscono valori. RETURN imposta separatamente il risultato. ByRef cambia un argomento, non il risultato. SUB senza RETURN produce Unit. I numeri degli esempi sono calcoli, non indicatori TRUE/FALSE.
+
+## Comportamento
+
+- Gli argomenti vengono valutati una volta da sinistra a destra. ByRef indicizzato conserva contenitore e indice/chiave; riassegnare il contenitore in un altro argomento non reindirizza la scrittura.
+- All’ingresso si creano parametri locali. All’uscita, dopo i FINALLY interni, ByRef riscrive i valori nell’ordine dei parametri, anche per errori che escono dal corpo. Due parametri della stessa variabile non sono collegati in tempo reale: prevale l’ultima scrittura.
+- ByVal impedisce di sostituire la variabile chiamante ma consente modifiche nell’array o oggetto condiviso. ReDim crea un nuovo riferimento locale. Dati indipendenti richiedono una copia esplicita.
+- Omettere Optional dalla fine; le posizioni vuote tra virgole non sono supportate. Le espressioni predefinite vengono eseguite a ogni omissione e non devono essere costanti VB.NET.
+- ParamArray non riscrive gli scalari raggruppati. Le modifiche a un array fornito esplicitamente sono visibili al chiamante. Passarlo a un altro ParamArray non aggiunge annidamenti.
+- Scrivere ByRef e ByVal esplicitamente. Queste regole riguardano le procedure utente chiamate dallo script; i comandi integrati hanno schede proprie.
+
+## Esempi
+
+### 1. Fattore omesso o esplicito
+
+```vb
+# Scale(3) usa factor=2 e restituisce 6. Scale(3,4) usa 4 e restituisce 12. Main restituisce 6*100+12, Integer 612.
+Option Explicit On
+Function Scale(ByVal value, Optional ByVal factor = 2)
+    Return value * factor
+End Function
+Sub Main()
+    Return Scale(3) * 100 + Scale(3, 4)
+End Sub
+```
+
+**Spiegazione dei parametri e dell’esecuzione:**
+
+Scale(3) usa factor=2 e restituisce 6. Scale(3,4) usa 4 e restituisce 12. Main restituisce 6*100+12, Integer 612.
+
+### 2. Quando si valuta il valore predefinito
+
+```vb
+# Pick(5) restituisce 5 senza chiamare DefaultAmount. Pick() lo chiama una volta: calls=1, valore 7. Main restituisce 5*100+7*10+1, Integer 571.
+Option Explicit On
+Module Counter
+    Public Var calls = 0
+End Module
+Function DefaultAmount()
+    Counter.calls += 1
+    Return 7
+End Function
+Function Pick(Optional ByVal value = DefaultAmount())
+    Return value
+End Function
+Sub Main()
+    Var first = Pick(5)
+    Var second = Pick()
+    Return first * 100 + second * 10 + Counter.calls
+End Sub
+```
+
+**Spiegazione dei parametri e dell’esecuzione:**
+
+Pick(5) restituisce 5 senza chiamare DefaultAmount. Pick() lo chiama una volta: calls=1, valore 7. Main restituisce 5*100+7*10+1, Integer 571.
+
+### 3. Optional, ByRef e As Integer
+
+```vb
+# value parte da 1. Increase(value) aggiunge amount=2 e memorizza 3; Increase(value,4) aggiunge 4 e memorizza 7. Entrambi i parametri sono Integer. Main restituisce Integer 7.
+Option Explicit On
+Sub Increase(ByRef value As Integer, Optional ByVal amount As Integer = 2)
+    value += amount
+End Sub
+Sub Main()
+    Var value As Integer = 1
+    Increase(value)
+    Increase(value, 4)
+    Return value
+End Sub
+```
+
+**Spiegazione dei parametri e dell’esecuzione:**
+
+value parte da 1. Increase(value) aggiunge amount=2 e memorizza 3; Increase(value,4) aggiunge 4 e memorizza 7. Entrambi i parametri sono Integer. Main restituisce Integer 7.
+
+<!-- implementation references (not callable script procedures):
+Parsing/injection.g4: parameterName / parameterModifier / defaultValue
+Runtime/SubrutineDefinition.cs: WritableParameters / RequiredArgumentCount / HasParamArray
+Runtime/Interpreter.cs: VisitCall / CreateArgumentWriter / CallSubrutine / EvaluateInitializer
+Runtime/IndexedValueSlot.cs: Read / Write
+https://learn.microsoft.com/en-us/dotnet/visual-basic/language-reference/modifiers/byref
+https://learn.microsoft.com/en-us/dotnet/visual-basic/language-reference/modifiers/byval
+https://learn.microsoft.com/en-us/dotnet/visual-basic/language-reference/modifiers/optional
+https://learn.microsoft.com/en-us/dotnet/visual-basic/language-reference/modifiers/paramarray
+-->

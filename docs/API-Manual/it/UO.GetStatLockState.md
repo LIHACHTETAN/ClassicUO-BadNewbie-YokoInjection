@@ -1,0 +1,149 @@
+# UO.GetStatLockState
+
+ClassicUO • Runtime API
+
+<!-- yoko-manual: 1 -->
+<!-- yoko-locale: it -->
+
+Legge la modalità locale di crescita dell’attributo.
+
+## Sintassi esatta
+
+```text
+UO.GetStatLockState(statNum:Any) -> Integer
+```
+
+## Parametri
+
+- `statNum` — Numero obbligatorio dell’attributo: 0 — STR, 1 — DEX, 2 — INT. Non il valore attuale né il nome testuale.
+
+## Restituisce
+
+Integer: 0 — aumento, 1 — diminuzione, 2 — bloccato. Codice di modalità, non true/false. Numeri fuori 0..2 restituiscono −1. Senza personaggio, un numero valido restituisce 0 predefinito; non conferma lo stato del server.
+
+## Comportamento
+
+- Invoke legge dati esistenti sul thread del gioco senza pacchetti di rete. Non usa né allena l’abilità. Due letture sono istantanee separate.
+- Numero obbligatorio dell’attributo: 0 — STR, 1 — DEX, 2 — INT. Non il valore attuale né il nome testuale.
+- ExecuteStealthCompatibility sceglie il ramo. Text legge il selettore abilità; Arg legge numeri e modalità. Un argomento non convertibile può causare un errore di conversione.
+
+### Funzioni interne: dalla chiamata al risultato
+
+Queste sono le vere fasi interne C#. ReadMode è una funzione ausiliaria completamente definita nell’esempio, non un comando integrato nascosto.
+
+#### 1. ExecuteStealthCompatibility
+
+ExecuteStealthCompatibility sceglie il ramo. Text legge il selettore abilità; Arg legge numeri e modalità. Un argomento non convertibile può causare un errore di conversione.
+
+Integer: 0 — aumento, 1 — diminuzione, 2 — bloccato. Codice di modalità, non true/false. Numeri fuori 0..2 restituiscono −1. Senza personaggio, un numero valido restituisce 0 predefinito; non conferma lo stato del server.
+
+Sorgente del progetto: `external/InjectionScript/src/InjectionScript/Runtime/InjectionApiUO.cs`; funzione `ExecuteStealthCompatibility`.
+
+#### 2. Invoke
+
+Invoke legge nel thread del gioco; un thread di lavoro attende l’elaborazione del gestore. L’annullamento dello script interrompe l’attesa. Nessun ritardo o richiesta di rete aggiuntivi.
+
+Invoke legge dati esistenti sul thread del gioco senza pacchetti di rete. Non usa né allena l’abilità. Due letture sono istantanee separate.
+
+Sorgente del progetto: `src/ClassicUO.Client/Game/Managers/ClassicUOInjectionApiBridge.cs`; funzione `Invoke`.
+
+#### 3. GetStatLockState
+
+GetStatLockState/SetStatLockState scelgono StrLock, DexLock o IntLock tramite 0/1/2. Un numero sconosciuto legge −1; la scrittura verifica entrambi i limiti prima dell’invio.
+
+Integer: 0 — aumento, 1 — diminuzione, 2 — bloccato. Codice di modalità, non true/false. Numeri fuori 0..2 restituiscono −1. Senza personaggio, un numero valido restituisce 0 predefinito; non conferma lo stato del server.
+
+Sorgente del progetto: `src/ClassicUO.Client/Game/Managers/ClassicUOInjectionApiBridge.cs`; funzione `GetStatLockState`.
+
+Invoke legge dati esistenti sul thread del gioco senza pacchetti di rete. Non usa né allena l’abilità. Due letture sono istantanee separate.
+
+
+## Esempi
+
+### Leggere e mostrare
+
+```vb
+# Leggere e mostrare
+#
+# Legge la modalità locale di crescita dell’attributo.
+#
+# Integer: 0 — aumento, 1 — diminuzione, 2 — bloccato. Codice di modalità, non true/false.
+# Numeri fuori 0..2 restituiscono −1. Senza personaggio, un numero valido restituisce 0
+# predefinito; non conferma lo stato del server.
+
+SUB Main()
+    # L’esempio imposta selector e, in scrittura, mode. La prima riga sceglie l’abilità per nome o
+    # l’attributo per numero. Print mostra soltanto il risultato.
+
+    VAR selector = 0
+    VAR mode = UO.GetStatLockState(selector)
+    UO.Print(CStr(mode))
+END SUB
+```
+
+**Spiegazione dei parametri e dell’esecuzione:**
+
+- L’esempio imposta selector e, in scrittura, mode. La prima riga sceglie l’abilità per nome o l’attributo per numero. Print mostra soltanto il risultato.
+
+### Usare in una condizione o confronto
+
+```vb
+# Usare in una condizione o confronto
+#
+# Legge la modalità locale di crescita dell’attributo.
+#
+# Integer: 0 — aumento, 1 — diminuzione, 2 — bloccato. Codice di modalità, non true/false.
+# Numeri fuori 0..2 restituiscono −1. Senza personaggio, un numero valido restituisce 0
+# predefinito; non conferma lo stato del server.
+
+SUB Main()
+    # Soglia 95.1 e modalità 0/1/2 sono impostazioni di esempio. Verificare −1 prima di modificare
+    # la modalità. La lettura dopo la scrittura mostra la copia locale senza attendere il server.
+
+    VAR mode = UO.GetStatLockState(0)
+    IF mode = 2 THEN
+        UO.Print("Locked")
+    ELSE
+        IF mode = -1 THEN
+            UO.Print("Unknown selector")
+        ELSE
+            UO.Print("Mode: " + CStr(mode))
+        END IF
+    END IF
+END SUB
+```
+
+**Spiegazione dei parametri e dell’esecuzione:**
+
+- Soglia 95.1 e modalità 0/1/2 sono impostazioni di esempio. Verificare −1 prima di modificare la modalità. La lettura dopo la scrittura mostra la copia locale senza attendere il server.
+
+### Funzione ausiliaria completa
+
+```vb
+# Funzione ausiliaria completa
+#
+# Legge la modalità locale di crescita dell’attributo.
+#
+# Integer: 0 — aumento, 1 — diminuzione, 2 — bloccato. Codice di modalità, non true/false.
+# Numeri fuori 0..2 restituiscono −1. Senza personaggio, un numero valido restituisce 0
+# predefinito; non conferma lo stato del server.
+
+SUB Main()
+    # La funzione completa segue Main. selector sceglie abilità/attributo; mode indica la modalità.
+    # ReadValue/ReadMode restituiscono il numero originale; ApplyMode verifica gli argomenti, agisce
+    # e non restituisce valori. WAIT(1000) separa due letture.
+
+    VAR before = ReadMode(0)
+    WAIT(1000)
+    VAR after = ReadMode(0)
+    UO.Print(CStr(before) + " -> " + CStr(after))
+END SUB
+
+SUB ReadMode(selector)
+    RETURN UO.GetStatLockState(selector)
+END SUB
+```
+
+**Spiegazione dei parametri e dell’esecuzione:**
+
+- La funzione completa segue Main. selector sceglie abilità/attributo; mode indica la modalità. ReadValue/ReadMode restituiscono il numero originale; ApplyMode verifica gli argomenti, agisce e non restituisce valori. WAIT(1000) separa due letture.

@@ -1,0 +1,104 @@
+# =, ==, <>, <, >, <=, >=
+
+ClassicUO • Basic
+
+<!-- yoko-manual: 1 -->
+<!-- yoko-language-guide: 1 -->
+<!-- yoko-locale: ru -->
+
+Операторы сравнения проверяют два значения и дают логический результат. Его можно использовать в IF, сохранить в переменную либо вернуть из вспомогательной функции.
+
+## Точный синтаксис
+
+```text
+left = right
+left == right
+left <> right
+left < right
+left > right
+left <= right
+left >= right
+```
+
+## Параметры
+
+- `left` — Левое значение: литерал, объявленная переменная, выражение или результат функции.
+- `right` — Правое значение. Для сравнения порядка нужны числовые Integer или Decimal; равенство поддерживает и другие виды значений.
+- `operator` — = и == внутри выражения проверяют равенство; <> — неравенство; < и > — строгий порядок; <= и >= включают равенство. Отдельная инструкция name = expression выполняет присваивание.
+
+## Возвращает
+
+Integer 1 (TRUE), если сравнение выполняется, иначе Integer 0 (FALSE). Для этого результата result=1 равнозначно result=TRUE, а result=0 — result=FALSE. Количество или ID имеют другой смысл: 2 ненулевое, но 2=TRUE ложно. Проверяйте count<>0, если нужно ненулевое количество.
+
+## Поведение
+
+- Integer и Decimal сравниваются численно между видами: 5=5.0 истинно. Текст автоматически не преобразуется: "5"=5 ложно. Строки сравниваются по символам с учётом регистра: "Ore"<>"ore". Сравнение порядка текста, массивов, объектов или Unit через <, >, <=, >= вызывает ошибку.
+- Равенство массивов и нативных объектов проверяет одну и ту же ссылку, а не содержимое. Два Unit равны, но Unit не равен числовому нулю. Разные виды не равны, кроме числовой пары Integer/Decimal. NaN не равен даже себе; все числовые сравнения порядка с NaN ложны.
+- Арифметика выполняется до сравнения. Цепочки идут слева направо: 1<3<2 означает (1<3)<2 и даёт истину. Для диапазона пишите (low<=value) AND (value<=high). Скобками явно задавайте группировку.
+- Двоичная дробная арифметика округляет: для приблизительных измерений используйте Abs(actual-expected)<=tolerance с подходящим неотрицательным допуском. Допуск задаёт скрипт; сами операторы его автоматически не применяют.
+
+## Примеры
+
+### 1. Диапазон с границами и TRUE
+
+```vb
+# InRange получает value=4, low=2, high=5. Оба сравнения дают 1, AND объединяет их в 1, Main проверяет accepted=TRUE. Функция и вызывающий код приведены полностью; Main возвращает 1.
+Option Explicit On
+FUNCTION InRange(value, low, high)
+    RETURN (low <= value) AND (value <= high)
+END FUNCTION
+SUB Main()
+    VAR accepted = InRange(4, 2, 5)
+    IF accepted = TRUE THEN
+        RETURN 1
+    END IF
+    RETURN 0
+END SUB
+```
+
+**Разбор параметров и выполнения:**
+
+InRange получает value=4, low=2, high=5. Оба сравнения дают 1, AND объединяет их в 1, Main проверяет accepted=TRUE. Функция и вызывающий код приведены полностью; Main возвращает 1.
+
+### 2. Текст, числа и регистр
+
+```vb
+# sameCase сравнивает "Ore" и "ore" и получает 0. sameKind сравнивает "5" с Integer 5 и получает 0. converted явно вызывает CDbl("5") и получает 1. CStr формирует возвращаемую диагностическую строку "0:0:1".
+Option Explicit On
+SUB Main()
+    VAR sameCase = ("Ore" = "ore")
+    VAR sameKind = ("5" == 5)
+    VAR converted = (CDbl("5") = 5)
+    RETURN CStr(sameCase) + ":" + CStr(sameKind) + ":" + CStr(converted)
+END SUB
+```
+
+**Разбор параметров и выполнения:**
+
+sameCase сравнивает "Ore" и "ore" и получает 0. sameKind сравнивает "5" с Integer 5 и получает 0. converted явно вызывает CDbl("5") и получает 1. CStr формирует возвращаемую диагностическую строку "0:0:1".
+
+### 3. Приблизительное равенство дробей
+
+```vb
+# NearlyEqual получает 0.1+0.2, expected=0.3, tolerance=0.000001. Отрицательный допуск отклоняется. Abs вычисляет величину разности; <= принимает отклонение в пределах допуска. Main возвращает 1. Все параметры вспомогательной функции указаны явно.
+Option Explicit On
+FUNCTION NearlyEqual(actual, expected, tolerance)
+    IF tolerance < 0 THEN
+        RETURN FALSE
+    END IF
+    RETURN Abs(actual - expected) <= tolerance
+END FUNCTION
+SUB Main()
+    RETURN NearlyEqual(0.1 + 0.2, 0.3, 0.000001)
+END SUB
+```
+
+**Разбор параметров и выполнения:**
+
+NearlyEqual получает 0.1+0.2, expected=0.3, tolerance=0.000001. Отрицательный допуск отклоняется. Abs вычисляет величину разности; <= принимает отклонение в пределах допуска. Main возвращает 1. Все параметры вспомогательной функции указаны явно.
+
+<!-- implementation references (not callable script procedures):
+Parsing/injection.g4: logicalOperand / comparativeOperation
+Runtime/Interpreter.cs: VisitLogicalOperand
+Runtime/InjectionValue.cs: Equals / comparison operators
+-->

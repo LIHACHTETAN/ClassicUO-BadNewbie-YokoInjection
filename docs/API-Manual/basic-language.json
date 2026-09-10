@@ -1,0 +1,1183 @@
+{
+  "schemaVersion": 1,
+  "section": "Basic",
+  "builtins": [
+    "Abs",
+    "ArrayContains",
+    "ASC",
+    "Atn",
+    "BasicMod",
+    "BasicXor",
+    "CBool",
+    "CDbl",
+    "Chr",
+    "CInt",
+    "CLng",
+    "contains",
+    "Cos",
+    "CSng",
+    "CStr",
+    "Dictionary",
+    "Exp",
+    "File",
+    "Fix",
+    "GetArrayLength",
+    "GetWord",
+    "GetWordCount",
+    "Hex",
+    "InStr",
+    "InStrRev",
+    "Int",
+    "IsNumeric",
+    "LCase",
+    "left",
+    "len",
+    "List",
+    "Log",
+    "LTrim",
+    "MemoryStream",
+    "message",
+    "messagebox",
+    "mid",
+    "Now",
+    "remain",
+    "Replace",
+    "RGB",
+    "right",
+    "Rnd",
+    "Round",
+    "RTrim",
+    "Sgn",
+    "Sin",
+    "sleep",
+    "Space",
+    "Sqr",
+    "str",
+    "StrComp",
+    "String",
+    "Tan",
+    "Timer",
+    "Trim",
+    "UCase",
+    "val",
+    "wait"
+  ],
+  "guides": [
+    {
+      "id": "Basic.Program",
+      "name": "SUB Main()",
+      "signatures": [
+        "Option Explicit On",
+        "SUB Main()",
+        "    statement",
+        "END SUB",
+        "# comment",
+        "; comment",
+        "REM comment",
+        "// comment",
+        "' comment"
+      ],
+      "descriptions": {
+        "en": "A Basic file contains procedure/function definitions and optional global declarations. Put executable work inside a procedure. These examples use Main() as their entry point and are complete files, not fragments to paste outside a procedure.",
+        "ru": "Файл Basic содержит определения процедур/функций и необязательные глобальные объявления. Исполняемые действия помещаются внутрь процедуры. Здесь точка входа — Main(); примеры являются полными файлами, а не фрагментами для вставки вне процедуры.",
+        "uk": "Файл Basic містить визначення процедур/функцій і необов’язкові глобальні оголошення. Виконувані дії розташовуються всередині процедури. Тут точка входу — Main(); приклади є повними файлами, а не фрагментами для вставлення поза процедурою.",
+        "fr": "Un fichier Basic contient des définitions de procédures/fonctions et des déclarations globales facultatives. Placez les actions dans une procédure. Les exemples utilisent Main() comme point d’entrée et constituent des fichiers complets.",
+        "de": "Eine Basic-Datei enthält Prozedur-/Funktionsdefinitionen und optionale globale Deklarationen. Ausführbare Arbeit gehört in eine Prozedur. Diese Beispiele verwenden Main() als Einstieg und sind vollständige Dateien.",
+        "it": "Un file Basic contiene definizioni di procedure/funzioni e dichiarazioni globali facoltative. Le azioni eseguibili vanno in una procedura. Questi esempi sono file completi con Main() come punto di ingresso.",
+        "es": "Un archivo Basic contiene definiciones de procedimientos/funciones y declaraciones globales opcionales. Las acciones ejecutables van dentro de un procedimiento. Estos ejemplos son archivos completos con Main() como entrada.",
+        "zh-tw": "Basic 檔案包含程序/函式定義及可選的全域宣告。可執行動作應放在程序內。以下範例以 Main() 為進入點，都是完整檔案，不是可貼在程序外的片段。",
+        "ja": "Basic ファイルには手続き/関数定義と任意のグローバル宣言を記述します。実行する処理は手続き内に置きます。以下は Main() を入口とする完全なファイルで、手続き外へ貼る断片ではありません。",
+        "ko": "Basic 파일에는 프로시저/함수 정의와 선택적 전역 선언을 넣습니다. 실행할 작업은 프로시저 안에 둡니다. 다음 예제는 Main()을 진입점으로 하는 완전한 파일이며 프로시저 밖에 붙일 코드 조각이 아닙니다."
+      },
+      "examples": [
+        "Option Explicit On\n# Complete file\nSUB Main()\n    REM Full-line comment\n    VAR note = \"ore #1; keep\" # Trailing comment\n    // Another full-line comment\n    ' Another full-line comment\n    RETURN note\nEND SUB\n",
+        "Option Explicit On\nSUB Main()\n    RETURN DoubleCount(7)\nEND SUB\nFUNCTION DoubleCount(ByVal amount AS Integer)\n    VAR result = amount * 2\n    RETURN result\nEND FUNCTION\n",
+        "Option Explicit On\nsUb Main()\n    Var itemCount = 3\n    ITEMCOUNT = itemcount + 2\n    ReTuRn ItemCount\nEnD sUb\n"
+      ]
+    },
+    {
+      "id": "Basic.ApiNames",
+      "name": "Basic / UO.",
+      "signatures": [
+        "UO.command(arguments)",
+        "BasicFunction(arguments)",
+        "UserFunction(arguments)"
+      ],
+      "descriptions": {
+        "en": "Game commands use UO.; Basic constructs, built-in functions and your own functions use their declared names.",
+        "ru": "Игровые команды вызываются через UO.; конструкции Basic, встроенные и собственные функции — по их объявленным именам.",
+        "uk": "Ігрові команди викликаються через UO.; конструкції Basic, вбудовані та власні функції — за оголошеними іменами.",
+        "fr": "Les commandes de jeu utilisent UO.; Basic et vos fonctions utilisent leurs noms déclarés.",
+        "de": "Spielbefehle verwenden UO.; Basic und eigene Funktionen verwenden ihre deklarierten Namen.",
+        "it": "I comandi di gioco usano UO.; Basic e le funzioni personali usano i nomi dichiarati.",
+        "es": "Los comandos del juego usan UO.; Basic y tus funciones usan sus nombres declarados.",
+        "zh-tw": "遊戲命令使用 UO.；Basic 語法、內建及自訂函式使用各自宣告的名稱。",
+        "ja": "ゲームコマンドは UO. を使用し、Basic の構文・組み込み関数・自作関数は宣言された名前を使用します。",
+        "ko": "게임 명령은 UO.를 사용하고 Basic 구문, 내장 함수와 사용자 함수는 선언된 이름을 사용합니다."
+      },
+      "examples": [
+        "Option Explicit On\nSub Main()\n    Var graphic = UO.GetType('self')\n    Var whole = Int(2.9)\n    Var registered = UO.ApiSignatureExists('UO.GetType', 1)\n    Return CStr(whole) + \":\" + CStr(registered)\nEnd Sub\n",
+        "Option Explicit On\nFunction GetType(value)\n    Return value + 1\nEnd Function\nSub Main()\n    Var localResult = GetType(CInt(6))\n    Var graphic = UO.GetType('self')\n    Return localResult\nEnd Sub\n",
+        "Option Explicit On\nSub Main()\n    Var oldCall = UO.ApiSignatureExists('GetType', 1)\n    Var gameCall = UO.ApiSignatureExists('UO.GetType', 1)\n    Var basicCall = UO.ApiSignatureExists('Int', 1)\n    Var argumentName = UO.ApiParameterExists('backpack')\n    Return CStr(oldCall) + \":\" + CStr(gameCall) + \":\" + CStr(basicCall) + \":\" + CStr(argumentName)\nEnd Sub\n"
+      ]
+    },
+    {
+      "id": "Basic.Variables",
+      "name": "VAR / DIM",
+      "signatures": [
+        "VAR name [AS type] [= expression] [, name ...]",
+        "DIM name [AS type] [= expression] [, name ...]",
+        "name = expression",
+        "LET name = expression",
+        "SET name = expression"
+      ],
+      "descriptions": {
+        "en": "VAR and scalar DIM declare a named value. Assignment evaluates the expression and stores its result. A declaration inside a procedure is local to that call; a declaration outside procedures is global to the script.",
+        "ru": "VAR и скалярный DIM объявляют именованное значение. Присваивание вычисляет выражение и сохраняет результат. Объявление внутри процедуры локально для её вызова; объявление вне процедур глобально для скрипта.",
+        "uk": "VAR і скалярний DIM оголошують іменоване значення. Присвоєння обчислює вираз і зберігає результат. Оголошення всередині процедури локальне для її виклику; поза процедурами — глобальне для скрипту.",
+        "fr": "VAR et DIM scalaire déclarent une valeur nommée. Une affectation évalue l’expression et stocke son résultat. Une déclaration dans une procédure est locale à cet appel ; en dehors des procédures, elle est globale au script.",
+        "de": "VAR und skalares DIM deklarieren einen benannten Wert. Eine Zuweisung wertet den Ausdruck aus und speichert das Ergebnis. Deklarationen in einer Prozedur sind lokal für den Aufruf, außerhalb der Prozeduren global für das Skript.",
+        "it": "VAR e DIM scalare dichiarano un valore con nome. L’assegnazione valuta l’espressione e conserva il risultato. Una dichiarazione dentro una procedura è locale alla chiamata; fuori dalle procedure è globale allo script.",
+        "es": "VAR y DIM escalar declaran un valor con nombre. La asignación evalúa la expresión y guarda su resultado. Dentro de un procedimiento la declaración es local a esa llamada; fuera de los procedimientos es global al script.",
+        "zh-tw": "VAR 與純量 DIM 宣告具名的值。指定會計算運算式並儲存結果。程序內的宣告只屬於該次呼叫；程序外的宣告則為腳本全域變數。",
+        "ja": "VAR とスカラーの DIM は名前付きの値を宣言します。代入は式を評価して結果を保存します。プロシージャ内の宣言はその呼び出しにローカルで、外の宣言はスクリプト全体で使用できます。",
+        "ko": "VAR와 스칼라 DIM은 이름 있는 값을 선언합니다. 대입은 표현식을 계산하여 결과를 저장합니다. 프로시저 내부 선언은 해당 호출의 지역 변수이며 외부 선언은 스크립트 전역 변수입니다."
+      },
+      "examples": [
+        "Option Explicit On\nSUB Main()\n    DIM count AS Integer\n    count = 5\n    LET count = count + 2\n    RETURN count\nEND SUB\n",
+        "Option Explicit On\nSUB Main()\n    DIM label AS String\n    VAR enabled AS Boolean = TRUE\n    SET label = \"ore\"\n    IF enabled = TRUE THEN\n        RETURN label\n    END IF\n    RETURN \"disabled\"\nEND SUB\n",
+        "Option Explicit On\nVAR baseAmount AS Integer = 4\nFUNCTION Calculate()\n    VAR extra = 3\n    RETURN baseAmount + extra\nEND FUNCTION\nSUB Main()\n    VAR result = Calculate()\n    RETURN result\nEND SUB\n"
+      ]
+    },
+    {
+      "id": "Basic.Types",
+      "name": "AS",
+      "signatures": [
+        "VAR name AS type [= value]",
+        "DIM name AS type [= value]"
+      ],
+      "descriptions": {
+        "en": "AS records a scalar variable’s conversion rule. The stored runtime kinds are Integer, Decimal, String, Array, Object and Unit (no value). Boolean uses Integer 1/0. This Basic dialect has its own storage rules; an alias does not imply the corresponding VB.NET storage width.",
+        "ru": "AS задаёт правило преобразования скалярной переменной. В движке хранятся Integer, Decimal, String, Array, Object и Unit — отсутствие значения. Boolean хранится как Integer 1/0. У этого диалекта Basic собственные правила: имя типа не означает соответствующую разрядность VB.NET.",
+        "uk": "AS задає правило перетворення скалярної змінної. Рушій зберігає Integer, Decimal, String, Array, Object і Unit — відсутність значення. Boolean зберігається як Integer 1/0. Цей діалект Basic має власні правила: назва типу не означає відповідну розрядність VB.NET.",
+        "fr": "AS fixe la conversion d’une variable scalaire. Les valeurs internes sont Integer, Decimal, String, Array, Object et Unit (absence de valeur). Boolean utilise Integer 1/0. Les alias de ce dialecte Basic ne garantissent pas les tailles de stockage de VB.NET.",
+        "de": "AS legt die Konvertierung einer skalaren Variablen fest. Intern gibt es Integer, Decimal, String, Array, Object und Unit (kein Wert). Boolean verwendet Integer 1/0. Die Typnamen dieses Basic-Dialekts garantieren nicht die Speicherbreiten von VB.NET.",
+        "it": "AS stabilisce la conversione di una variabile scalare. I tipi interni sono Integer, Decimal, String, Array, Object e Unit (nessun valore). Boolean usa Integer 1/0. Gli alias di questo Basic non garantiscono le dimensioni dei tipi VB.NET.",
+        "es": "AS establece la conversión de una variable escalar. Los tipos internos son Integer, Decimal, String, Array, Object y Unit (sin valor). Boolean usa Integer 1/0. Los alias de este Basic no garantizan los tamaños de almacenamiento de VB.NET.",
+        "zh-tw": "AS 設定純量變數的轉換規則。執行時的值種類為 Integer、Decimal、String、Array、Object 和 Unit（沒有值）。Boolean 使用 Integer 1/0。此 Basic 方言有自己的儲存規則；別名不代表 VB.NET 中相同名稱的位元寬度。",
+        "ja": "AS はスカラー変数の変換規則を指定します。内部の値種別は Integer、Decimal、String、Array、Object、Unit（値なし）です。Boolean は Integer の 1/0 を使います。この Basic の別名は VB.NET の同名型と同じビット幅を保証しません。",
+        "ko": "AS는 스칼라 변수의 변환 규칙을 지정합니다. 내부 값 종류는 Integer, Decimal, String, Array, Object, Unit(값 없음)입니다. Boolean은 Integer 1/0을 사용합니다. 이 Basic의 별칭은 VB.NET에서 같은 이름을 쓰는 형식의 저장 크기를 보장하지 않습니다."
+      },
+      "examples": [
+        "Option Explicit On\nSUB Main()\n    VAR source = 2.6\n    VAR whole AS Integer = source\n    VAR rounded = CInt(source)\n    RETURN whole * 10 + rounded\nEND SUB\n",
+        "Option Explicit On\nSUB Main()\n    VAR count = 2\n    VAR hasItems AS Boolean = count\n    IF count = TRUE THEN\n        RETURN -1\n    END IF\n    IF count <> 0 THEN\n        RETURN hasItems\n    END IF\n    RETURN FALSE\nEND SUB\n",
+        "Option Explicit On\nSUB Main()\n    VAR value AS Variant = 7\n    value = \"ore\"\n    VAR text AS String\n    text = value + CStr(12)\n    RETURN text\nEND SUB\n"
+      ]
+    },
+    {
+      "id": "Basic.Constants",
+      "name": "CONST",
+      "signatures": [
+        "CONST name [AS type] = expression [, name ...]"
+      ],
+      "descriptions": {
+        "en": "CONST declares a name whose binding rejects ordinary reassignment. It can hold a literal or an expression result. This engine evaluates the initializer at runtime when the declaration is executed.",
+        "ru": "CONST объявляет имя, привязку которого нельзя изменить обычным присваиванием. Начальным значением может быть литерал или результат выражения. Движок вычисляет инициализатор во время выполнения объявления.",
+        "uk": "CONST оголошує ім’я, прив’язку якого не можна змінити звичайним присвоєнням. Початковим значенням може бути літерал або результат виразу. Рушій обчислює ініціалізатор під час виконання оголошення.",
+        "fr": "CONST déclare un nom dont la liaison refuse les réaffectations ordinaires. L’initialisation peut être un littéral ou le résultat d’une expression, évalué lorsque la déclaration s’exécute.",
+        "de": "CONST deklariert einen Namen, dessen Bindung gewöhnliche Neuzuweisungen ablehnt. Der Startwert kann ein Literal oder Ausdrucksergebnis sein und wird bei Ausführung der Deklaration berechnet.",
+        "it": "CONST dichiara un nome la cui associazione rifiuta la normale riassegnazione. Il valore iniziale può essere un letterale o il risultato di un’espressione, valutato all’esecuzione della dichiarazione.",
+        "es": "CONST declara un nombre cuya vinculación rechaza la reasignación normal. El valor inicial puede ser un literal o el resultado de una expresión, evaluado al ejecutar la declaración.",
+        "zh-tw": "CONST 宣告一個名稱，其綁定不允許一般重新指定。初始值可以是常值或運算式結果，由引擎在執行宣告時計算。",
+        "ja": "CONST は通常の再代入を拒否する名前の束縛を宣言します。初期値はリテラルや式の結果を使用でき、宣言の実行時に評価します。",
+        "ko": "CONST는 일반적인 재대입을 허용하지 않는 이름 바인딩을 선언합니다. 초기값으로 리터럴이나 표현식 결과를 사용할 수 있으며 선언이 실행될 때 계산합니다."
+      },
+      "examples": [
+        "Option Explicit On\nSUB Main()\n    CONST delay AS Integer = 350\n    VAR doubled = delay * 2\n    RETURN doubled\nEND SUB\n",
+        "Option Explicit On\nCONST limit AS Integer = 50\nFUNCTION ApplyLimit(amount, maximum)\n    IF amount > maximum THEN\n        RETURN maximum\n    END IF\n    RETURN amount\nEND FUNCTION\nSUB Main()\n    RETURN ApplyLimit(72, limit)\nEND SUB\n",
+        "Option Explicit On\nSUB Main()\n    CONST limit = 3\n    VAR caught = FALSE\n    TRY\n        limit = 4\n    CATCH problem\n        caught = TRUE\n    END TRY\n    RETURN caught\nEND SUB\n"
+      ]
+    },
+    {
+      "id": "Basic.Literals",
+      "name": "123 / 0x0EED / \"text\" / TRUE",
+      "signatures": [
+        "123",
+        "-2147483648",
+        "0x0EED",
+        "0xFFFFFFFF",
+        "2.5",
+        "\"text\"",
+        "'text'",
+        "TRUE",
+        "FALSE"
+      ],
+      "descriptions": {
+        "en": "A literal writes a value directly in source code. Numbers and quoted text do not require declarations. TRUE and FALSE are predefined logical values. A quoted number remains text until an explicit or declared conversion changes it.",
+        "ru": "Литерал записывает значение прямо в исходнике. Для чисел и текста в кавычках объявление не требуется. TRUE и FALSE — предопределённые логические значения. Число в кавычках остаётся текстом, пока его не изменит явное преобразование или тип объявления.",
+        "uk": "Літерал записує значення безпосередньо у вихідному коді. Числа та текст у лапках не потребують оголошення. TRUE і FALSE — наперед визначені логічні значення. Число в лапках залишається текстом до явного перетворення або застосування типу оголошення.",
+        "fr": "Un littéral écrit une valeur directement dans le code, sans déclaration pour les nombres et textes entre guillemets. TRUE/FALSE sont des valeurs logiques prédéfinies. Un nombre entre guillemets reste du texte jusqu’à sa conversion.",
+        "de": "Ein Literal schreibt einen Wert direkt in den Code. Zahlen und zitierte Texte brauchen keine Deklaration. TRUE/FALSE sind vordefinierte logische Werte. Eine zitierte Zahl bleibt bis zur Konvertierung Text.",
+        "it": "Un letterale scrive direttamente un valore nel codice. Numeri e testi tra virgolette non richiedono dichiarazioni. TRUE/FALSE sono valori logici predefiniti. Un numero tra virgolette rimane testo fino alla conversione.",
+        "es": "Un literal escribe un valor directamente en el código. Números y textos entre comillas no requieren declaraciones. TRUE/FALSE son valores lógicos predefinidos. Un número entre comillas sigue siendo texto hasta convertirlo.",
+        "zh-tw": "常值直接在原始碼中寫出值。數字與引號文字不需要宣告。TRUE/FALSE 是預先定義的邏輯值。加上引號的數字仍是文字，直到明確或宣告型別轉換改變它。",
+        "ja": "リテラルは値をコードに直接記述します。数値や引用文字列は宣言不要です。TRUE/FALSE は定義済み論理値です。引用符付きの数値は、明示的変換や宣言型の変換を行うまで文字列です。",
+        "ko": "리터럴은 코드에 값을 직접 적습니다. 숫자와 따옴표 문자열은 선언이 필요 없습니다. TRUE/FALSE는 미리 정의된 논리 값입니다. 따옴표 안의 숫자는 명시적 변환이나 선언 형식 변환 전까지 문자열입니다."
+      },
+      "examples": [
+        "Option Explicit On\nSUB Main()\n    VAR itemType = 0x0EED\n    VAR lowest = -2147483648\n    IF lowest = 0x80000000 THEN\n        RETURN itemType\n    END IF\n    RETURN 0\nEND SUB\n",
+        "Option Explicit On\nSUB Main()\n    VAR owner = \"O'Brien\"\n    VAR instruction = 'say \"go\"'\n    RETURN owner + \" | \" + instruction\nEND SUB\n",
+        "Option Explicit On\nSUB Main()\n    VAR enabled = TRUE\n    VAR stopped = FALSE\n    RETURN enabled * 10 + stopped\nEND SUB\n"
+      ]
+    },
+    {
+      "id": "Basic.Arithmetic",
+      "name": "+, -, *, /, MOD",
+      "signatures": [
+        "left + right",
+        "left - right",
+        "-right",
+        "left * right",
+        "left / right",
+        "left MOD right",
+        "(expression)"
+      ],
+      "descriptions": {
+        "en": "Arithmetic expressions calculate a value from their operands. + adds, - subtracts or negates, * multiplies, / divides, and MOD returns the integer remainder. Assign or return the expression to retain its result.",
+        "ru": "Арифметическое выражение вычисляет значение из операндов. + складывает, - вычитает или меняет знак, * умножает, / делит, MOD даёт целочисленный остаток. Сохраните выражение в переменную или верните через RETURN, чтобы использовать результат.",
+        "uk": "Арифметичний вираз обчислює значення з операндів. + додає, - віднімає або змінює знак, * множить, / ділить, MOD дає цілочисельну остачу. Збережіть вираз у змінну або поверніть через RETURN для подальшого використання.",
+        "fr": "Une expression arithmétique calcule une valeur : + additionne, - soustrait ou change le signe, * multiplie, / divise, MOD donne le reste entier. Affectez le résultat à une variable ou renvoyez-le avec RETURN.",
+        "de": "Ein arithmetischer Ausdruck berechnet einen Wert: + addiert, - subtrahiert oder kehrt das Vorzeichen um, * multipliziert, / dividiert, MOD liefert den ganzzahligen Rest. Den Wert einer Variablen zuweisen oder mit RETURN zurückgeben.",
+        "it": "Un’espressione aritmetica calcola un valore: + somma, - sottrae o cambia segno, * moltiplica, / divide, MOD restituisce il resto intero. Assegnare il risultato a una variabile oppure restituirlo con RETURN.",
+        "es": "Una expresión aritmética calcula un valor: + suma, - resta o cambia el signo, * multiplica, / divide y MOD devuelve el resto entero. Asigne el resultado a una variable o devuélvalo mediante RETURN.",
+        "zh-tw": "算術運算式由運算元計算一個值：+ 相加，- 相減或反轉正負號，* 相乘，/ 相除，MOD 取得整數餘數。將結果指定給變數或以 RETURN 傳回，便可繼續使用。",
+        "ja": "算術式は値を計算します。+ は加算、- は減算または符号反転、* は乗算、/ は除算、MOD は整数の余りです。結果を変数に代入するか RETURN で返して利用します。",
+        "ko": "산술식은 값을 계산합니다. +는 더하기, -는 빼기 또는 부호 반전, *는 곱하기, /는 나누기, MOD는 정수 나머지입니다. 결과를 변수에 대입하거나 RETURN으로 반환하여 사용합니다."
+      },
+      "examples": [
+        "Option Explicit On\nSUB Main()\n    VAR plain = 2 + 3 * 4\n    VAR grouped = (2 + 3) * 4\n    RETURN plain * 100 + grouped\nEND SUB\n",
+        "Option Explicit On\nFUNCTION DescribeBatches(total, size)\n    IF size <= 0 THEN\n        RETURN \"invalid\"\n    END IF\n    VAR whole = Fix(total / size)\n    VAR remaining = total mOd size\n    RETURN CStr(whole) + \":\" + CStr(remaining)\nEND FUNCTION\nSUB Main()\n    RETURN DescribeBatches(27, 5)\nEND SUB\n",
+        "Option Explicit On\nSUB Main()\n    VAR caught = FALSE\n    TRY\n        VAR unusedResult = 10 MOD 0\n    CATCH problem\n        caught = TRUE\n    END TRY\n    RETURN caught\nEND SUB\n"
+      ]
+    },
+    {
+      "id": "Basic.Comparison",
+      "name": "=, ==, <>, <, >, <=, >=",
+      "signatures": [
+        "left = right",
+        "left == right",
+        "left <> right",
+        "left < right",
+        "left > right",
+        "left <= right",
+        "left >= right"
+      ],
+      "descriptions": {
+        "en": "Comparison operators test two values and produce a logical result. Use that result in IF, assign it to a variable, or return it from a helper function.",
+        "ru": "Операторы сравнения проверяют два значения и дают логический результат. Его можно использовать в IF, сохранить в переменную либо вернуть из вспомогательной функции.",
+        "uk": "Оператори порівняння перевіряють два значення та дають логічний результат. Його можна використати в IF, зберегти у змінну або повернути з допоміжної функції.",
+        "fr": "Les opérateurs de comparaison testent deux valeurs et produisent un résultat logique, utilisable dans IF, une variable ou le RETURN d’une fonction auxiliaire.",
+        "de": "Vergleichsoperatoren prüfen zwei Werte und liefern ein logisches Ergebnis für IF, eine Variable oder RETURN in einer Hilfsfunktion.",
+        "it": "Gli operatori di confronto verificano due valori e producono un risultato logico, utilizzabile in IF, in una variabile o nel RETURN di una funzione ausiliaria.",
+        "es": "Los operadores de comparación comprueban dos valores y producen un resultado lógico para IF, una variable o el RETURN de una función auxiliar.",
+        "zh-tw": "比較運算子檢查兩個值並產生邏輯結果，可用於 IF、存入變數或由輔助函式 RETURN 傳回。",
+        "ja": "比較演算子は2つの値を調べ、IF、変数への代入、補助関数の RETURN に使える論理結果を生成します。",
+        "ko": "비교 연산자는 두 값을 검사하여 IF, 변수 대입 또는 보조 함수 RETURN에서 사용할 논리 결과를 만듭니다."
+      },
+      "examples": [
+        "Option Explicit On\nFUNCTION InRange(value, low, high)\n    RETURN (low <= value) AND (value <= high)\nEND FUNCTION\nSUB Main()\n    VAR accepted = InRange(4, 2, 5)\n    IF accepted = TRUE THEN\n        RETURN 1\n    END IF\n    RETURN 0\nEND SUB\n",
+        "Option Explicit On\nSUB Main()\n    VAR sameCase = (\"Ore\" = \"ore\")\n    VAR sameKind = (\"5\" == 5)\n    VAR converted = (CDbl(\"5\") = 5)\n    RETURN CStr(sameCase) + \":\" + CStr(sameKind) + \":\" + CStr(converted)\nEND SUB\n",
+        "Option Explicit On\nFUNCTION NearlyEqual(actual, expected, tolerance)\n    IF tolerance < 0 THEN\n        RETURN FALSE\n    END IF\n    RETURN Abs(actual - expected) <= tolerance\nEND FUNCTION\nSUB Main()\n    RETURN NearlyEqual(0.1 + 0.2, 0.3, 0.000001)\nEND SUB\n"
+      ]
+    },
+    {
+      "id": "Basic.Logic",
+      "name": "NOT / AND / OR / XOR",
+      "signatures": [
+        "NOT (condition)",
+        "left AND right",
+        "left && right",
+        "left OR right",
+        "left || right",
+        "left XOR right"
+      ],
+      "descriptions": {
+        "en": "NOT inverts a condition. AND requires both conditions, OR at least one, XOR exactly one. && is an alias of AND and || is an alias of OR. Keywords are case-insensitive.",
+        "ru": "NOT инвертирует условие. AND требует оба условия, OR — хотя бы одно, XOR — ровно одно. && является записью AND, || — записью OR. Регистр ключевых слов не важен.",
+        "uk": "NOT інвертує умову. AND вимагає обидві умови, OR — хоча б одну, XOR — рівно одну. && є записом AND, || — записом OR. Регістр ключових слів не важливий.",
+        "fr": "NOT inverse une condition. AND exige les deux, OR au moins une, XOR exactement une. && est un alias de AND, || de OR. La casse des mots-clés est indifférente.",
+        "de": "NOT kehrt eine Bedingung um. AND verlangt beide, OR mindestens eine, XOR genau eine. && entspricht AND, || entspricht OR. Groß-/Kleinschreibung ist bei Schlüsselwörtern egal.",
+        "it": "NOT inverte una condizione. AND richiede entrambe, OR almeno una, XOR esattamente una. && equivale a AND e || a OR. Le parole chiave non distinguono le maiuscole.",
+        "es": "NOT invierte una condición. AND exige ambas, OR al menos una, XOR exactamente una. && equivale a AND y || a OR. Las palabras clave no distinguen mayúsculas.",
+        "zh-tw": "NOT 反轉條件。AND 要求兩個條件都成立，OR 至少一個，XOR 恰好一個。&& 是 AND 的別名，|| 是 OR 的別名。關鍵字不區分大小寫。",
+        "ja": "NOT は条件を反転します。AND は両方、OR は少なくとも一方、XOR は一方だけが成立するか調べます。&& は AND、|| は OR の別名です。キーワードの大文字小文字は区別しません。",
+        "ko": "NOT은 조건을 반전합니다. AND는 둘 다, OR는 적어도 하나, XOR는 정확히 하나가 참이어야 합니다. &&는 AND, ||는 OR의 별칭이며 키워드 대소문자를 구분하지 않습니다."
+      },
+      "examples": [
+        "Option Explicit On\nSUB Main()\n    VAR ready = TRUE\n    VAR blocked = FALSE\n    VAR canRun = ready AND (NOT blocked)\n    VAR exclusive = ready XOR blocked\n    RETURN canRun * 10 + exclusive\nEND SUB\n",
+        "Option Explicit On\nFUNCTION Mark(ByRef counter)\n    counter = counter + 1\n    RETURN TRUE\nEND FUNCTION\nSUB Main()\n    VAR counter = 0\n    VAR first = FALSE AND Mark(counter)\n    VAR second = TRUE OR Mark(counter)\n    RETURN counter\nEND SUB\n",
+        "Option Explicit On\nSUB Main()\n    VAR legacy = TRUE OR FALSE AND FALSE\n    VAR grouped = TRUE OR (FALSE AND FALSE)\n    RETURN legacy * 10 + grouped\nEND SUB\n"
+      ]
+    },
+    {
+      "id": "Basic.ShortCircuit",
+      "name": "AndAlso / OrElse",
+      "signatures": [
+        "left AndAlso right",
+        "left OrElse right",
+        "(conditionA OrElse conditionB) AndAlso conditionC"
+      ],
+      "descriptions": {
+        "en": "AndAlso and OrElse combine conditions while skipping an unnecessary right operand. AndAlso skips it when the left is false; OrElse skips it when the left is true. Use them to guard array access or avoid unnecessary calls.",
+        "ru": "AndAlso и OrElse соединяют условия и пропускают ненужный правый операнд. AndAlso пропускает его, если слева ложь; OrElse — если слева истина. Так можно защитить обращение к массиву и избежать лишних вызовов.",
+        "uk": "AndAlso та OrElse поєднують умови, пропускаючи непотрібний правий операнд. AndAlso пропускає його, коли ліворуч хибність; OrElse — коли істина. Це захищає доступ до масиву й усуває зайві виклики.",
+        "fr": "AndAlso et OrElse combinent des conditions en évitant un opérande droit inutile. AndAlso le saute si la gauche est fausse ; OrElse si elle est vraie. Cela permet de protéger un accès au tableau ou d’éviter des appels.",
+        "de": "AndAlso und OrElse verbinden Bedingungen und überspringen unnötige rechte Operanden. AndAlso überspringt bei falscher linker Seite, OrElse bei wahrer. Damit lassen sich Arrayzugriffe absichern und Aufrufe vermeiden.",
+        "it": "AndAlso e OrElse combinano condizioni saltando l’operando destro inutile. AndAlso lo salta se la sinistra è falsa; OrElse se è vera. Servono a proteggere accessi all’array ed evitare chiamate inutili.",
+        "es": "AndAlso y OrElse combinan condiciones omitiendo el operando derecho innecesario. AndAlso lo omite si la izquierda es falsa; OrElse si es verdadera. Úselos para proteger accesos a matrices y evitar llamadas.",
+        "zh-tw": "AndAlso 與 OrElse 結合條件並略過不必要的右運算元。AndAlso 在左側為假時略過右側；OrElse 在左側為真時略過。可用來保護陣列存取或避免多餘呼叫。",
+        "ja": "AndAlso と OrElse は不要な右オペランドを評価せずに条件を結合します。AndAlso は左が偽なら、OrElse は左が真なら右を省略します。配列アクセスの保護や不要な呼び出しの回避に使えます。",
+        "ko": "AndAlso와 OrElse는 불필요한 오른쪽 피연산자를 건너뛰며 조건을 결합합니다. AndAlso는 왼쪽이 거짓이면, OrElse는 왼쪽이 참이면 오른쪽을 생략합니다. 배열 접근을 보호하거나 불필요한 호출을 피할 때 사용하세요."
+      },
+      "examples": [
+        "Option Explicit On\nFUNCTION FirstEquals(ByVal items, expected)\n    RETURN (GetArrayLength(items) > 0) AndAlso (items[0] = expected)\nEND FUNCTION\nSUB Main()\n    DIM items[0], empty[-1]\n    items[0] = 42\n    VAR present = FirstEquals(items, 42)\n    VAR missing = FirstEquals(empty, 42)\n    RETURN present * 10 + missing\nEND SUB\n",
+        "Option Explicit On\nFUNCTION Probe(ByRef calls)\n    calls += 1\n    RETURN TRUE\nEND FUNCTION\nSUB Main()\n    VAR calls = 0\n    VAR cached = TRUE OrElse Probe(calls)\n    VAR fallback = FALSE OrElse Probe(calls)\n    RETURN calls\nEND SUB\n",
+        "Option Explicit On\nFUNCTION AverageExceeds(total, count, limit)\n    RETURN (count > 0) AndAlso (total / count > limit)\nEND FUNCTION\nSUB Main()\n    VAR empty = AverageExceeds(25, 0, 10)\n    VAR accepted = AverageExceeds(25, 2, 10)\n    VAR priority = TRUE OrElse FALSE AndAlso FALSE\n    RETURN CStr(empty) + \":\" + CStr(accepted) + \":\" + CStr(priority)\nEND SUB\n"
+      ]
+    },
+    {
+      "id": "Basic.Concatenation",
+      "name": "String + / &",
+      "signatures": [
+        "leftText + rightText",
+        "leftText & rightText",
+        "\"label\" & CStr(number)"
+      ],
+      "descriptions": {
+        "en": "Join text with + or the Basic compatibility spelling &. Convert numeric values explicitly with CStr before adding labels, quantities or coordinates to a message.",
+        "ru": "Соединяйте текст через + или совместимую запись Basic &. Числа явно преобразуйте через CStr, прежде чем добавлять в сообщение подписи, количество или координаты.",
+        "uk": "Поєднуйте текст через + або сумісний запис Basic &. Числа явно перетворюйте через CStr перед додаванням підписів, кількості чи координат до повідомлення.",
+        "fr": "Assembler du texte avec + ou la notation Basic compatible &. Convertir explicitement les nombres avec CStr avant de les ajouter à des libellés, quantités ou coordonnées.",
+        "de": "Text mit + oder der kompatiblen Basic-Schreibweise & verbinden. Zahlen ausdrücklich mit CStr umwandeln, bevor Beschriftungen, Mengen oder Koordinaten daraus entstehen.",
+        "it": "Unire testo con + oppure la notazione Basic compatibile &. Convertire i numeri esplicitamente con CStr prima di aggiungere etichette, quantità o coordinate.",
+        "es": "Una texto con + o la escritura Basic compatible &. Convierta los números explícitamente con CStr antes de añadir etiquetas, cantidades o coordenadas.",
+        "zh-tw": "以 + 或 Basic 相容寫法 & 串接文字。將數量、座標等數字加入訊息前，請先用 CStr 明確轉換。",
+        "ja": "+ または Basic 互換の & で文字列を結合します。数量や座標などの数値は CStr で明示的に変換してからメッセージに追加します。",
+        "ko": "+ 또는 Basic 호환 표기 &로 텍스트를 연결합니다. 수량이나 좌표 같은 숫자는 CStr로 명시적으로 변환한 뒤 메시지에 추가하세요."
+      },
+      "examples": [
+        "Option Explicit On\nSUB Main()\n    VAR amount = 50\n    RETURN \"Items: \" & CStr(amount)\nEND SUB\n",
+        "Option Explicit On\nFUNCTION Label(name, amount)\n    RETURN name + \":\" + CStr(amount)\nEND FUNCTION\nSUB Main()\n    RETURN Label(\"ore\", 3)\nEND SUB\n",
+        "Option Explicit On\nSUB Main()\n    RETURN \"Total: \" & CStr(2 + 3) & \"; literal: A&B\"\nEND SUB\n"
+      ]
+    },
+    {
+      "id": "Basic.CompoundAssignment",
+      "name": "+= / -= / *= / /= / &=",
+      "signatures": [
+        "target += value",
+        "target -= value",
+        "target *= value",
+        "target /= value",
+        "target &= value"
+      ],
+      "descriptions": {
+        "en": "Update an existing variable or array element with +=, -=, *= or /=. The engine reads its current value, applies the operation and writes the result back without evaluating the target twice.",
+        "ru": "Изменяйте существующую переменную или элемент массива через +=, -=, *=, /=. Движок читает текущее значение, выполняет операцию и записывает результат, не вычисляя цель дважды.",
+        "uk": "Змінюйте наявну змінну або елемент масиву через +=, -=, *=, /=. Рушій читає поточне значення, виконує операцію та записує результат, не обчислюючи ціль двічі.",
+        "fr": "Modifier une variable ou un élément de tableau existant avec +=, -=, *=, /=. Le moteur lit sa valeur, applique l’opération et écrit le résultat sans évaluer deux fois la cible.",
+        "de": "Vorhandene Variablen oder Arrayelemente mit +=, -=, *=, /= ändern. Die Engine liest den Wert, rechnet und schreibt zurück, ohne das Ziel zweimal auszuwerten.",
+        "it": "Aggiornare una variabile o elemento di array esistente con +=, -=, *=, /=. Il motore legge il valore, esegue l’operazione e lo riscrive senza valutare due volte la destinazione.",
+        "es": "Actualice una variable o elemento de matriz existente con +=, -=, *=, /=. El motor lee el valor, aplica la operación y lo guarda sin evaluar dos veces el destino.",
+        "zh-tw": "使用 +=、-=、*=、/= 更新既有變數或陣列元素。引擎讀取目前值、運算並寫回，不會重複計算目標。",
+        "ja": "既存の変数や配列要素を +=、-=、*=、/= で更新します。現在値を読み、計算して書き戻し、対象を二度評価しません。",
+        "ko": "+=, -=, *=, /=로 기존 변수나 배열 요소를 갱신합니다. 현재 값을 읽고 계산하여 다시 쓰며 대상을 두 번 평가하지 않습니다."
+      },
+      "examples": [
+        "Option Explicit On\nSUB Main()\n    VAR amount = 10\n    amount += 2\n    amount -= 3\n    amount *= 4\n    amount /= 2\n    RETURN amount\nEND SUB\n",
+        "Option Explicit On\nFUNCTION NextIndex(ByRef calls)\n    calls += 1\n    RETURN 0\nEND FUNCTION\nSUB Main()\n    DIM items[0]\n    items[0] = 5\n    VAR calls = 0\n    items[NextIndex(calls)] += 2\n    RETURN items[0] * 10 + calls\nEND SUB\n",
+        "Option Explicit On\nSUB Main()\n    CONST limit = 5\n    VAR caught = FALSE\n    TRY\n        limit += 1\n    CATCH problem\n        caught = TRUE\n    END TRY\n    VAR report = CStr(limit)\n    report &= \":\"\n    report &= CStr(caught)\n    RETURN report\nEND SUB\n"
+      ]
+    },
+    {
+      "id": "Basic.Arrays",
+      "name": "DIM / REDIM / PRESERVE",
+      "signatures": [
+        "DIM name[upper]",
+        "DIM name(upper) AS type",
+        "DIM grid[xUpper][yUpper]",
+        "DIM grid(xUpper, yUpper)",
+        "REDIM name[upper]",
+        "REDIM PRESERVE name[upper]",
+        "name[index] = value",
+        "GetArrayLength(name)"
+      ],
+      "descriptions": {
+        "en": "DIM creates a dynamic array; REDIM replaces its storage. Add PRESERVE to copy values at overlapping indices. Dimensions specify inclusive upper bounds, not item counts. Initialize elements before reading them.",
+        "ru": "DIM создаёт динамический массив; REDIM заменяет его хранилище. PRESERVE копирует значения по совпадающим индексам. Размерность задаётся включительной верхней границей, а не количеством элементов. Перед чтением заполните ячейки.",
+        "uk": "DIM створює динамічний масив; REDIM замінює його сховище. PRESERVE копіює значення за спільними індексами. Розмірність задає включну верхню межу, а не кількість елементів. Перед читанням заповніть комірки.",
+        "fr": "DIM crée un tableau dynamique ; REDIM remplace son stockage. PRESERVE copie les valeurs aux indices communs. Une dimension indique la borne supérieure incluse, pas le nombre d’éléments. Initialiser les cases avant lecture.",
+        "de": "DIM erstellt ein dynamisches Array; REDIM ersetzt dessen Speicher. PRESERVE kopiert Werte an gemeinsamen Indizes. Dimensionen nennen inklusive Obergrenzen, keine Elementzahlen. Elemente vor dem Lesen initialisieren.",
+        "it": "DIM crea un array dinamico; REDIM ne sostituisce la memoria. PRESERVE copia i valori agli indici comuni. Le dimensioni indicano limiti superiori inclusi, non quantità. Inizializzare gli elementi prima di leggerli.",
+        "es": "DIM crea una matriz dinámica; REDIM sustituye su almacenamiento. PRESERVE copia valores en índices comunes. Las dimensiones indican límites superiores incluidos, no cantidades. Inicialice las celdas antes de leerlas.",
+        "zh-tw": "DIM 建立動態陣列；REDIM 替換其儲存空間。PRESERVE 複製重疊索引的值。維度指定包含在內的上界，而非元素數量。讀取前必須初始化元素。",
+        "ja": "DIM は動的配列を作り、REDIM はその格納領域を置き換えます。PRESERVE は重なる添字の値をコピーします。各次元は要素数ではなく、含まれる上限を指定します。読む前に要素を初期化してください。",
+        "ko": "DIM은 동적 배열을 만들고 REDIM은 저장 공간을 교체합니다. PRESERVE는 겹치는 인덱스의 값을 복사합니다. 차원에는 개수가 아닌 포함되는 상한을 지정합니다. 읽기 전에 요소를 초기화하세요."
+      },
+      "examples": [
+        "Option Explicit On\nFUNCTION Sum(ByVal items)\n    VAR total = 0\n    VAR i = 0\n    FOR i = 0 TO GetArrayLength(items) - 1\n        total += items[i]\n    NEXT\n    RETURN total\nEND FUNCTION\nSUB Main()\n    DIM items(Abs(-2))\n    items[0] = 2\n    items[1] = 4\n    items[2] = 6\n    RETURN Sum(items)\nEND SUB\n",
+        "Option Explicit On\nSUB Main()\n    DIM values[1]\n    values[0] = 7\n    values[1] = 8\n    REDIM PRESERVE values(2)\n    values[2] = 9\n    RETURN values[0] * 100 + values[1] * 10 + values[2]\nEND SUB\n",
+        "Option Explicit On\nSUB Main()\n    DIM grid[1][1]\n    grid[0][1] = 4\n    VAR alias = grid\n    alias[0][1] = 9\n    REDIM PRESERVE grid[2][1]\n    RETURN CStr(grid[0][1]) + \":\" + CStr(GetArrayLength(grid)) + \":\" + CStr(GetArrayLength(alias))\nEND SUB\n"
+      ]
+    },
+    {
+      "id": "Basic.If",
+      "name": "IF / ELSEIF / ELSE / END IF",
+      "signatures": [
+        "IF condition THEN\n    statements\nEND IF",
+        "IF condition THEN\n    statements\nELSEIF elseifCondition THEN\n    statements\nELSE\n    statements\nEND IF"
+      ],
+      "descriptions": {
+        "en": "IF selects at most one branch. It checks IF, then successive ELSEIF conditions until the first true result; otherwise it runs ELSE when present. Execution normally continues after END IF.",
+        "ru": "IF выбирает не более одной ветки. Сначала проверяется IF, затем условия ELSEIF до первого истинного результата; если ни одно не подошло, выполняется ELSE при его наличии. Затем выполнение обычно продолжается после END IF.",
+        "uk": "IF обирає не більше однієї гілки. Спочатку перевіряється IF, далі ELSEIF до першої істинної умови; якщо жодна не підійшла, виконується наявний ELSE. Потім виконання зазвичай триває після END IF.",
+        "fr": "IF sélectionne au plus une branche : IF, puis les ELSEIF jusqu’au premier résultat vrai, sinon ELSE s’il existe. L’exécution continue normalement après END IF.",
+        "de": "IF wählt höchstens einen Zweig: zuerst IF, dann ELSEIF bis zum ersten wahren Ergebnis, sonst das optionale ELSE. Danach geht es normalerweise nach END IF weiter.",
+        "it": "IF sceglie al massimo un ramo: IF, poi ELSEIF fino al primo risultato vero; altrimenti ELSE, se presente. Normalmente si prosegue dopo END IF.",
+        "es": "IF elige como máximo una rama: IF, después ELSEIF hasta la primera condición verdadera; en su defecto ELSE, si existe. Normalmente continúa después de END IF.",
+        "zh-tw": "IF 最多選擇一個分支。先檢查 IF，再依序檢查 ELSEIF，直到第一個真條件；都不符合時執行可選的 ELSE。正常情況下接著執行 END IF 之後的程式。",
+        "ja": "IF は最大一つの分岐を選びます。IF、続く ELSEIF を順に調べ、最初の真を選びます。すべて偽なら、存在する場合は ELSE を実行し、通常は END IF の後に進みます。",
+        "ko": "IF는 최대 하나의 분기를 선택합니다. IF와 이어지는 ELSEIF를 순서대로 확인해 처음 참인 조건을 선택합니다. 모두 거짓이면 선택적인 ELSE를 실행하고 보통 END IF 다음으로 진행합니다."
+      },
+      "examples": [
+        "Option Explicit On\nFUNCTION Classify(value)\n    IF value < 0 THEN\n        RETURN \"negative\"\n    ELSEIF value = 0 THEN\n        RETURN \"zero\"\n    ELSEIF value < 10 THEN\n        RETURN \"small\"\n    ELSE\n        RETURN \"large\"\n    END IF\nEND FUNCTION\nSUB Main()\n    RETURN Classify(-2) + \":\" + Classify(0) + \":\" + Classify(7) + \":\" + Classify(20)\nEND SUB\n",
+        "Option Explicit On\nFUNCTION Action(enabled, amount)\n    IF enabled THEN\n        IF amount > 0 THEN\n            RETURN \"work\"\n        ELSE\n            RETURN \"idle\"\n        END IF\n    ELSE\n        RETURN \"disabled\"\n    END IF\nEND FUNCTION\nSUB Main()\n    RETURN Action(TRUE, 5) + \":\" + Action(TRUE, 0) + \":\" + Action(FALSE, 5)\nEND SUB\n",
+        "Option Explicit On\nFUNCTION Check(ByRef calls, ByVal value)\n    calls += 1\n    RETURN value\nEND FUNCTION\nSUB Main()\n    VAR calls = 0\n    VAR result = 0\n    IF Check(calls, FALSE) THEN\n        result = 5\n    ELSEIF Check(calls, TRUE) THEN\n        result = 7\n    ELSEIF Check(calls, TRUE) THEN\n        result = 9\n    ELSE\n        result = 8\n    END IF\n    RETURN calls * 10 + result\nEND SUB\n"
+      ]
+    },
+    {
+      "id": "Basic.SelectCase",
+      "name": "Select Case / Case / Exit Select",
+      "signatures": [
+        "Select Case expression",
+        "    Case value1, value2",
+        "        statements",
+        "        Exit Select",
+        "    Case from To to",
+        "        statements",
+        "    Case Is >= value",
+        "        statements",
+        "    Case Else",
+        "        statements",
+        "End Select"
+      ],
+      "descriptions": {
+        "en": "Select Case chooses one branch by comparing a captured value with ordered alternatives. Use it for item categories, script modes or numeric ranges. It is a Basic statement, written without UO.; game calls inside expressions still require UO.",
+        "ru": "Select Case выбирает одну ветку, сравнивая сохранённое значение с вариантами по порядку. Подходит для категорий предметов, режимов скрипта и диапазонов чисел. Это конструкция Basic без UO.; игровые вызовы внутри выражений по-прежнему требуют UO.",
+        "uk": "Select Case обирає одну гілку, порівнюючи збережене значення з варіантами по черзі. Підходить для категорій предметів, режимів скрипту та числових діапазонів. Це конструкція Basic без UO.; ігрові виклики у виразах потребують UO.",
+        "fr": "Select Case choisit une branche en comparant une valeur mémorisée aux alternatives dans l’ordre. Il convient aux catégories d’objets, aux modes de script et aux intervalles. Cette instruction Basic s’écrit sans UO.; les appels de jeu dans ses expressions gardent UO.",
+        "de": "Select Case wählt einen Zweig, indem ein gespeicherter Wert der Reihe nach mit Alternativen verglichen wird. Geeignet für Gegenstandskategorien, Skriptmodi und Zahlenbereiche. Die Basic-Anweisung braucht kein UO.; Spielaufrufe in Ausdrücken behalten UO.",
+        "it": "Select Case sceglie un ramo confrontando un valore memorizzato con alternative ordinate. È utile per categorie di oggetti, modalità e intervalli numerici. È un’istruzione Basic senza UO.; le chiamate di gioco nelle espressioni richiedono UO.",
+        "es": "Select Case elige una rama comparando un valor guardado con alternativas ordenadas. Sirve para categorías, modos del script e intervalos numéricos. Es una instrucción Basic sin UO.; las llamadas al juego dentro de expresiones conservan UO.",
+        "zh-tw": "Select Case 將儲存的值依序與候選條件比較，只選擇一個分支。適合物品分類、腳本模式及數值區間。它是 Basic 敘述，不加 UO.；運算式中的遊戲 API 呼叫仍須加 UO.。",
+        "ja": "Select Case は保存した値を候補と順番に比較し、一つの分岐を選びます。アイテム分類、スクリプトのモード、数値範囲に使えます。UO. を付けない Basic 文です。式の中のゲーム API 呼び出しには UO. が必要です。",
+        "ko": "Select Case는 저장한 값을 후보와 순서대로 비교하여 한 분기를 선택합니다. 아이템 분류, 스크립트 모드, 숫자 범위에 적합합니다. UO. 없이 쓰는 Basic 구문이며 식 안의 게임 API 호출에는 UO.가 필요합니다."
+      },
+      "examples": [
+        "Option Explicit On\nFunction DescribeAmount(ByVal amount)\n    Select Case amount\n        Case 0\n            Return \"empty\"\n        Case 1 To 4\n            Return \"small\"\n        Case Is >= 5\n            Return \"large\"\n        Case Else\n            Return \"negative\"\n    End Select\nEnd Function\n\nSub Main()\n    Return DescribeAmount(-1) & \":\" & DescribeAmount(0) & \":\" & DescribeAmount(4) & \":\" & DescribeAmount(5)\nEnd Sub\n",
+        "Option Explicit On\nFunction ReadMode(ByRef reads)\n    reads += 1\n    Return 2\nEnd Function\n\nFunction Candidate(ByRef checks, ByVal value)\n    checks += 1\n    Return value\nEnd Function\n\nSub Main()\n    Dim reads = 0\n    Dim checks = 0\n    Dim selected = 0\n    Select Case ReadMode(reads)\n        Case Candidate(checks, 1)\n            selected = -1\n        Case Candidate(checks, 2), Candidate(checks, 3)\n            selected = 7\n        Case Else\n            selected = -9\n    End Select\n    Return reads * 100 + checks * 10 + selected\nEnd Sub\n",
+        "Option Explicit On\nSub Main()\n    Dim route = \"harvest\"\n    Dim trace = 0\n    Select Case route\n        Case \"harvest\", \"loot\"\n            trace = 1\n            Select Case 2\n                Case 2\n                    Try\n                        Exit Select\n                        trace = 99\n                    Finally\n                        trace = trace * 10 + 2\n                    End Try\n            End Select\n            trace = trace * 10 + 3\n        Case Else\n            trace = -1\n    End Select\n    Return trace\nEnd Sub\n"
+      ]
+    },
+    {
+      "id": "Basic.For",
+      "name": "For / To / Step / Next / Exit For",
+      "signatures": [
+        "For [VAR] counter = start To limit [Step increment]\n    statements\nNext [counter]",
+        "Continue For",
+        "Exit For",
+        "Break"
+      ],
+      "descriptions": {
+        "en": "For repeats a block over an inclusive numeric range. Use it for array indices or a known number of operations; For Each instead enumerates element values.",
+        "ru": "For повторяет блок по числовому диапазону, включая достижимую границу. Подходит для индексов массива и заданного числа операций; For Each перебирает сами значения элементов.",
+        "uk": "For повторює блок у числовому діапазоні, включно з досяжною межею. Підходить для індексів масиву або визначеної кількості дій; For Each перебирає значення елементів.",
+        "fr": "For répète un bloc sur une plage numérique inclusive. Utilisez-le pour les indices ou un nombre connu d’opérations ; For Each parcourt les valeurs.",
+        "de": "For wiederholt einen Block über einen einschließlichen Zahlenbereich. Geeignet für Indizes oder eine bekannte Anzahl von Schritten; For Each durchläuft Elementwerte.",
+        "it": "For ripete un blocco lungo un intervallo numerico inclusivo. Serve per indici o un numero noto di operazioni; For Each visita i valori degli elementi.",
+        "es": "For repite un bloque en un intervalo numérico inclusivo. Úsalo para índices o una cantidad conocida de operaciones; For Each recorre valores de elementos.",
+        "zh-tw": "For 在包含可到達端點的數字範圍內重複區塊，適合陣列索引或已知次數的操作；For Each 則走訪元素值。",
+        "ja": "For は到達可能な終点を含む数値範囲でブロックを繰り返します。配列インデックスや既知回数の処理向けです。For Each は要素の値を列挙します。",
+        "ko": "For는 도달 가능한 끝값을 포함하는 숫자 범위에서 블록을 반복합니다. 배열 인덱스나 정해진 횟수의 작업에 적합하며 For Each는 요소 값을 순회합니다."
+      },
+      "examples": [
+        "Option Explicit On\nFunction Sum(ByVal items)\n    Var total = 0\n    For Var index = 0 To GetArrayLength(items) - 1\n        total += items[index]\n    Next index\n    Return total\nEnd Function\nSub Main()\n    Dim values[2]\n    values[0] = 2\n    values[1] = 4\n    values[2] = 6\n    Return Sum(values)\nEnd Sub\n",
+        "Option Explicit On\nSub Main()\n    Var items = List()\n    items.Add(-1)\n    items.Add(3)\n    items.Add(-2)\n    items.Add(5)\n    For Var index = items.Count() - 1 To 0 Step -1\n        If items[index] < 0 Then\n            items.RemoveAt(index)\n        End If\n    Next index\n    Return items.Count() * 10 + items[0] + items[1]\nEnd Sub\n",
+        "Option Explicit On\nFunction ReadLimit(ByRef calls, ByVal value)\n    calls += 1\n    Return value\nEnd Function\nSub Main()\n    Var calls = 0\n    Var upper = 5\n    Var stride = 2\n    Var total = 0\n    For Var index = ReadLimit(calls, 1) To ReadLimit(calls, upper) Step ReadLimit(calls, stride)\n        total += index\n        upper = 99\n        stride = 1\n    Next index\n    Return calls * 100 + total * 10 + index\nEnd Sub\n"
+      ]
+    },
+    {
+      "id": "Basic.ForEach",
+      "name": "For Each / Next",
+      "signatures": [
+        "For Each item [AS type] In collection\n    statements\nNext [item]"
+      ],
+      "descriptions": {
+        "en": "For Each reads each element of an array or a native enumerable collection in order, without a numeric index. It is a loop statement inside a procedure or function; it is not a callable API function.",
+        "ru": "For Each по порядку перебирает элементы массива или перечисляемой нативной коллекции без числового индекса. Это оператор цикла внутри процедуры или функции, а не вызываемая команда API.",
+        "uk": "For Each послідовно перебирає елементи масиву або нативної колекції з підтримкою переліку без числового індексу. Це оператор циклу всередині процедури чи функції, а не виклик API.",
+        "fr": "For Each parcourt les éléments d’un tableau ou d’une collection native énumérable, sans index numérique. Cette instruction se place dans une procédure ou fonction ; ce n’est pas un appel API.",
+        "de": "For Each durchläuft die Elemente eines Arrays oder einer aufzählbaren nativen Sammlung ohne numerischen Index. Die Anweisung steht in einer Prozedur oder Funktion und ist kein API-Aufruf.",
+        "it": "For Each visita gli elementi di un array o di una raccolta nativa enumerabile senza indice numerico. È un’istruzione nel corpo di una procedura o funzione, non una chiamata API.",
+        "es": "For Each recorre los elementos de un array o colección nativa enumerable sin índice numérico. Es una instrucción dentro de un procedimiento o función, no una llamada API.",
+        "zh-tw": "For Each 不使用數字索引，依序走訪陣列或可列舉原生集合的元素。這是程序或函式內的迴圈陳述式，不是可呼叫的 API 函式。",
+        "ja": "For Each は数値インデックスを使わず、配列または列挙可能なネイティブコレクションの要素を順に読みます。手続きや関数内のループ文であり、API 関数の呼び出しではありません。",
+        "ko": "For Each는 숫자 인덱스 없이 배열이나 열거 가능한 네이티브 컬렉션의 요소를 순서대로 읽습니다. 프로시저나 함수 안의 반복문이며 API 함수 호출이 아닙니다."
+      },
+      "examples": [
+        "Option Explicit On\nFunction SumItems(values)\n    Var total = 0\n    For Each item In values\n        total += item\n    Next item\n    Return total\nEnd Function\nSub Main()\n    Dim values[2]\n    values[0] = 2\n    values[1] = 4\n    values[2] = 6\n    Return SumItems(values)\nEnd Sub\n",
+        "Option Explicit On\nFunction SelectItems(ByRef calls)\n    calls += 1\n    Dim values[1]\n    values[0] = \"2\"\n    values[1] = \"3\"\n    Return values\nEnd Function\nSub Main()\n    Var calls = 0\n    Var total = 0\n    For Each item As Integer In SelectItems(calls)\n        total += item\n        item = 100\n    Next\n    Return calls * 100 + total\nEnd Sub\n",
+        "Option Explicit On\nFunction SumGrid(rows)\n    Var total = 0\n    For Each row In rows\n        For Each cell In row\n            total += cell\n        Next cell\n    Next row\n    Return total\nEnd Function\nSub Main()\n    Dim rows[1][1]\n    rows[0][0] = 1\n    rows[0][1] = 2\n    rows[1][0] = 3\n    rows[1][1] = 4\n    Return SumGrid(rows)\nEnd Sub\n"
+      ]
+    },
+    {
+      "id": "Basic.While",
+      "name": "While / Wend / Exit While / Break",
+      "signatures": [
+        "While condition\n    statements\nWend",
+        "Continue While",
+        "Exit While",
+        "Break"
+      ],
+      "descriptions": {
+        "en": "While tests its condition before each iteration and repeats while it is true. This engine closes the block with Wend; the VB.NET spelling End While is not supported.",
+        "ru": "While проверяет условие перед каждой итерацией и повторяет тело, пока оно истинно. В этом движке блок закрывается Wend; написание End While из VB.NET не поддерживается.",
+        "uk": "While перевіряє умову перед кожною ітерацією та повторює тіло, доки вона істинна. Рушій закриває блок словом Wend; End While з VB.NET не підтримується.",
+        "fr": "While teste avant chaque passage et répète tant que la condition est vraie. Ce moteur ferme le bloc avec Wend ; End While de VB.NET n’est pas accepté.",
+        "de": "While prüft vor jedem Durchlauf und wiederholt bei wahrer Bedingung. Diese Engine schließt mit Wend; die VB.NET-Schreibweise End While wird nicht unterstützt.",
+        "it": "While controlla prima di ogni passaggio e ripete quando la condizione è vera. Questo motore chiude con Wend; End While di VB.NET non è supportato.",
+        "es": "While comprueba antes de cada pasada y repite mientras la condición sea verdadera. Este motor cierra con Wend; End While de VB.NET no está admitido.",
+        "zh-tw": "While 在每次迭代前檢查條件，為真時重複本體。本引擎用 Wend 結束區塊，不支援 VB.NET 的 End While 寫法。",
+        "ja": "While は各反復の前に条件を検査し、真の間繰り返します。このエンジンでは Wend で閉じます。VB.NET の End While は対応していません。",
+        "ko": "While는 매 반복 전에 조건을 검사하고 참인 동안 본문을 반복합니다. 이 엔진은 Wend로 닫으며 VB.NET의 End While 표기는 지원하지 않습니다."
+      },
+      "examples": [
+        "Option Explicit On\nFunction DigitSum(ByVal number)\n    Var total = 0\n    While number > 0\n        total += number MOD 10\n        number = Fix(number / 10)\n    Wend\n    Return total\nEnd Function\nSub Main()\n    Return DigitSum(123)\nEnd Sub\n",
+        "Option Explicit On\nFunction FirstAbove(ByVal values, ByVal threshold)\n    Var index = 0\n    Var found = -1\n    While index < GetArrayLength(values)\n        If values[index] > threshold Then\n            found = index\n            Exit While\n        End If\n        index += 1\n    Wend\n    Return found\nEnd Function\nSub Main()\n    Dim values[2]\n    values[0] = 4\n    values[1] = 7\n    values[2] = 9\n    Return FirstAbove(values, 6)\nEnd Sub\n",
+        "Option Explicit On\nFunction CanContinue(ByRef checks, ByVal index, ByVal limit)\n    checks += 1\n    Return index < limit\nEnd Function\nSub Main()\n    Var checks = 0\n    Var index = 0\n    Var total = 0\n    While CanContinue(checks, index, 3)\n        index += 1\n        total += index\n    Wend\n    Return checks * 100 + total\nEnd Sub\n"
+      ]
+    },
+    {
+      "id": "Basic.Do",
+      "name": "Do / Loop / While / Until / Repeat",
+      "signatures": [
+        "Do While condition\n    statements\nLoop",
+        "Do Until condition\n    statements\nLoop",
+        "Do\n    statements\nLoop While condition",
+        "Do\n    statements\nLoop Until condition",
+        "Do\n    statements\nLoop",
+        "Repeat\n    statements\nUntil condition",
+        "Continue Do",
+        "Exit Do",
+        "Break"
+      ],
+      "descriptions": {
+        "en": "Do supports a condition before or after its body. While repeats while true; Until repeats until true. Repeat … Until is the supported legacy form with a condition after the body.",
+        "ru": "Do допускает проверку до либо после тела. While продолжает при истинном условии, Until — до его истинности. Repeat … Until — поддерживаемая старая форма с проверкой после тела.",
+        "uk": "Do перевіряє умову перед тілом або після нього. While повторює при істині, Until — до істини. Repeat … Until є підтримуваною старою формою з перевіркою після тіла.",
+        "fr": "Do accepte un contrôle avant ou après le corps. While poursuit si vrai ; Until poursuit jusqu’à vrai. Repeat … Until est la forme historique à contrôle final.",
+        "de": "Do prüft vor oder nach dem Rumpf. While wiederholt bei wahr; Until bis wahr. Repeat … Until ist die unterstützte ältere Form mit abschließender Prüfung.",
+        "it": "Do controlla prima o dopo il corpo. While ripete se vero; Until fino al vero. Repeat … Until è la forma storica supportata con controllo finale.",
+        "es": "Do comprueba antes o después del cuerpo. While repite si es verdadero; Until hasta que sea verdadero. Repeat … Until es la forma antigua admitida con comprobación final.",
+        "zh-tw": "Do 可在本體前或後檢查條件。While 在真時繼續；Until 在真時結束。Repeat … Until 是支援的舊式寫法，於本體後檢查。",
+        "ja": "Do は本体の前または後で条件を検査します。While は真の間、Until は真になるまで繰り返します。Repeat … Until は後で検査する対応済みの旧形式です。",
+        "ko": "Do는 본문 전이나 후에 조건을 검사합니다. While는 참인 동안, Until은 참이 될 때까지 반복합니다. Repeat … Until은 본문 뒤에 검사하는 지원되는 기존 형식입니다."
+      },
+      "examples": [
+        "Option Explicit On\nSub Main()\n    Var ready = True\n    Var before = 0\n    Var after = 0\n    Do Until ready\n        before += 1\n    Loop\n    Do\n        after += 1\n    Loop Until ready\n    Return before * 10 + after\nEnd Sub\n",
+        "Option Explicit On\nSub Main()\n    Var attempts = 0\n    Var cleanup = 0\n    Do\n        Try\n            attempts += 1\n            If attempts < 3 Then\n                Continue Do\n            End If\n            Exit Do\n        Finally\n            cleanup += 1\n        End Try\n    Loop While attempts < 4\n    Return attempts * 10 + cleanup\nEnd Sub\n",
+        "Option Explicit On\nSub Main()\n    Dim values[2]\n    values[0] = 3\n    values[1] = 5\n    values[2] = 0\n    Var index = 0\n    Var value = 0\n    Var total = 0\n    Repeat\n        value = values[index]\n        index += 1\n        total += value\n    Until (value = 0) OrElse (index >= GetArrayLength(values))\n    Return total * 10 + index\nEnd Sub\n"
+      ]
+    },
+    {
+      "id": "Basic.Continue",
+      "name": "Continue For / Do / While",
+      "signatures": [
+        "Continue For",
+        "Continue Do",
+        "Continue While"
+      ],
+      "descriptions": {
+        "en": "Continue skips the remaining body of the nearest enclosing loop of the requested kind. Use Continue For for both numeric For and For Each, Continue Do for Do/Loop or Repeat/Until, and Continue While for While/Wend.",
+        "ru": "Continue пропускает оставшуюся часть тела ближайшего внешнего цикла указанного вида. Continue For применяется к числовому For и For Each, Continue Do — к Do/Loop и Repeat/Until, Continue While — к While/Wend.",
+        "uk": "Continue пропускає решту тіла найближчого зовнішнього циклу вказаного виду. Continue For працює для числового For і For Each, Continue Do — для Do/Loop та Repeat/Until, Continue While — для While/Wend.",
+        "fr": "Continue ignore le reste du corps de la boucle englobante la plus proche du type demandé. Continue For vise For et For Each ; Continue Do vise Do/Loop et Repeat/Until ; Continue While vise While/Wend.",
+        "de": "Continue überspringt den restlichen Rumpf der nächsten umgebenden Schleife des angegebenen Typs. Continue For gilt für For und For Each, Continue Do für Do/Loop und Repeat/Until, Continue While für While/Wend.",
+        "it": "Continue salta il resto del corpo del ciclo contenitore più vicino del tipo richiesto. Continue For vale per For e For Each, Continue Do per Do/Loop e Repeat/Until, Continue While per While/Wend.",
+        "es": "Continue omite el resto del cuerpo del bucle contenedor más próximo del tipo indicado. Continue For sirve para For y For Each, Continue Do para Do/Loop y Repeat/Until, Continue While para While/Wend.",
+        "zh-tw": "Continue 略過最近、指定類型之外層迴圈的剩餘本體。Continue For 用於數字 For 與 For Each，Continue Do 用於 Do/Loop 或 Repeat/Until，Continue While 用於 While/Wend。",
+        "ja": "Continue は指定した種類の最も近い外側ループの残りを飛ばします。Continue For は数値 For と For Each、Continue Do は Do/Loop と Repeat/Until、Continue While は While/Wend に使います。",
+        "ko": "Continue는 지정한 종류의 가장 가까운 바깥 반복문에서 남은 본문을 건너뜁니다. Continue For는 숫자 For와 For Each, Continue Do는 Do/Loop와 Repeat/Until, Continue While는 While/Wend에 씁니다."
+      },
+      "examples": [
+        "Option Explicit On\nFunction SumPositive(values)\n    Var total = 0\n    For Each item In values\n        If item <= 0 Then\n            Continue For\n        End If\n        total += item\n    Next\n    Return total\nEnd Function\nSub Main()\n    Dim values[3]\n    values[0] = -2\n    values[1] = 4\n    values[2] = 0\n    values[3] = 6\n    Return SumPositive(values)\nEnd Sub\n",
+        "Option Explicit On\nFunction AdvanceTo(limit)\n    Var count = 0\n    Do While count < limit\n        While True\n            count += 1\n            Continue Do\n        Wend\n    Loop\n    Return count\nEnd Function\nSub Main()\n    Return AdvanceTo(3)\nEnd Sub\n",
+        "Option Explicit On\nFunction Process(limit, skip)\n    Var total = 0\n    Var cleanup = 0\n    For Var i = 1 To limit\n        Try\n            If i = skip Then\n                Continue For\n            End If\n            total += i\n        Finally\n            cleanup += 1\n        End Try\n    Next i\n    Return cleanup * 10 + total\nEnd Function\nSub Main()\n    Return Process(3, 2)\nEnd Sub\n"
+      ]
+    },
+    {
+      "id": "Basic.Sub",
+      "name": "Sub / Call / Exit Sub / End Sub",
+      "signatures": [
+        "Sub name(parameters)",
+        "    statements",
+        "End Sub",
+        "name(arguments)",
+        "Call name(arguments)",
+        "Call name arguments",
+        "Call name",
+        "Exit Sub",
+        "Return",
+        "Return expression"
+      ],
+      "descriptions": {
+        "en": "Sub groups statements into a named procedure. Use helpers to share inventory processing, validation or cleanup. Calls run synchronously in the current script; calling a helper does not start another background script.",
+        "ru": "Sub объединяет инструкции в именованную процедуру. Подходит для общей обработки предметов, проверок и завершения операции. Вызов помощника выполняется последовательно в текущем скрипте и не запускает отдельный фоновый скрипт.",
+        "uk": "Sub об’єднує інструкції в іменовану процедуру для обробки предметів, перевірок або завершення операції. Допоміжна процедура виконується послідовно в поточному скрипті; її виклик не запускає окремий фоновий скрипт.",
+        "fr": "Sub regroupe des instructions dans une procédure nommée, utile pour traiter des objets, vérifier des données ou terminer une opération. Un appel est synchrone dans le script actuel et ne lance pas un autre script en arrière-plan.",
+        "de": "Sub fasst Anweisungen in einer benannten Prozedur zusammen, etwa für Gegenstände, Prüfungen oder Abschlussarbeiten. Ein Aufruf läuft synchron im aktuellen Skript und startet kein weiteres Hintergrundskript.",
+        "it": "Sub raggruppa istruzioni in una procedura con nome, utile per oggetti, controlli e operazioni finali. La chiamata è sincrona nello script corrente e non avvia un altro script in background.",
+        "es": "Sub agrupa instrucciones en un procedimiento con nombre para tratar objetos, validar datos o finalizar una operación. La llamada es síncrona dentro del script actual y no inicia otro script en segundo plano.",
+        "zh-tw": "Sub 將多個指令整理為具名程序，適用於物品處理、檢查及收尾工作。呼叫會在目前腳本中依序執行，不會另開背景腳本。",
+        "ja": "Sub は複数の文を名前付き手続きにまとめます。アイテム処理、検証、後処理の共通化に使えます。呼び出しは現在のスクリプト内で同期的に実行され、別のバックグラウンドスクリプトを開始しません。",
+        "ko": "Sub는 여러 문장을 이름 있는 프로시저로 묶습니다. 아이템 처리, 검증, 마무리 작업을 재사용할 때 유용합니다. 호출은 현재 스크립트에서 동기적으로 실행되며 별도의 백그라운드 스크립트를 시작하지 않습니다."
+      },
+      "examples": [
+        "Option Explicit On\nSub AddAmount(ByRef total, Optional ByVal amount=1)\n    total += amount\nEnd Sub\n\nSub Main()\n    Dim total=4\n    Call AddAmount(total)\n    Call AddAmount total, 3\n    AddAmount(total, 2)\n    Return total\nEnd Sub\n",
+        "Option Explicit On\nModule Batches\n    Private Sub AppendAmount(ByRef total, ByVal value)\n        If value < 0 Then\n            Exit Sub\n        End If\n        total += value\n    End Sub\n\n    Public Sub SumInto(ByRef total, ParamArray values)\n        For Each value In values\n            AppendAmount(total, value)\n        Next\n    End Sub\nEnd Module\n\nSub Main()\n    Dim total=2\n    Batches.SumInto(total, 3, -9, 4)\n    Return total\nEnd Sub\n",
+        "Option Explicit On\nSub Finish(ByRef trace)\n    Try\n        trace=1\n        Exit Sub\n        trace=99\n    Finally\n        trace=trace*10+2\n    End Try\nEnd Sub\n\nSub LegacyValue()\n    Return 7\nEnd Sub\n\nSub Main()\n    Dim trace=0\n    Call Finish(trace)\n    Return trace*10+LegacyValue()\nEnd Sub\n"
+      ]
+    },
+    {
+      "id": "Basic.Function",
+      "name": "Function / Return / Exit Function / End Function",
+      "signatures": [
+        "Function name(parameters) As type",
+        "    name = expression",
+        "End Function",
+        "Function name(parameters)",
+        "    Return expression",
+        "End Function",
+        "result = name(arguments)",
+        "Exit Function",
+        "Return"
+      ],
+      "descriptions": {
+        "en": "Function declares a helper that returns a value. It can calculate a quantity, produce text or return a List/Dictionary reference. It is user code, called without UO.; UO.GetType(item) remains a separate game API even if you declare Function GetType(value).",
+        "ru": "Function объявляет помощника, возвращающего значение: количество, строку или ссылку на List/Dictionary. Это собственный код без UO.; UO.GetType(item) остаётся отдельной игровой командой, даже если объявлена Function GetType(value).",
+        "uk": "Function оголошує помічника, що повертає кількість, текст або посилання на List/Dictionary. Це власний код без UO.; UO.GetType(item) лишається окремою ігровою командою, навіть за наявності Function GetType(value).",
+        "fr": "Function définit un auxiliaire qui renvoie une quantité, du texte ou une référence List/Dictionary. Votre fonction se nomme sans UO. ; UO.GetType(item) reste une API du jeu distincte de Function GetType(value).",
+        "de": "Function definiert einen Helfer mit Rückgabewert: Menge, Text oder List/Dictionary-Referenz. Eigene Funktionen benötigen kein UO.; UO.GetType(item) bleibt getrennt von einer selbst definierten Function GetType(value).",
+        "it": "Function definisce un aiuto che restituisce quantità, testo o riferimenti List/Dictionary. Si chiama senza UO.; UO.GetType(item) resta un’API del gioco distinta da una Function GetType(value) propria.",
+        "es": "Function define un ayudante que devuelve una cantidad, texto o referencia List/Dictionary. Se llama sin UO.; UO.GetType(item) sigue siendo una API del juego distinta de una Function GetType(value) propia.",
+        "zh-tw": "Function 宣告會回傳數量、文字或 List/Dictionary 參照的輔助函式。自己的函式不加 UO.；即使宣告 Function GetType(value)，UO.GetType(item) 仍是獨立的遊戲 API。",
+        "ja": "Function は数量、文字列、List/Dictionary の参照などを返す補助関数です。自作名に UO. は不要です。Function GetType(value) を宣言しても、UO.GetType(item) は別のゲーム API のままです。",
+        "ko": "Function은 수량, 문자열, List/Dictionary 참조 등을 반환하는 도우미 함수입니다. 사용자 함수에는 UO.가 필요 없으며 Function GetType(value)를 선언해도 UO.GetType(item)은 별도의 게임 API로 유지됩니다."
+      },
+      "examples": [
+        "Option Explicit On\nFunction TotalPrice(ByVal count, ByVal price) As Integer\n    If count < 0 OrElse price < 0 Then\n        Return -1\n    End If\n    TotalPrice=count*price\n    TotalPrice+=2\nEnd Function\n\nSub Main()\n    Return CStr(TotalPrice(3, 4)) & \":\" & CStr(TotalPrice(-1, 4))\nEnd Sub\n",
+        "Option Explicit On\nFunction Factorial(ByVal n) As Integer\n    Factorial=1\n    If n <= 1 Then\n        Exit Function\n    End If\n    Factorial=n*Factorial(n-1)\nEnd Function\n\nSub Main()\n    Return Factorial(5)+Factorial(3)\nEnd Sub\n",
+        "Option Explicit On\nFunction Calculate(ByRef trace) As Integer\n    Try\n        Try\n            trace=1\n            Return 1\n        Finally\n            Calculate=Calculate*10+2\n            trace=trace*10+2\n        End Try\n    Finally\n        Calculate=Calculate*10+3\n        trace=trace*10+3\n    End Try\nEnd Function\n\nSub Main()\n    Dim trace=0\n    Dim result=Calculate(trace)\n    Return CStr(result) & \":\" & CStr(trace)\nEnd Sub\n"
+      ]
+    },
+    {
+      "id": "Basic.OptionExplicit",
+      "name": "Option Explicit",
+      "signatures": [
+        "Option Explicit",
+        "Option Explicit On",
+        "Option Explicit Off"
+      ],
+      "descriptions": {
+        "en": "Requires variable declarations before script execution. This is a file directive of the Basic language in this engine, not a UO command or a function call.",
+        "ru": "Требует объявления переменных до запуска скрипта. Это директива файла языка Basic этого движка, а не команда UO и не вызов функции.",
+        "uk": "Вимагає оголошення змінних до запуску скрипту. Це директива файлу мови Basic цього рушія, а не команда UO чи виклик функції.",
+        "fr": "Exige la déclaration des variables avant l’exécution du script. Il s’agit d’une directive de fichier du langage Basic de ce moteur, pas d’une commande UO ni d’un appel de fonction.",
+        "de": "Verlangt Variablendeklarationen vor der Skriptausführung. Dies ist eine Dateidirektive der Basic-Sprache dieser Engine, kein UO-Befehl und kein Funktionsaufruf.",
+        "it": "Richiede la dichiarazione delle variabili prima di eseguire lo script. È una direttiva di file del linguaggio Basic di questo motore, non un comando UO o una chiamata di funzione.",
+        "es": "Exige declarar las variables antes de ejecutar el script. Es una directiva de archivo del lenguaje Basic de este motor, no un comando UO ni una llamada de función.",
+        "zh-tw": "要求在執行腳本前宣告變數。這是本引擎 Basic 語言的檔案指示詞，不是 UO 指令，也不是函式呼叫。",
+        "ja": "スクリプト実行前に変数の宣言を要求します。このエンジンの Basic 言語におけるファイル指令であり、UO コマンドや関数呼び出しではありません。",
+        "ko": "스크립트 실행 전에 변수 선언을 요구합니다. 이 엔진 Basic 언어의 파일 지시문이며 UO 명령이나 함수 호출이 아닙니다."
+      },
+      "examples": [
+        "Option Explicit On\nSUB Main()\n    DIM count AS Integer\n    count = 5\n    RETURN count\nEND SUB\n",
+        "Option Explicit\nCONST minimum = 3\nFUNCTION Enough(amount)\n    RETURN amount >= minimum\nEND FUNCTION\nSUB Main()\n    VAR amount = 5\n    RETURN Enough(amount)\nEND SUB\n",
+        "Option Explicit Off\nSUB Main()\n    legacyCounter = 7\n    RETURN legacyCounter\nEND SUB\n"
+      ]
+    },
+    {
+      "id": "Basic.Include",
+      "name": "Include",
+      "signatures": [
+        "Include \"fileName\""
+      ],
+      "descriptions": {
+        "en": "Include loads another source file before parsing and execution. Its shared functions and variables become available to the main script; it does not automatically start a procedure or thread.",
+        "ru": "Include подключает исходный код из другого файла до разбора и запуска скрипта. Общие функции и переменные становятся доступны основному скрипту; отдельный поток или процедура автоматически не запускаются.",
+        "uk": "Include підключає інший файл вихідного коду до розбору й запуску. Спільні функції та змінні стають доступними головному скрипту; процедура чи потік автоматично не запускаються.",
+        "fr": "Include charge un autre fichier source avant analyse et exécution. Ses fonctions et variables deviennent disponibles sans lancer automatiquement une procédure ou un thread.",
+        "de": "Include lädt eine weitere Quelldatei vor Analyse und Ausführung. Funktionen und Variablen werden verfügbar; Prozeduren oder Threads starten dadurch nicht automatisch.",
+        "it": "Include carica un altro file sorgente prima di analisi ed esecuzione. Rende disponibili funzioni e variabili senza avviare automaticamente procedure o thread.",
+        "es": "Include carga otro archivo fuente antes del análisis y la ejecución. Sus funciones y variables quedan disponibles sin iniciar automáticamente procedimientos ni hilos.",
+        "zh-tw": "Include 在解析及執行前載入其他原始碼檔案，讓主腳本使用其中的函式與變數；不會自動啟動程序或執行緒。",
+        "ja": "Include は解析と実行の前に別のソースファイルを読み込みます。関数や変数を主スクリプトで利用できますが、手続きやスレッドは自動的に起動しません。",
+        "ko": "Include는 구문 분석과 실행 전에 다른 소스 파일을 읽습니다. 주 스크립트에서 함수와 변수를 사용할 수 있게 하지만 프로시저나 스레드를 자동 실행하지 않습니다."
+      },
+      "examples": [
+        "Option Explicit On\nInclude \"Common.bas\"\nSUB Main()\n    RETURN Add(4, 7)\nEND SUB\n",
+        "Option Explicit On\nInclude \"lib/Route.bas\"\nSUB Main()\n    RETURN Distance(-3, 5)\nEND SUB\n",
+        "Option Explicit On\nInclude \"Common.bas\"\nInclude \"./Common.bas\"\nSUB Main()\n    RETURN GetShared() * 2\nEND SUB\n"
+      ],
+      "exampleRoots": [
+        "Examples/Basic.Include/1/Main.bas",
+        "Examples/Basic.Include/2/Main.bas",
+        "Examples/Basic.Include/3/Main.bas"
+      ]
+    },
+    {
+      "id": "Basic.Module",
+      "name": "Module / End Module",
+      "signatures": [
+        "Module moduleName\n    members\nEnd Module",
+        "moduleName.member(arguments)",
+        "moduleName.field"
+      ],
+      "descriptions": {
+        "en": "Module groups functions, procedures, VAR/DIM and CONST under one name. Outside use Tools.Sum or Counter.count; members of the current module may use short names.",
+        "ru": "Module объединяет функции, процедуры, VAR/DIM и CONST под одним именем. Снаружи используются имена Tools.Sum или Counter.count; внутри модуля можно писать короткое имя своего участника.",
+        "uk": "Module об’єднує функції, процедури, VAR/DIM і CONST під одним ім’ям. Ззовні пишіть Tools.Sum або Counter.count; усередині модуля дозволені короткі імена його учасників.",
+        "fr": "Module regroupe fonctions, procédures, VAR/DIM et CONST sous un nom. À l’extérieur, utilisez Tools.Sum ou Counter.count ; les membres du module courant acceptent un nom court.",
+        "de": "Module fasst Funktionen, Prozeduren, VAR/DIM und CONST unter einem Namen zusammen. Von außen gelten Tools.Sum oder Counter.count; im eigenen Modul sind kurze Mitgliedsnamen möglich.",
+        "it": "Module raggruppa funzioni, procedure, VAR/DIM e CONST sotto un nome. Dall’esterno si usano Tools.Sum o Counter.count; nel modulo corrente sono ammessi nomi brevi.",
+        "es": "Module agrupa funciones, procedimientos, VAR/DIM y CONST bajo un nombre. Desde fuera se usan Tools.Sum o Counter.count; dentro del módulo actual se admiten nombres cortos.",
+        "zh-tw": "Module 將函式、程序、VAR/DIM 與 CONST 放在同一名稱下。外部使用 Tools.Sum 或 Counter.count；目前模組內可以使用成員的短名稱。",
+        "ja": "Module は関数、手続き、VAR/DIM、CONST を一つの名前にまとめます。外部からは Tools.Sum や Counter.count、同じモジュール内では短いメンバー名を使えます。",
+        "ko": "Module은 함수, 프로시저, VAR/DIM, CONST를 하나의 이름으로 묶습니다. 외부에서는 Tools.Sum 또는 Counter.count를 쓰며, 현재 모듈 안에서는 짧은 멤버 이름을 사용할 수 있습니다."
+      },
+      "examples": [
+        "Option Explicit On\nModule Tools\n    Public Function Sum(ByVal left, ByVal right)\n        Return left + right\n    End Function\nEnd Module\nModule Other\n    Public Function Sum(ByVal left, ByVal right)\n        Return left * right\n    End Function\nEnd Module\nSub Main()\n    Return Tools.Sum(2, 3) + Other.Sum(2, 3)\nEnd Sub\n",
+        "Option Explicit On\nModule Counter\n    Public Var count As Integer = 0\n    Public Sub Increment()\n        count += 1\n    End Sub\n    Public Function Read()\n        Return count\n    End Function\nEnd Module\nSub Main()\n    Counter.Increment()\n    Counter.Increment()\n    Var before = Counter.Read()\n    Counter.count = 5\n    Return before * 10 + Counter.Read()\nEnd Sub\n",
+        "Option Explicit On\nModule Limits\n    Private Const maximum = 4\n    Public Function Allowed(ByVal amount)\n        Return amount <= maximum\n    End Function\nEnd Module\nSub Main()\n    Var accepted = Limits.Allowed(3)\n    Var rejected = Limits.Allowed(7)\n    If accepted = TRUE AndAlso rejected = FALSE Then\n        Return 10\n    End If\n    Return 0\nEnd Sub\n"
+      ]
+    },
+    {
+      "id": "Basic.Visibility",
+      "name": "Public / Private",
+      "signatures": [
+        "Public declaration",
+        "Private declaration"
+      ],
+      "descriptions": {
+        "en": "Public exposes a module member to external code. Private permits access only from functions, procedures and initializers in its own module. Place the modifier before the declaration, not the call.",
+        "ru": "Public открывает участника модуля для внешнего кода. Private оставляет его доступным только функциям, процедурам и инициализаторам своего модуля. Модификатор пишется перед объявлением, а не перед вызовом.",
+        "uk": "Public відкриває учасника модуля зовнішньому коду. Private дозволяє доступ тільки функціям, процедурам та ініціалізаторам свого модуля. Модифікатор ставиться перед оголошенням, а не викликом.",
+        "fr": "Public expose un membre du module au code extérieur. Private limite l’accès aux fonctions, procédures et initialiseurs de son propre module. Le modificateur précède la déclaration, pas l’appel.",
+        "de": "Public macht ein Modulmitglied von außen zugänglich. Private erlaubt nur Funktionen, Prozeduren und Initialisierern desselben Moduls den Zugriff. Der Modifikator steht vor der Deklaration, nicht vor dem Aufruf.",
+        "it": "Public espone un membro del modulo al codice esterno. Private limita l’accesso a funzioni, procedure e inizializzatori dello stesso modulo. Il modificatore precede la dichiarazione, non la chiamata.",
+        "es": "Public expone un miembro del módulo al código externo. Private permite acceso solo desde funciones, procedimientos e inicializadores de su propio módulo. El modificador va antes de la declaración, no de la llamada.",
+        "zh-tw": "Public 讓外部程式碼存取模組成員；Private 只允許同一模組的函式、程序和初始化式存取。修飾詞放在宣告前，不是呼叫前。",
+        "ja": "Public はモジュールのメンバーを外部に公開します。Private は同じモジュール内の関数、手続き、初期化式からだけアクセスできます。修飾子は呼び出しではなく宣言の前に書きます。",
+        "ko": "Public은 모듈 멤버를 외부 코드에 공개합니다. Private는 같은 모듈의 함수, 프로시저, 초기화 식에서만 접근할 수 있습니다. 한정자는 호출이 아닌 선언 앞에 씁니다."
+      },
+      "examples": [
+        "Option Explicit On\nModule Limits\n    Private Const maximum = 10\n    Private Function Clamp(ByVal value)\n        If value > maximum Then\n            Return maximum\n        End If\n        Return value\n    End Function\n    Public Function Normalize(ByVal value)\n        Return Clamp(value)\n    End Function\nEnd Module\nSub Main()\n    Return Limits.Normalize(12)\nEnd Sub\n",
+        "Option Explicit On\nModule Store\n    Var value = 7\n    Public Function Read()\n        Return value\n    End Function\n    Public Function LocalValue()\n        Var value = 9\n        Return value\n    End Function\nEnd Module\nSub Main()\n    Return Store.Read() * 10 + Store.LocalValue()\nEnd Sub\n",
+        "Option Explicit On\nModule Counter\n    Public Const increment = 2\n    Private Var count = 1\n    Public Function NextCount()\n        count += increment\n        Return count\n    End Function\nEnd Module\nSub Main()\n    Var result = Counter.NextCount()\n    Return result * 10 + Counter.increment\nEnd Sub\n"
+      ]
+    },
+    {
+      "id": "Basic.Parameters",
+      "name": "Parameters / ByRef / ByVal / Optional / ParamArray",
+      "signatures": [
+        "Sub name(ByRef target, ByVal value, Optional ByVal amount = 2, ParamArray rest())",
+        "Function name(parameters) As type",
+        "name(arguments)"
+      ],
+      "descriptions": {
+        "en": "Parameters pass data into SUB/FUNCTION. ByRef writes an updated value back to the caller; ByVal preserves the caller’s variable. Optional supplies an omitted argument and ParamArray collects remaining arguments. These are declaration modifiers, not callable commands.",
+        "ru": "Параметры передают данные в SUB/FUNCTION. ByRef позволяет записать изменённое значение обратно вызывающему коду; ByVal сохраняет его переменную. Optional задаёт значение при пропуске аргумента, ParamArray принимает оставшиеся аргументы массивом. Это модификаторы объявления, а не отдельные вызываемые команды.",
+        "uk": "Параметри передають дані в SUB/FUNCTION. ByRef записує змінене значення назад у код виклику; ByVal зберігає його змінну. Optional задає пропущений аргумент, ParamArray збирає решту аргументів. Це модифікатори оголошення, а не окремі команди.",
+        "fr": "Les paramètres transmettent des données à SUB/FUNCTION. ByRef réécrit la valeur modifiée chez l’appelant ; ByVal préserve sa variable. Optional fournit un argument omis et ParamArray regroupe les arguments restants. Ce sont des modificateurs de déclaration, pas des commandes appelables.",
+        "de": "Parameter übergeben Daten an SUB/FUNCTION. ByRef schreibt den geänderten Wert zurück; ByVal bewahrt die Variable des Aufrufers. Optional ergänzt ausgelassene Argumente, ParamArray sammelt übrige Argumente. Dies sind Deklarationsmodifizierer, keine aufrufbaren Befehle.",
+        "it": "I parametri passano dati a SUB/FUNCTION. ByRef riscrive il valore modificato nel chiamante; ByVal ne conserva la variabile. Optional fornisce un argomento omesso e ParamArray raccoglie gli argomenti rimanenti. Sono modificatori della dichiarazione, non comandi richiamabili.",
+        "es": "Los parámetros pasan datos a SUB/FUNCTION. ByRef escribe el valor modificado en el llamador; ByVal conserva su variable. Optional proporciona un argumento omitido y ParamArray agrupa los restantes. Son modificadores de declaración, no comandos invocables.",
+        "zh-tw": "參數將資料傳入 SUB/FUNCTION。ByRef 把修改後的值寫回呼叫方；ByVal 保留呼叫方的變數。Optional 提供省略的引數，ParamArray 收集剩餘引數。它們是宣告修飾詞，不是可單獨呼叫的命令。",
+        "ja": "パラメーターは SUB/FUNCTION にデータを渡します。ByRef は変更値を呼び出し元へ書き戻し、ByVal は呼び出し元の変数を保ちます。Optional は省略引数を補い、ParamArray は残りの引数を集めます。呼び出す命令ではなく宣言の修飾子です。",
+        "ko": "매개변수는 SUB/FUNCTION에 데이터를 전달합니다. ByRef는 변경 값을 호출자에게 기록하고 ByVal은 호출자의 변수를 보존합니다. Optional은 생략한 인수를 보충하고 ParamArray는 나머지 인수를 모읍니다. 호출 명령이 아니라 선언 한정자입니다."
+      },
+      "examples": [
+        "Option Explicit On\nSub Adjust(ByRef amount, ByVal increment)\n    amount += increment\nEnd Sub\nSub Main()\n    Var amount = 5\n    Adjust(amount, 3)\n    Return amount\nEnd Sub\n",
+        "Option Explicit On\nFunction Scale(ByVal value, Optional ByVal factor = 2)\n    Return value * factor\nEnd Function\nSub Main()\n    Return Scale(3) * 100 + Scale(3, 4)\nEnd Sub\n",
+        "Option Explicit On\nFunction Sum(ParamArray values())\n    Var total = 0\n    For Each value In values\n        total += value\n    Next\n    Return total\nEnd Function\nSub Main()\n    Return Sum() + Sum(2, 3, 4)\nEnd Sub\n"
+      ]
+    },
+    {
+      "id": "Basic.ByRef",
+      "name": "ByRef",
+      "signatures": [
+        "Sub Adjust(ByRef amount, ByVal increment)",
+        "Adjust(amount, 3)",
+        "Bump(items[index])",
+        "Function name(ByRef value As type)"
+      ],
+      "descriptions": {
+        "en": "Parameters pass data into SUB/FUNCTION. ByRef writes an updated value back to the caller; ByVal preserves the caller’s variable. Optional supplies an omitted argument and ParamArray collects remaining arguments. These are declaration modifiers, not callable commands.",
+        "ru": "Параметры передают данные в SUB/FUNCTION. ByRef позволяет записать изменённое значение обратно вызывающему коду; ByVal сохраняет его переменную. Optional задаёт значение при пропуске аргумента, ParamArray принимает оставшиеся аргументы массивом. Это модификаторы объявления, а не отдельные вызываемые команды.",
+        "uk": "Параметри передають дані в SUB/FUNCTION. ByRef записує змінене значення назад у код виклику; ByVal зберігає його змінну. Optional задає пропущений аргумент, ParamArray збирає решту аргументів. Це модифікатори оголошення, а не окремі команди.",
+        "fr": "Les paramètres transmettent des données à SUB/FUNCTION. ByRef réécrit la valeur modifiée chez l’appelant ; ByVal préserve sa variable. Optional fournit un argument omis et ParamArray regroupe les arguments restants. Ce sont des modificateurs de déclaration, pas des commandes appelables.",
+        "de": "Parameter übergeben Daten an SUB/FUNCTION. ByRef schreibt den geänderten Wert zurück; ByVal bewahrt die Variable des Aufrufers. Optional ergänzt ausgelassene Argumente, ParamArray sammelt übrige Argumente. Dies sind Deklarationsmodifizierer, keine aufrufbaren Befehle.",
+        "it": "I parametri passano dati a SUB/FUNCTION. ByRef riscrive il valore modificato nel chiamante; ByVal ne conserva la variabile. Optional fornisce un argomento omesso e ParamArray raccoglie gli argomenti rimanenti. Sono modificatori della dichiarazione, non comandi richiamabili.",
+        "es": "Los parámetros pasan datos a SUB/FUNCTION. ByRef escribe el valor modificado en el llamador; ByVal conserva su variable. Optional proporciona un argumento omitido y ParamArray agrupa los restantes. Son modificadores de declaración, no comandos invocables.",
+        "zh-tw": "參數將資料傳入 SUB/FUNCTION。ByRef 把修改後的值寫回呼叫方；ByVal 保留呼叫方的變數。Optional 提供省略的引數，ParamArray 收集剩餘引數。它們是宣告修飾詞，不是可單獨呼叫的命令。",
+        "ja": "パラメーターは SUB/FUNCTION にデータを渡します。ByRef は変更値を呼び出し元へ書き戻し、ByVal は呼び出し元の変数を保ちます。Optional は省略引数を補い、ParamArray は残りの引数を集めます。呼び出す命令ではなく宣言の修飾子です。",
+        "ko": "매개변수는 SUB/FUNCTION에 데이터를 전달합니다. ByRef는 변경 값을 호출자에게 기록하고 ByVal은 호출자의 변수를 보존합니다. Optional은 생략한 인수를 보충하고 ParamArray는 나머지 인수를 모읍니다. 호출 명령이 아니라 선언 한정자입니다."
+      },
+      "examples": [
+        "Option Explicit On\nSub Adjust(ByRef amount, ByVal increment)\n    amount += increment\nEnd Sub\nSub Main()\n    Var amount = 5\n    Adjust(amount, 3)\n    Return amount\nEnd Sub\n",
+        "Option Explicit On\nFunction NextIndex(ByRef calls)\n    calls += 1\n    Return 0\nEnd Function\nSub Bump(ByRef amount)\n    amount += 1\nEnd Sub\nSub Main()\n    Dim items[0]\n    items[0] = 5\n    Var calls = 0\n    Bump(items[NextIndex(calls)])\n    Return items[0] * 100 + calls\nEnd Sub\n",
+        "Option Explicit On\nSub Change(ByRef first, ByRef second)\n    first += 1\n    second += 2\nEnd Sub\nSub Main()\n    Var value = 5\n    Change(value, value)\n    Return value\nEnd Sub\n"
+      ]
+    },
+    {
+      "id": "Basic.ByVal",
+      "name": "ByVal",
+      "signatures": [
+        "Sub Change(ByVal value)",
+        "Function Increment(ByVal value)",
+        "Increment(expression)"
+      ],
+      "descriptions": {
+        "en": "Parameters pass data into SUB/FUNCTION. ByRef writes an updated value back to the caller; ByVal preserves the caller’s variable. Optional supplies an omitted argument and ParamArray collects remaining arguments. These are declaration modifiers, not callable commands.",
+        "ru": "Параметры передают данные в SUB/FUNCTION. ByRef позволяет записать изменённое значение обратно вызывающему коду; ByVal сохраняет его переменную. Optional задаёт значение при пропуске аргумента, ParamArray принимает оставшиеся аргументы массивом. Это модификаторы объявления, а не отдельные вызываемые команды.",
+        "uk": "Параметри передають дані в SUB/FUNCTION. ByRef записує змінене значення назад у код виклику; ByVal зберігає його змінну. Optional задає пропущений аргумент, ParamArray збирає решту аргументів. Це модифікатори оголошення, а не окремі команди.",
+        "fr": "Les paramètres transmettent des données à SUB/FUNCTION. ByRef réécrit la valeur modifiée chez l’appelant ; ByVal préserve sa variable. Optional fournit un argument omis et ParamArray regroupe les arguments restants. Ce sont des modificateurs de déclaration, pas des commandes appelables.",
+        "de": "Parameter übergeben Daten an SUB/FUNCTION. ByRef schreibt den geänderten Wert zurück; ByVal bewahrt die Variable des Aufrufers. Optional ergänzt ausgelassene Argumente, ParamArray sammelt übrige Argumente. Dies sind Deklarationsmodifizierer, keine aufrufbaren Befehle.",
+        "it": "I parametri passano dati a SUB/FUNCTION. ByRef riscrive il valore modificato nel chiamante; ByVal ne conserva la variabile. Optional fornisce un argomento omesso e ParamArray raccoglie gli argomenti rimanenti. Sono modificatori della dichiarazione, non comandi richiamabili.",
+        "es": "Los parámetros pasan datos a SUB/FUNCTION. ByRef escribe el valor modificado en el llamador; ByVal conserva su variable. Optional proporciona un argumento omitido y ParamArray agrupa los restantes. Son modificadores de declaración, no comandos invocables.",
+        "zh-tw": "參數將資料傳入 SUB/FUNCTION。ByRef 把修改後的值寫回呼叫方；ByVal 保留呼叫方的變數。Optional 提供省略的引數，ParamArray 收集剩餘引數。它們是宣告修飾詞，不是可單獨呼叫的命令。",
+        "ja": "パラメーターは SUB/FUNCTION にデータを渡します。ByRef は変更値を呼び出し元へ書き戻し、ByVal は呼び出し元の変数を保ちます。Optional は省略引数を補い、ParamArray は残りの引数を集めます。呼び出す命令ではなく宣言の修飾子です。",
+        "ko": "매개변수는 SUB/FUNCTION에 데이터를 전달합니다. ByRef는 변경 값을 호출자에게 기록하고 ByVal은 호출자의 변수를 보존합니다. Optional은 생략한 인수를 보충하고 ParamArray는 나머지 인수를 모읍니다. 호출 명령이 아니라 선언 한정자입니다."
+      },
+      "examples": [
+        "Option Explicit On\nSub Change(ByVal amount)\n    amount = 99\nEnd Sub\nSub Main()\n    Var amount = 5\n    Change(amount)\n    Return amount\nEnd Sub\n",
+        "Option Explicit On\nSub Change(ByVal items)\n    items[0] = 9\n    ReDim items[1]\n    items[0] = 20\nEnd Sub\nSub Main()\n    Dim items[0]\n    items[0] = 4\n    Change(items)\n    Return items[0] * 10 + GetArrayLength(items)\nEnd Sub\n",
+        "Option Explicit On\nFunction Increment(ByVal value)\n    value += 1\n    Return value\nEnd Function\nSub Main()\n    Var amount = 4\n    Var result = Increment(amount + 3)\n    Return amount * 10 + result\nEnd Sub\n"
+      ]
+    },
+    {
+      "id": "Basic.Optional",
+      "name": "Optional",
+      "signatures": [
+        "Function Scale(ByVal value, Optional ByVal factor = 2)",
+        "Scale(3)",
+        "Scale(3, 4)"
+      ],
+      "descriptions": {
+        "en": "Parameters pass data into SUB/FUNCTION. ByRef writes an updated value back to the caller; ByVal preserves the caller’s variable. Optional supplies an omitted argument and ParamArray collects remaining arguments. These are declaration modifiers, not callable commands.",
+        "ru": "Параметры передают данные в SUB/FUNCTION. ByRef позволяет записать изменённое значение обратно вызывающему коду; ByVal сохраняет его переменную. Optional задаёт значение при пропуске аргумента, ParamArray принимает оставшиеся аргументы массивом. Это модификаторы объявления, а не отдельные вызываемые команды.",
+        "uk": "Параметри передають дані в SUB/FUNCTION. ByRef записує змінене значення назад у код виклику; ByVal зберігає його змінну. Optional задає пропущений аргумент, ParamArray збирає решту аргументів. Це модифікатори оголошення, а не окремі команди.",
+        "fr": "Les paramètres transmettent des données à SUB/FUNCTION. ByRef réécrit la valeur modifiée chez l’appelant ; ByVal préserve sa variable. Optional fournit un argument omis et ParamArray regroupe les arguments restants. Ce sont des modificateurs de déclaration, pas des commandes appelables.",
+        "de": "Parameter übergeben Daten an SUB/FUNCTION. ByRef schreibt den geänderten Wert zurück; ByVal bewahrt die Variable des Aufrufers. Optional ergänzt ausgelassene Argumente, ParamArray sammelt übrige Argumente. Dies sind Deklarationsmodifizierer, keine aufrufbaren Befehle.",
+        "it": "I parametri passano dati a SUB/FUNCTION. ByRef riscrive il valore modificato nel chiamante; ByVal ne conserva la variabile. Optional fornisce un argomento omesso e ParamArray raccoglie gli argomenti rimanenti. Sono modificatori della dichiarazione, non comandi richiamabili.",
+        "es": "Los parámetros pasan datos a SUB/FUNCTION. ByRef escribe el valor modificado en el llamador; ByVal conserva su variable. Optional proporciona un argumento omitido y ParamArray agrupa los restantes. Son modificadores de declaración, no comandos invocables.",
+        "zh-tw": "參數將資料傳入 SUB/FUNCTION。ByRef 把修改後的值寫回呼叫方；ByVal 保留呼叫方的變數。Optional 提供省略的引數，ParamArray 收集剩餘引數。它們是宣告修飾詞，不是可單獨呼叫的命令。",
+        "ja": "パラメーターは SUB/FUNCTION にデータを渡します。ByRef は変更値を呼び出し元へ書き戻し、ByVal は呼び出し元の変数を保ちます。Optional は省略引数を補い、ParamArray は残りの引数を集めます。呼び出す命令ではなく宣言の修飾子です。",
+        "ko": "매개변수는 SUB/FUNCTION에 데이터를 전달합니다. ByRef는 변경 값을 호출자에게 기록하고 ByVal은 호출자의 변수를 보존합니다. Optional은 생략한 인수를 보충하고 ParamArray는 나머지 인수를 모읍니다. 호출 명령이 아니라 선언 한정자입니다."
+      },
+      "examples": [
+        "Option Explicit On\nFunction Scale(ByVal value, Optional ByVal factor = 2)\n    Return value * factor\nEnd Function\nSub Main()\n    Return Scale(3) * 100 + Scale(3, 4)\nEnd Sub\n",
+        "Option Explicit On\nModule Counter\n    Public Var calls = 0\nEnd Module\nFunction DefaultAmount()\n    Counter.calls += 1\n    Return 7\nEnd Function\nFunction Pick(Optional ByVal value = DefaultAmount())\n    Return value\nEnd Function\nSub Main()\n    Var first = Pick(5)\n    Var second = Pick()\n    Return first * 100 + second * 10 + Counter.calls\nEnd Sub\n",
+        "Option Explicit On\nSub Increase(ByRef value As Integer, Optional ByVal amount As Integer = 2)\n    value += amount\nEnd Sub\nSub Main()\n    Var value As Integer = 1\n    Increase(value)\n    Increase(value, 4)\n    Return value\nEnd Sub\n"
+      ]
+    },
+    {
+      "id": "Basic.ParamArray",
+      "name": "ParamArray",
+      "signatures": [
+        "Function Sum(ParamArray values())",
+        "Sum()",
+        "Sum(2, 3, 4)",
+        "Sum(existingArray)"
+      ],
+      "descriptions": {
+        "en": "Parameters pass data into SUB/FUNCTION. ByRef writes an updated value back to the caller; ByVal preserves the caller’s variable. Optional supplies an omitted argument and ParamArray collects remaining arguments. These are declaration modifiers, not callable commands.",
+        "ru": "Параметры передают данные в SUB/FUNCTION. ByRef позволяет записать изменённое значение обратно вызывающему коду; ByVal сохраняет его переменную. Optional задаёт значение при пропуске аргумента, ParamArray принимает оставшиеся аргументы массивом. Это модификаторы объявления, а не отдельные вызываемые команды.",
+        "uk": "Параметри передають дані в SUB/FUNCTION. ByRef записує змінене значення назад у код виклику; ByVal зберігає його змінну. Optional задає пропущений аргумент, ParamArray збирає решту аргументів. Це модифікатори оголошення, а не окремі команди.",
+        "fr": "Les paramètres transmettent des données à SUB/FUNCTION. ByRef réécrit la valeur modifiée chez l’appelant ; ByVal préserve sa variable. Optional fournit un argument omis et ParamArray regroupe les arguments restants. Ce sont des modificateurs de déclaration, pas des commandes appelables.",
+        "de": "Parameter übergeben Daten an SUB/FUNCTION. ByRef schreibt den geänderten Wert zurück; ByVal bewahrt die Variable des Aufrufers. Optional ergänzt ausgelassene Argumente, ParamArray sammelt übrige Argumente. Dies sind Deklarationsmodifizierer, keine aufrufbaren Befehle.",
+        "it": "I parametri passano dati a SUB/FUNCTION. ByRef riscrive il valore modificato nel chiamante; ByVal ne conserva la variabile. Optional fornisce un argomento omesso e ParamArray raccoglie gli argomenti rimanenti. Sono modificatori della dichiarazione, non comandi richiamabili.",
+        "es": "Los parámetros pasan datos a SUB/FUNCTION. ByRef escribe el valor modificado en el llamador; ByVal conserva su variable. Optional proporciona un argumento omitido y ParamArray agrupa los restantes. Son modificadores de declaración, no comandos invocables.",
+        "zh-tw": "參數將資料傳入 SUB/FUNCTION。ByRef 把修改後的值寫回呼叫方；ByVal 保留呼叫方的變數。Optional 提供省略的引數，ParamArray 收集剩餘引數。它們是宣告修飾詞，不是可單獨呼叫的命令。",
+        "ja": "パラメーターは SUB/FUNCTION にデータを渡します。ByRef は変更値を呼び出し元へ書き戻し、ByVal は呼び出し元の変数を保ちます。Optional は省略引数を補い、ParamArray は残りの引数を集めます。呼び出す命令ではなく宣言の修飾子です。",
+        "ko": "매개변수는 SUB/FUNCTION에 데이터를 전달합니다. ByRef는 변경 값을 호출자에게 기록하고 ByVal은 호출자의 변수를 보존합니다. Optional은 생략한 인수를 보충하고 ParamArray는 나머지 인수를 모읍니다. 호출 명령이 아니라 선언 한정자입니다."
+      },
+      "examples": [
+        "Option Explicit On\nFunction Sum(ParamArray values())\n    Var total = 0\n    For Each value In values\n        total += value\n    Next\n    Return total\nEnd Function\nSub Main()\n    Return Sum() + Sum(2, 3, 4)\nEnd Sub\n",
+        "Option Explicit On\nFunction Sum(ParamArray values())\n    Var total = 0\n    For Each value In values\n        total += value\n    Next\n    Return total\nEnd Function\nFunction Forward(ParamArray values())\n    Return Sum(values)\nEnd Function\nSub Main()\n    Dim values[1]\n    values[0] = 2\n    values[1] = 5\n    Return Forward(values)\nEnd Sub\n",
+        "Option Explicit On\nSub SetFirst(ParamArray values())\n    If GetArrayLength(values) > 0 Then\n        values[0] = 9\n    End If\nEnd Sub\nSub Main()\n    Var first = 2\n    Var second = 3\n    SetFirst(first, second)\n    Dim packed[0]\n    packed[0] = 4\n    SetFirst(packed)\n    Return first * 100 + second * 10 + packed[0]\nEnd Sub\n"
+      ]
+    },
+    {
+      "id": "Basic.List",
+      "name": "List",
+      "signatures": [
+        "List() -> Object:List",
+        "List(source:Array/List) -> Object:List",
+        "items.Add(value:Any) -> Unit",
+        "items.Insert(index:Number, value:Any) -> Unit",
+        "items.Item(index:Number) -> Any",
+        "items[index] = value",
+        "items.Set(index:Number, value:Any) -> Unit",
+        "items.Count() -> Integer",
+        "items.Contains(value:Any) -> Integer:1/0",
+        "items.IndexOf(value:Any) -> Integer:index/-1",
+        "items.Remove(value:Any) -> Integer:1/0",
+        "items.RemoveAt(index:Number) -> Unit",
+        "items.Clear() -> Unit",
+        "items.ToArray() -> Array"
+      ],
+      "descriptions": {
+        "en": "List() creates an ordered, resizable collection. Use its returned object through a variable; items.Add is an object method, not a global List.Add command.",
+        "ru": "List() создаёт упорядоченный список изменяемой длины. Сохраните полученный объект в переменную: items.Add — метод объекта, отдельной глобальной команды List.Add нет.",
+        "uk": "List() створює впорядкований список змінної довжини. Збережіть об’єкт у змінній: items.Add є методом об’єкта, окремої глобальної команди List.Add немає.",
+        "fr": "List() crée une collection ordonnée de taille variable. Conservez l’objet dans une variable : items.Add est une méthode d’objet, pas une commande globale List.Add.",
+        "de": "List() erzeugt eine geordnete Sammlung mit veränderlicher Länge. Das Ergebnis in einer Variablen speichern: items.Add ist eine Objektmethode, kein globaler Befehl List.Add.",
+        "it": "List() crea una raccolta ordinata di lunghezza variabile. Salvare l’oggetto in una variabile: items.Add è un metodo, non un comando globale List.Add.",
+        "es": "List() crea una colección ordenada de longitud variable. Guarde el objeto en una variable: items.Add es un método, no un comando global List.Add.",
+        "zh-tw": "List() 建立有順序、可調整長度的集合。請用變數保存物件；items.Add 是物件方法，並不存在全域 List.Add 命令。",
+        "ja": "List() は順序を持つ可変長コレクションを作ります。結果を変数に保存してください。items.Add はオブジェクトのメソッドであり、グローバルな List.Add 命令はありません。",
+        "ko": "List()는 순서가 있고 길이를 바꿀 수 있는 컬렉션을 만듭니다. 반환 객체를 변수에 저장하세요. items.Add는 객체 메서드이며 전역 List.Add 명령은 없습니다."
+      },
+      "examples": [
+        "Option Explicit On\nSub Main()\n    Var items = List()\n    items.Add(3)\n    items.Add(7)\n    items.Insert(1, 5)\n    items.Set(0, 2)\n    Var total = 0\n    For Each item In items\n        total += item\n    Next\n    Return total\nEnd Sub\n",
+        "Option Explicit On\nSub Main()\n    Dim seed[1]\n    seed[0] = 4\n    seed[1] = 6\n    Var items = List(seed)\n    Var copied = List(items)\n    Var snapshot = items.ToArray()\n    items[0] = 9\n    Var removed = items.Remove(6)\n    items.RemoveAt(0)\n    items.Clear()\n    Return snapshot[0]*100 + copied[1]*10 + removed + items.Count()\nEnd Sub\n",
+        "Option Explicit On\nFunction NextIndex(ByRef calls)\n    calls += 1\n    Return 0\nEnd Function\nSub Bump(ByRef value)\n    value += 1\nEnd Sub\nSub Main()\n    Var items = List()\n    items.Add(5)\n    Var calls = 0\n    Bump(items[NextIndex(calls)])\n    If items.Contains(6) AndAlso items.IndexOf(6) = 0 Then\n        Return items.Item(0)*100 + calls\n    End If\n    Return -1\nEnd Sub\n"
+      ]
+    },
+    {
+      "id": "Basic.Dictionary",
+      "name": "Dictionary",
+      "signatures": [
+        "Dictionary() -> Object:Dictionary",
+        "Dictionary(source:Dictionary) -> Object:Dictionary",
+        "values.Add(key:String/Number, value:Any) -> Unit",
+        "values.Item(key:String/Number) -> Any",
+        "values[key] = value",
+        "values.Set(key:String/Number, value:Any) -> Unit",
+        "values.Get(key:String/Number, fallback:Any) -> Any",
+        "values.Count() -> Integer",
+        "values.ContainsKey(key:String/Number) -> Integer:1/0",
+        "values.Remove(key:String/Number) -> Integer:1/0",
+        "values.Clear() -> Unit",
+        "values.Keys() -> Array",
+        "values.Values() -> Array",
+        "entry.Key() -> String/Number",
+        "entry.Value() -> Any"
+      ],
+      "descriptions": {
+        "en": "Dictionary() creates a key/value collection. Use methods on the returned object. Numeric and textual keys are distinct; \"ore\" and \"Ore\" are different keys.",
+        "ru": "Dictionary() создаёт словарь ключ → значение. Методы вызываются у полученного объекта. Числовые и текстовые ключи различаются; \"ore\" и \"Ore\" — разные ключи.",
+        "uk": "Dictionary() створює словник ключ → значення. Викликайте методи отриманого об’єкта. Числові й текстові ключі різні; \"ore\" та \"Ore\" — різні ключі.",
+        "fr": "Dictionary() crée une collection clé → valeur. Appelez les méthodes sur l’objet retourné. Les clés numériques et textuelles diffèrent ; \"ore\" et \"Ore\" sont distinctes.",
+        "de": "Dictionary() erzeugt eine Schlüssel/Wert-Sammlung. Methoden werden am Ergebnisobjekt aufgerufen. Zahlen und Text sind verschiedene Schlüssel; auch \"ore\" und \"Ore\" unterscheiden sich.",
+        "it": "Dictionary() crea una raccolta chiave → valore. Usare i metodi dell’oggetto restituito. Chiavi numeriche e testuali sono distinte; anche \"ore\" e \"Ore\" differiscono.",
+        "es": "Dictionary() crea una colección clave → valor. Use los métodos del objeto devuelto. Las claves numéricas y textuales son distintas; \"ore\" y \"Ore\" también difieren.",
+        "zh-tw": "Dictionary() 建立鍵 → 值集合。請在回傳的物件上呼叫方法。數字鍵與文字鍵不同，\"ore\" 和 \"Ore\" 也不同。",
+        "ja": "Dictionary() はキーと値のコレクションを作ります。返されたオブジェクトのメソッドを使います。数値キーと文字列キー、また \"ore\" と \"Ore\" は異なります。",
+        "ko": "Dictionary()는 키 → 값 컬렉션을 만듭니다. 반환 객체의 메서드를 사용합니다. 숫자 키와 문자열 키, \"ore\"와 \"Ore\"는 서로 다릅니다."
+      },
+      "examples": [
+        "Option Explicit On\nSub Main()\n    Var values = Dictionary()\n    values.Add(\"ore\", 5)\n    values.Set(\"ore\", 8)\n    values[1] = 2\n    values[\"1\"] = 3\n    Return values.Item(\"ore\")*100 + values[1]*10 + values[\"1\"] + values.Get(\"wood\", 7)\nEnd Sub\n",
+        "Option Explicit On\nSub Main()\n    Var values = Dictionary()\n    values.Add(\"ore\", 2)\n    values.Add(\"wood\", 3)\n    Var copied = Dictionary(values)\n    Var snapshot = values.Values()\n    Var total = 0\n    For Each entry In values\n        If values.ContainsKey(entry.Key()) Then\n            total += entry.Value()\n        End If\n    Next\n    For Each key In values.Keys()\n        values.Remove(key)\n    Next\n    values.Clear()\n    Return total*100 + copied[\"ore\"]*10 + GetArrayLength(snapshot) + values.Count()\nEnd Sub\n",
+        "Option Explicit On\nSub Main()\n    Var values = Dictionary()\n    values.Add(\"ore\", 4)\n    Var caught = 0\n    Try\n        values.Add(\"ore\", 7)\n    Catch problem\n        caught = 1\n    End Try\n    Return values[\"ore\"]*10 + caught\nEnd Sub\n"
+      ]
+    },
+    {
+      "id": "Basic.OnError",
+      "name": "On Error / Resume",
+      "signatures": [
+        "On Error GoTo label",
+        "On Error Resume Next",
+        "On Error GoTo 0",
+        "label:",
+        "Resume",
+        "Resume Next"
+      ],
+      "descriptions": {
+        "en": "On Error selects how subsequent runtime errors are handled in the current procedure or function. It is a language statement, not a callable API. For structured recovery and cleanup, use Try/Catch/Finally.",
+        "ru": "On Error задаёт обработку последующих ошибок выполнения в текущей процедуре или функции. Это конструкция языка, а не вызываемая API-команда. Для структурированной обработки и завершения используйте Try/Catch/Finally.",
+        "uk": "On Error задає обробку подальших помилок виконання у поточній процедурі або функції. Це конструкція мови, а не виклик API. Для структурованої обробки й завершення використовуйте Try/Catch/Finally.",
+        "fr": "On Error choisit le traitement des erreurs d’exécution suivantes dans la procédure ou fonction actuelle. C’est une instruction du langage, pas un appel API. Pour une gestion structurée avec nettoyage, utilisez Try/Catch/Finally.",
+        "de": "On Error bestimmt die Behandlung folgender Laufzeitfehler im aktuellen Prozedur- oder Funktionsaufruf. Es ist eine Sprachanweisung, kein API-Aufruf. Für strukturierte Behandlung und Abschluss dient Try/Catch/Finally.",
+        "it": "On Error sceglie come gestire gli errori successivi nella procedura o funzione corrente. È un’istruzione del linguaggio, non un’API. Per gestione strutturata e pulizia usa Try/Catch/Finally.",
+        "es": "On Error selecciona cómo tratar errores posteriores en el procedimiento o función actual. Es una instrucción del lenguaje, no una API. Para gestión estructurada y limpieza usa Try/Catch/Finally.",
+        "zh-tw": "On Error 指定目前程序或函式中後續執行期錯誤的處理方式。它是語言陳述式，不是 API 呼叫。結構化處理與清理可使用 Try/Catch/Finally。",
+        "ja": "On Error は現在の手続き・関数で以後に発生する実行時エラーの扱いを選びます。API 呼び出しではなく言語文です。構造化した回復と後処理には Try/Catch/Finally を使います。",
+        "ko": "On Error는 현재 프로시저나 함수에서 이후 실행 오류를 처리할 방식을 선택합니다. API 호출이 아닌 언어 문장입니다. 구조화된 복구와 정리는 Try/Catch/Finally를 사용하세요."
+      },
+      "examples": [
+        "Option Explicit On\nSub Main()\n    Dim values[0]\n    Var result = 1\n    On Error Resume Next\n    result = values[5]\n    On Error GoTo 0\n    result += 4\n    Return result\nEnd Sub\n",
+        "Option Explicit On\nFunction ReadCell()\n    Dim values[0]\n    values[0] = 8\n    Var index = 2\n    Var handled = 0\n    Var result = 0\n    On Error GoTo FixIndex\n    result = values[index]\n    Return handled * 10 + result\nFixIndex:\n    On Error GoTo 0\n    handled += 1\n    index = 0\n    Resume\nEnd Function\nSub Main()\n    Return ReadCell()\nEnd Sub\n",
+        "Option Explicit On\nSub Main()\n    Dim values[0]\n    Var result = 0\n    Var handled = 0\n    GoTo Work\nFailed:\n    On Error GoTo 0\n    handled += 1\n    Resume Next\nWork:\n    On Error GoTo Failed\n    result = values[2]\n    Return handled * 10 + result\nEnd Sub\n"
+      ]
+    },
+    {
+      "id": "Basic.Goto",
+      "name": "GoTo / label:",
+      "signatures": [
+        "GoTo label",
+        "label:"
+      ],
+      "descriptions": {
+        "en": "GoTo transfers execution to a named label in the current procedure or function. A label marks a location; it does not create a callable procedure. Prefer If, loops and Return for ordinary structured control flow.",
+        "ru": "GoTo переводит выполнение к именованной метке в текущей процедуре или функции. Метка обозначает место в коде, а не отдельную вызываемую процедуру. Для обычных ветвлений и циклов удобнее If, циклы и Return.",
+        "uk": "GoTo переводить виконання до іменованої мітки в поточній процедурі або функції. Мітка позначає місце коду, а не окрему процедуру. Для звичайного керування використовуйте If, цикли та Return.",
+        "fr": "GoTo transfère l’exécution vers une étiquette de la procédure ou fonction courante. Une étiquette indique un emplacement, pas une procédure appelable. Pour le contrôle ordinaire, privilégiez If, les boucles et Return.",
+        "de": "GoTo springt zu einer benannten Marke in der aktuellen Prozedur oder Funktion. Eine Marke bezeichnet eine Codestelle, keine aufrufbare Prozedur. Für normalen Kontrollfluss eignen sich If, Schleifen und Return.",
+        "it": "GoTo trasferisce l’esecuzione a un’etichetta della procedura o funzione corrente. L’etichetta indica una posizione, non una procedura chiamabile. Per il controllo ordinario usa If, cicli e Return.",
+        "es": "GoTo transfiere la ejecución a una etiqueta del procedimiento o función actual. Una etiqueta marca una posición, no un procedimiento invocable. Para el control habitual usa If, bucles y Return.",
+        "zh-tw": "GoTo 將執行移至目前程序或函式中的具名標籤。標籤只是程式位置，不是可呼叫的程序。一般流程請優先使用 If、迴圈與 Return。",
+        "ja": "GoTo は現在のプロシージャまたは関数内の名前付きラベルへ実行を移します。ラベルはコード上の位置であり、呼び出せるプロシージャではありません。通常の制御には If、ループ、Return を使います。",
+        "ko": "GoTo는 현재 프로시저 또는 함수의 이름 있는 레이블로 실행을 옮깁니다. 레이블은 코드 위치이며 호출 가능한 프로시저가 아닙니다. 일반 제어에는 If, 반복문, Return을 사용하세요."
+      },
+      "examples": [
+        "Option Explicit On\nSub Main()\n    Var amount = 0\n    Var result = 0\n    If amount <= 0 Then\n        GoTo NoItems\n    End If\n    result = amount * 10\n    GoTo Finished\nNoItems:\n    result = -1\nFinished:\n    Return result\nEnd Sub\n",
+        "Option Explicit On\nSub Main()\n    Var attempt = 0\n    Var total = 0\nAgain:\n    attempt += 1\n    total += attempt\n    If attempt < 3 Then\n        GoTo again\n    End If\n    Return total\nEnd Sub\n",
+        "Option Explicit On\nSub Main()\n    Var trace = 0\n    Try\n        Try\n            trace = trace * 10 + 1\n            GoTo Finished\n            trace = 99\n        Finally\n            trace = trace * 10 + 2\n        End Try\n    Finally\n        trace = trace * 10 + 3\n    End Try\nFinished:\n    Return trace\nEnd Sub\n"
+      ]
+    },
+    {
+      "id": "Basic.With",
+      "name": "With / End With",
+      "signatures": [
+        "With objectExpression",
+        "    .Method(arguments)",
+        "    statements",
+        "End With",
+        "With UO",
+        "    .Command(arguments)",
+        "End With",
+        "With moduleName",
+        "    .field = expression",
+        "    .Procedure(arguments)",
+        "End With"
+      ],
+      "descriptions": {
+        "en": "With groups operations on one captured object. A leading dot selects a member of that object. Basic also allows With UO and With moduleName as explicit namespace shorthand; these two forms are engine extensions.",
+        "ru": "With объединяет операции над одним сохранённым объектом. Точка перед именем выбирает его метод. В Basic также есть With UO и With moduleName — явное указание пространства имён; эти две формы являются расширениями движка.",
+        "uk": "With об’єднує операції над одним збереженим об’єктом. Крапка перед іменем вибирає його метод. Basic також дозволяє With UO і With moduleName як явне зазначення простору імен; ці дві форми є розширеннями рушія.",
+        "fr": "With regroupe des opérations sur un même objet mémorisé. Le point initial désigne un membre de cet objet. Basic propose aussi With UO et With moduleName pour choisir explicitement un espace de noms : ce sont des extensions du moteur.",
+        "de": "With fasst Operationen an einem gespeicherten Objekt zusammen. Ein führender Punkt bezeichnet dessen Mitglied. With UO und With moduleName sind zusätzliche Basic-Formen für ausdrücklich gewählte Namensräume.",
+        "it": "With raggruppa operazioni sullo stesso oggetto acquisito. Il punto iniziale seleziona un membro di tale oggetto. With UO e With moduleName sono estensioni Basic per indicare esplicitamente uno spazio dei nomi.",
+        "es": "With agrupa operaciones sobre un mismo objeto guardado. El punto inicial selecciona un miembro de ese objeto. With UO y With moduleName son extensiones de Basic para indicar explícitamente un espacio de nombres.",
+        "zh-tw": "With 將多個操作套用到同一個已保存的物件。成員名稱前的句點指向該物件。Basic 也支援 With UO 與 With moduleName，明確指定命名空間；這兩種形式是引擎擴充。",
+        "ja": "With は、保存した同じオブジェクトに対する操作をまとめます。名前の先頭のドットは、そのオブジェクトのメンバーを指定します。With UO と With moduleName は、名前空間を明示的に選択する Basic 独自の拡張です。",
+        "ko": "With는 저장한 하나의 객체에 대한 작업을 묶습니다. 이름 앞의 점은 그 객체의 멤버를 뜻합니다. With UO와 With moduleName은 이름 공간을 명시적으로 선택하는 Basic 확장 형식입니다."
+      },
+      "examples": [
+        "Option Explicit On\nFunction Choose(ByVal values, ByRef calls) As Object\n    calls += 1\n    Return values\nEnd Function\n\nSub Main()\n    Dim calls=0\n    Dim values=List()\n    Dim original=values\n    With Choose(values, calls)\n        .Add(2)\n        values=List()\n        .Add(7)\n    End With\n    Return calls*100+original.Item(0)*10+original.Item(1)\nEnd Sub\n",
+        "Option Explicit On\nSub Main()\n    Dim groups=Dictionary()\n    Dim child=List()\n    groups.Set(\"child\", child)\n    With groups\n        With .Item(\"child\")\n            Try\n                .Add(2)\n            Finally\n                .Add(7)\n            End Try\n        End With\n        .Set(\"result\", 8)\n    End With\n    Return child.Count()*10+groups.Item(\"result\")\nEnd Sub\n",
+        "Option Explicit On\nModule Tools\n    Public Var total=0\n    Public Sub AddAmount(ByVal amount)\n        total += amount\n    End Sub\n    Public Function CountItems(ByVal values) As Integer\n        With UO\n            Return .GetArrayLength(values)\n        End With\n    End Function\nEnd Module\n\nSub Main()\n    Dim values[1]\n    With Tools\n        .total=4\n        .AddAmount(3)\n        Return .total*10+.CountItems(values)\n    End With\nEnd Sub\n"
+      ]
+    },
+    {
+      "id": "Basic.Try",
+      "name": "Try / Catch / Finally / Throw",
+      "signatures": [
+        "Try",
+        "    statements",
+        "Catch",
+        "    handlerStatements",
+        "Finally",
+        "    cleanupStatements",
+        "End Try",
+        "Catch name",
+        "Catch name As Exception",
+        "Catch name As String",
+        "Throw stringExpression",
+        "Throw"
+      ],
+      "descriptions": {
+        "en": "Try handles execution errors from its body and called helpers. Catch handles the error, Finally completes the operation, and Throw raises or rethrows an error. An API result of 0 or false is an ordinary result: inspect it explicitly; it does not automatically enter Catch.",
+        "ru": "Try обрабатывает ошибки выполнения в своём теле и вызываемых помощниках. Catch принимает ошибку, Finally завершает операцию, а Throw создаёт или повторно выбрасывает ошибку. Возврат API-командой 0 или false — обычный результат: проверяйте его явно; сам по себе он не вызывает Catch.",
+        "uk": "Try обробляє помилки виконання у своєму тілі та викликаних помічниках. Catch приймає помилку, Finally завершує операцію, Throw створює або повторно викидає помилку. Повернення API-командою 0 чи false є звичайним результатом: перевіряйте його явно; воно саме не викликає Catch.",
+        "fr": "Try traite les erreurs d’exécution de son corps et des fonctions appelées. Catch reçoit l’erreur, Finally effectue la finalisation, Throw crée une erreur ou la relance. Un résultat API égal à 0 ou false reste un résultat ordinaire à vérifier explicitement : il ne déclenche pas Catch.",
+        "de": "Try behandelt Laufzeitfehler aus seinem Rumpf und aufgerufenen Hilfsfunktionen. Catch übernimmt den Fehler, Finally führt Abschlussarbeiten aus, Throw löst einen Fehler aus oder wirft ihn erneut. Ein API-Ergebnis 0 oder false ist kein Ausnahmefehler und muss ausdrücklich geprüft werden.",
+        "it": "Try gestisce gli errori di esecuzione del proprio corpo e delle funzioni chiamate. Catch riceve l’errore, Finally completa l’operazione e Throw crea o rilancia un errore. Un risultato API 0 o false va controllato esplicitamente: non attiva automaticamente Catch.",
+        "es": "Try trata errores de ejecución de su cuerpo y de las funciones llamadas. Catch recibe el error, Finally finaliza la operación y Throw crea o relanza un error. Un resultado API 0 o false debe comprobarse explícitamente: no activa Catch por sí solo.",
+        "zh-tw": "Try 處理內容及被呼叫函式的執行錯誤。Catch 接收錯誤，Finally 完成收尾，Throw 建立或重新拋出錯誤。API 傳回 0 或 false 是一般結果，必須明確檢查，不會自動進入 Catch。",
+        "ja": "Try は本体と呼び出した関数の実行エラーを扱います。Catch がエラーを受け取り、Finally が後処理を行い、Throw がエラーを発生または再送出します。API の 0 や false は通常の戻り値です。明示的に判定する必要があり、自動的に Catch には入りません。",
+        "ko": "Try는 본문과 호출한 함수의 실행 오류를 처리합니다. Catch가 오류를 받고 Finally가 마무리를 수행하며 Throw가 오류를 발생시키거나 다시 던집니다. API의 0 또는 false는 일반 반환값이므로 명시적으로 검사해야 합니다. 자동으로 Catch에 들어가지는 않습니다."
+      },
+      "examples": [
+        "Option Explicit On\nFunction CheckedAmount(ByVal amount As Integer) As Integer\n    If amount < 0 Then\n        Throw \"amount must be non-negative\"\n    End If\n    Return amount\nEnd Function\n\nSub Main()\n    Dim message=\"\"\n    Dim finished=0\n    Try\n        CheckedAmount(-2)\n    Catch problem As Exception\n        message=problem\n    Finally\n        finished=1\n    End Try\n    Return message & \":\" & CStr(finished)\nEnd Sub\n",
+        "Option Explicit On\nSub Main()\n    Dim trace=0\n    Dim message=\"\"\n    Try\n        Try\n            Throw \"missing item\"\n        Catch problem\n            trace=1\n            Throw\n        Finally\n            trace=trace*10+2\n        End Try\n    Catch outerProblem\n        message=outerProblem\n        trace=trace*10+3\n    Finally\n        trace=trace*10+4\n    End Try\n    Return CStr(trace) & \":\" & message\nEnd Sub\n",
+        "Option Explicit On\nSub Main()\n    Dim total=0\n    Dim finished=0\n    For Var number=1 To 3\n        Try\n            If number=2 Then\n                Continue For\n            End If\n            If number=3 Then\n                Exit For\n            End If\n            total+=number\n        Finally\n            finished+=1\n        End Try\n    Next\n    Return total*10+finished\nEnd Sub\n"
+      ]
+    },
+    {
+      "id": "Basic.WaitUntil",
+      "name": "Wait Until / Timeout",
+      "signatures": [
+        "Wait Until condition Timeout milliseconds"
+      ],
+      "descriptions": {
+        "en": "Wait Until repeatedly tests a condition until it succeeds or the time limit expires. This is a Basic extension, not a VB.NET statement. It runs in the current script and does not create a thread or start another procedure.",
+        "ru": "Wait Until повторяет проверку условия до успеха либо истечения времени. Это расширение Basic, а не оператор VB.NET. Ожидание выполняется в текущем скрипте и не создаёт поток или другую процедуру.",
+        "uk": "Wait Until повторює перевірку умови до успіху або вичерпання часу. Це розширення Basic, а не оператор VB.NET. Воно працює в поточному скрипті без створення потоку чи іншої процедури.",
+        "fr": "Wait Until teste une condition jusqu’au succès ou à l’expiration du délai. C’est une extension Basic, pas une instruction VB.NET. Elle reste dans le script courant sans créer de thread ni lancer une autre procédure.",
+        "de": "Wait Until prüft eine Bedingung bis zum Erfolg oder Zeitablauf. Es ist eine Basic-Erweiterung, keine VB.NET-Anweisung. Sie läuft im aktuellen Skript ohne neuen Thread oder weiteren Prozedurstart.",
+        "it": "Wait Until verifica una condizione fino al successo o alla scadenza. È un’estensione Basic, non un’istruzione VB.NET. Lavora nello script corrente senza creare thread o avviare altre procedure.",
+        "es": "Wait Until comprueba una condición hasta que se cumple o vence el plazo. Es una extensión de Basic, no una instrucción VB.NET. Se ejecuta en el script actual sin crear hilos ni iniciar otra rutina.",
+        "zh-tw": "Wait Until 會重複檢查條件，直到成功或超過時限。這是 Basic 擴充語法，不是 VB.NET 陳述式。它在目前腳本內執行，不會建立執行緒或啟動另一個程序。",
+        "ja": "Wait Until は条件が成立するか時間切れになるまで繰り返し確認します。VB.NET の文ではなく Basic の拡張です。現在のスクリプトで動作し、新しいスレッドや別の手続きを開始しません。",
+        "ko": "Wait Until은 조건이 참이 되거나 제한 시간이 끝날 때까지 반복 확인합니다. VB.NET 문이 아닌 Basic 확장입니다. 현재 스크립트에서 실행하며 새 스레드나 다른 프로시저를 시작하지 않습니다."
+      },
+      "examples": [
+        "Option Explicit On\nFunction Ready(ByRef checks As Integer, ByVal required As Integer) As Boolean\n    checks += 1\n    Return checks >= required\nEnd Function\n\nSub Main()\n    Dim checks As Integer = 0\n    Const budget = 5000\n    Wait Until Ready(checks, 3) Timeout budget\n    Return checks\nEnd Sub\n",
+        "Option Explicit On\nFunction TryWait(ByVal ready As Boolean, ByVal budget As Integer) As Boolean\n    Try\n        Wait Until ready Timeout budget\n        Return True\n    Catch problem\n        Return False\n    End Try\nEnd Function\n\nSub Main()\n    Dim success = TryWait(False, 0)\n    Return success\nEnd Sub\n",
+        "Option Explicit On\nFunction CheckStatus(ByVal state As Integer) As Boolean\n    If state < 0 Then\n        Throw \"disconnected\"\n    End If\n    Return state = 1\nEnd Function\n\nSub Main()\n    Dim message = \"\"\n    Dim finished = False\n    Try\n        Wait Until CheckStatus(-1) Timeout 3000\n    Catch problem\n        message = problem\n    Finally\n        finished = True\n    End Try\n    Return message & \":\" & CStr(finished)\nEnd Sub\n"
+      ]
+    },
+    {
+      "id": "Basic.Enum",
+      "name": "Enum / End Enum",
+      "signatures": [
+        "[Public | Private] Enum name [As Integer]",
+        "    member [= constantExpression]",
+        "    ...",
+        "End Enum",
+        "Dim state As name = name.member",
+        "ModuleName.name.member"
+      ],
+      "descriptions": {
+        "en": "Enum groups named Integer constants for script states and modes. Declare it at file or Module level, never inside Sub/Function. This engine implements a useful subset of VB.NET enumerations; it does not create a .NET Enum object.",
+        "ru": "Enum объединяет именованные константы Integer для состояний и режимов скрипта. Объявляется на уровне файла или Module, вне Sub/Function. Поддерживается полезная часть перечислений VB.NET; объект .NET Enum не создаётся.",
+        "uk": "Enum об’єднує іменовані константи Integer для станів і режимів скрипту. Оголошуйте на рівні файлу або Module, поза Sub/Function. Це підтримувана частина переліків VB.NET, без створення об’єкта .NET Enum.",
+        "fr": "Enum regroupe des constantes Integer nommées pour les états du script. Déclarez-le au niveau du fichier ou de Module, hors Sub/Function. Il s’agit d’un sous-ensemble de VB.NET, sans objet .NET Enum.",
+        "de": "Enum fasst benannte Integer-Konstanten für Skriptzustände zusammen. Die Deklaration steht auf Datei- oder Module-Ebene, außerhalb von Sub/Function. Unterstützt wird eine Teilmenge von VB.NET, kein .NET-Enum-Objekt.",
+        "it": "Enum raggruppa costanti Integer con nomi per gli stati dello script. Dichiararlo nel file o in Module, fuori da Sub/Function. È un sottoinsieme di VB.NET, senza creare oggetti .NET Enum.",
+        "es": "Enum agrupa constantes Integer con nombre para estados del script. Se declara en el archivo o en Module, fuera de Sub/Function. Es un subconjunto de VB.NET y no crea un objeto .NET Enum.",
+        "zh-tw": "Enum 將有名稱的 Integer 常數組成腳本狀態或模式。請在檔案或 Module 層級宣告，不可放在 Sub/Function 內。這是 VB.NET 列舉的支援子集，不會建立 .NET Enum 物件。",
+        "ja": "Enum はスクリプトの状態やモードを表す名前付き Integer 定数をまとめます。ファイルまたは Module レベルに宣言し、Sub/Function 内には置けません。VB.NET 列挙の一部を実装したもので、.NET Enum オブジェクトは生成しません。",
+        "ko": "Enum은 스크립트 상태와 모드를 나타내는 이름 있는 Integer 상수를 묶습니다. 파일이나 Module 수준에 선언하며 Sub/Function 내부에는 선언할 수 없습니다. VB.NET 열거형의 일부를 지원하며 .NET Enum 객체를 만들지 않습니다."
+      },
+      "examples": [
+        "Option Explicit On\nEnum TaskState As Integer\n    Idle\n    Queued\n    Working = 10\n    Finished\nEnd Enum\n\nSub Main()\n    Dim state As TaskState = TaskState.Working\n    Return CStr(TaskState.Idle) & \":\" & CStr(TaskState.Queued) & \":\" & CStr(state) & \":\" & CStr(TaskState.Finished)\nEnd Sub\n",
+        "Option Explicit On\nModule Controller\n    Private Enum Mode\n        Idle\n        Walking = 4\n        Arrived\n    End Enum\n\n    Public Function NextMode(ByVal distance As Integer) As Integer\n        Dim state As Mode\n        If distance <= 1 Then\n            state = Mode.Arrived\n        Else\n            state = Mode.Walking\n        End If\n        Return state\n    End Function\nEnd Module\n\nSub Main()\n    Dim farState = Controller.NextMode(3)\n    Dim nearState = Controller.NextMode(1)\n    Return farState * 10 + nearState\nEnd Sub\n",
+        "Option Explicit On\nConst FirstState As Integer = 2\nEnum Mode\n    Idle = FirstState\n    Working = Idle + 1\n    Finished\nEnd Enum\n\nSub Advance(ByRef state As Mode)\n    With Mode\n        Select Case state\n            Case .Idle\n                state = .Working\n            Case .Working\n                state = .Finished\n            Case Else\n                Throw \"No next state\"\n        End Select\n    End With\nEnd Sub\n\nFunction IsFinal(ByVal state As Mode) As Boolean\n    Return state = Mode.Finished\nEnd Function\n\nSub Main()\n    Dim state As Mode = Mode.Idle\n    Advance(state)\n    Advance(state)\n    Return IsFinal(state)\nEnd Sub\n"
+      ]
+    }
+  ]
+}

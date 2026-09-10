@@ -1,0 +1,116 @@
+# ByRef
+
+ClassicUO • Basic
+
+<!-- yoko-manual: 1 -->
+<!-- yoko-language-guide: 1 -->
+<!-- yoko-locale: ko -->
+
+매개변수는 SUB/FUNCTION에 데이터를 전달합니다. ByRef는 변경 값을 호출자에게 기록하고 ByVal은 호출자의 변수를 보존합니다. Optional은 생략한 인수를 보충하고 ParamArray는 나머지 인수를 모읍니다. 호출 명령이 아니라 선언 한정자입니다.
+
+## 정확한 구문
+
+```text
+Sub Adjust(ByRef amount, ByVal increment)
+Adjust(amount, 3)
+Bump(items[index])
+Function name(ByRef value As type)
+```
+
+## 매개변수
+
+- `name / As type` — name / As type: 이름과 선택적인 입력 형식 변환입니다. 인수는 위치순으로 전달하며 한정자는 선언에 씁니다.
+- `ByRef` — ByRef: 쓰기 가능한 변수 또는 기존 인덱스 요소입니다. 이 엔진은 ByVal이 없어도 값을 다시 기록하므로 VB.NET 기본값과 다릅니다. 리터럴, 상수, 계산식은 임시 값입니다.
+- `ByVal` — ByVal: 값의 지역 복사본입니다. 매개변수에 대입해도 호출자의 변수를 교체하지 않습니다. 배열과 객체는 참조를 공유하며 깊은 복사가 아닙니다.
+- `Optional / defaultValue` — Optional / defaultValue: 마지막 인수를 생략하면 = 뒤의 식을 계산합니다. 명시적 기본값을 지정하세요. 없으면 생략된 매개변수는 초기화되지 않은 Unit을 받습니다.
+- `ParamArray` — ParamArray values(): 마지막 매개변수가 나머지 값을 0개 이상 받습니다. 배열 하나는 그대로 사용하고 스칼라 인수는 새 배열로 묶습니다. GetArrayLength는 길이를 반환합니다.
+
+## 반환값
+
+한정자는 값을 반환하지 않습니다. RETURN은 결과를 따로 설정합니다. ByRef는 인수를 변경하는 것이지 반환값이 아닙니다. RETURN 없는 SUB는 Unit을 만듭니다. 예제 숫자는 계산 결과이며 TRUE/FALSE 플래그가 아닙니다.
+
+## 동작
+
+- 인수는 왼쪽부터 한 번씩 계산합니다. 인덱스 ByRef는 컨테이너와 인덱스/키를 저장합니다. 다른 인수가 컨테이너 변수를 재대입해도 기록 위치를 바꾸지 않습니다.
+- 진입할 때 지역 매개변수를 만듭니다. 종료 시 내부 FINALLY 뒤에 매개변수 순서대로 ByRef 값을 기록하며 본문에서 오류로 나올 때도 같습니다. 같은 변수를 두 번 전달해도 지역 매개변수가 즉시 연결되지는 않습니다. 마지막 기록이 남습니다.
+- ByVal은 호출자 변수의 교체를 막지만 공유 배열이나 객체 내부 수정은 허용합니다. ReDim은 새 지역 참조를 만듭니다. 독립 데이터에는 명시적 복사가 필요합니다.
+- Optional은 뒤에서부터 생략하며 쉼표 사이의 빈 인수는 지원하지 않습니다. 기본식은 생략할 때마다 실행하는 엔진 식이며 VB.NET 상수일 필요가 없습니다.
+- ParamArray는 묶인 스칼라를 원래 변수에 다시 쓰지 않습니다. 배열을 명시적으로 전달하면 요소 변경이 호출자에게 보입니다. 다른 ParamArray로 전달해도 중첩을 추가하지 않습니다.
+- 의도를 드러내도록 ByRef와 ByVal을 명시하세요. 이 규칙은 스크립트에서 사용자 프로시저를 호출할 때 적용되며 내장 명령 인수는 각 문서에 설명합니다.
+
+## 예제
+
+### 1. 변수 변경
+
+```vb
+# Adjust는 amount=5를 ByRef로, increment=3을 ByVal로 받습니다. amount가 8이 되어 다시 기록됩니다. Main은 Integer 8을 반환하고 Adjust는 결과가 없습니다.
+Option Explicit On
+Sub Adjust(ByRef amount, ByVal increment)
+    amount += increment
+End Sub
+Sub Main()
+    Var amount = 5
+    Adjust(amount, 3)
+    Return amount
+End Sub
+```
+
+**매개변수 및 실행 설명:**
+
+Adjust는 amount=5를 ByRef로, increment=3을 ByVal로 받습니다. amount가 8이 되어 다시 기록됩니다. Main은 Integer 8을 반환하고 Adjust는 결과가 없습니다.
+
+### 2. 인덱스를 한 번 계산
+
+```vb
+# items[0]=5입니다. NextIndex가 calls를 늘리고 0을 반환하며 Bump가 선택된 요소를 6으로 바꿉니다. 다시 계산하지 않아 calls=1입니다. Main은 6*100+1, Integer 601을 반환합니다.
+Option Explicit On
+Function NextIndex(ByRef calls)
+    calls += 1
+    Return 0
+End Function
+Sub Bump(ByRef amount)
+    amount += 1
+End Sub
+Sub Main()
+    Dim items[0]
+    items[0] = 5
+    Var calls = 0
+    Bump(items[NextIndex(calls)])
+    Return items[0] * 100 + calls
+End Sub
+```
+
+**매개변수 및 실행 설명:**
+
+items[0]=5입니다. NextIndex가 calls를 늘리고 0을 반환하며 Bump가 선택된 요소를 6으로 바꿉니다. 다시 계산하지 않아 calls=1입니다. Main은 6*100+1, Integer 601을 반환합니다.
+
+### 3. 한 변수를 두 매개변수로
+
+```vb
+# 둘 다 5를 받습니다. first는 6, second는 7이 됩니다. 종료 시 value에 6, 그 다음 7을 기록합니다. Main은 8이 아닌 Integer 7을 반환합니다.
+Option Explicit On
+Sub Change(ByRef first, ByRef second)
+    first += 1
+    second += 2
+End Sub
+Sub Main()
+    Var value = 5
+    Change(value, value)
+    Return value
+End Sub
+```
+
+**매개변수 및 실행 설명:**
+
+둘 다 5를 받습니다. first는 6, second는 7이 됩니다. 종료 시 value에 6, 그 다음 7을 기록합니다. Main은 8이 아닌 Integer 7을 반환합니다.
+
+<!-- implementation references (not callable script procedures):
+Parsing/injection.g4: parameterName / parameterModifier / defaultValue
+Runtime/SubrutineDefinition.cs: WritableParameters / RequiredArgumentCount / HasParamArray
+Runtime/Interpreter.cs: VisitCall / CreateArgumentWriter / CallSubrutine / EvaluateInitializer
+Runtime/IndexedValueSlot.cs: Read / Write
+https://learn.microsoft.com/en-us/dotnet/visual-basic/language-reference/modifiers/byref
+https://learn.microsoft.com/en-us/dotnet/visual-basic/language-reference/modifiers/byval
+https://learn.microsoft.com/en-us/dotnet/visual-basic/language-reference/modifiers/optional
+https://learn.microsoft.com/en-us/dotnet/visual-basic/language-reference/modifiers/paramarray
+-->
